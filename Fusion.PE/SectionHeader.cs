@@ -23,7 +23,6 @@ namespace Fusion.PE
         {
             if (!pReader.ReadString(ref Name, 8) ||
                 !pReader.ReadUInt32(ref PhysicalAddress) ||
-                !pReader.ReadUInt32(ref VirtualSize) ||
                 !pReader.ReadUInt32(ref VirtualAddress) ||
                 !pReader.ReadUInt32(ref SizeOfRawData) ||
                 !pReader.ReadUInt32(ref PointerToRawData) ||
@@ -32,6 +31,7 @@ namespace Fusion.PE
                 !pReader.ReadUInt16(ref NumberOfRelocations) ||
                 !pReader.ReadUInt16(ref NumberOfLineNumbers) ||
                 !pReader.ReadUInt32(ref Characteristics)) return false;
+            VirtualSize = PhysicalAddress;
             return true;
         }
     }

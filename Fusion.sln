@@ -2,6 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fusion", "Fusion\Fusion.csproj", "{ADAB4315-5A92-4F9B-A04F-AD2DBA3AB424}"
+	ProjectSection(ProjectDependencies) = postProject
+		{272B562C-F45F-4DAE-A585-3AFE15A07401} = {272B562C-F45F-4DAE-A585-3AFE15A07401}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fusion.PE", "Fusion.PE\Fusion.PE.csproj", "{1BBCA9CF-29B6-4C37-BE4C-DA34FEB55F8D}"
 EndProject

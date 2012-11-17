@@ -42,6 +42,7 @@ namespace Fusion.PE
 
         public bool Read(PEReader pReader)
         {
+            for (int index = 0; index < DataDirectories.Length; ++index) DataDirectories[index] = new DataDirectory();
             if (!pReader.ReadUInt16(ref Magic) ||
                 !pReader.ReadByte(ref MajorLinkerVersion) ||
                 !pReader.ReadByte(ref MinorLinkerVersion) ||

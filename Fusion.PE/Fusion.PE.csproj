@@ -40,16 +40,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CLIHeader.cs" />
-    <Compile Include="CLIMetadataHeader.cs" />
-    <Compile Include="CLIMetadataStreamHeader.cs" />
-    <Compile Include="CLIMetadataTablesHeader.cs" />
     <Compile Include="DataDirectory.cs" />
     <Compile Include="DOSHeader.cs" />
     <Compile Include="OptionalHeader.cs" />
     <Compile Include="PEFile.cs" />
     <Compile Include="PEHeader.cs" />
-    <Compile Include="PEReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SectionHeader.cs" />
   </ItemGroup>

@@ -1,4 +1,4 @@
-﻿using Fusion.PE;
+﻿using Fusion.CLI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,9 +11,8 @@ namespace Fusion
     {
         private static void Main(string[] pArguments)
         {
-            PEFile file = new PEFile();
-            PEReader reader = new PEReader(File.ReadAllBytes(pArguments[0]));
-            if (!file.Load(reader)) return;
+            CLIFile file = new CLIFile(File.ReadAllBytes(pArguments[0]));
+            file.Load();
 
             Console.Write("Press any key to exit...");
             Console.ReadKey(true);

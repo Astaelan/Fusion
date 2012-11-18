@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Fusion.PE;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Fusion.PE
+namespace Fusion.CLI
 {
     public sealed class CLIMetadataHeader
     {
@@ -17,21 +18,22 @@ namespace Fusion.PE
         public ushort StreamCount;
         public CLIMetadataStreamHeader[] Streams;
 
-        public bool Read(PEReader pReader)
+        public bool Read(PEFile pFile)
         {
-            if (!pReader.ReadUInt32(ref Signature) ||
-                !pReader.ReadUInt16(ref MajorVersion) ||
-                !pReader.ReadUInt16(ref MinorVersion) ||
-                !pReader.ReadUInt32(ref Reserved) ||
-                !pReader.ReadUInt32(ref VersionLength) ||
-                !pReader.ReadBytes(ref Version, VersionLength) ||
-                !pReader.ReadUInt16(ref Flags) ||
-                !pReader.ReadUInt16(ref StreamCount)) return false;
+            Signature = pFile.ReadUInt32();
+            MajorVersion = pFile.ReadUInt16();
+            MinorVersion = pFile.ReadUInt16();
+            Reserved = pFile.ReadUInt32();
+            VersionLength = pFile.ReadUInt32();
+            Version = pFile.ReadBytes(VersionLength);
+            Flags = pFile.ReadUInt16();
+            StreamCount = pFile.ReadUInt16();
+
             Streams = new CLIMetadataStreamHeader[StreamCount];
             for (int index = 0; index < Streams.Length; ++index)
             {
                 Streams[index] = new CLIMetadataStreamHeader();
-                if (!Streams[index].Read(pReader)) return false;
+                Streams[index].Read(pFile);
             }
             return true;
         }

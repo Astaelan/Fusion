@@ -40,55 +40,43 @@ namespace Fusion.PE
         public uint NumberOfRVAAndSizes;
         public DataDirectory[] DataDirectories = new DataDirectory[16];
 
-        public bool Read(PEReader pReader)
+        public bool Read(PEFile pFile)
         {
-            for (int index = 0; index < DataDirectories.Length; ++index) DataDirectories[index] = new DataDirectory();
-            if (!pReader.ReadUInt16(ref Magic) ||
-                !pReader.ReadByte(ref MajorLinkerVersion) ||
-                !pReader.ReadByte(ref MinorLinkerVersion) ||
-                !pReader.ReadUInt32(ref SizeOfCode) ||
-                !pReader.ReadUInt32(ref SizeOfInitializedData) ||
-                !pReader.ReadUInt32(ref SizeOfUninitializedData) ||
-                !pReader.ReadUInt32(ref AddressOfEntryPoint) ||
-                !pReader.ReadUInt32(ref BaseOfCode) ||
-                !pReader.ReadUInt32(ref BaseOfData) ||
-                !pReader.ReadUInt32(ref ImageBase) ||
-                !pReader.ReadUInt32(ref SectionAlignment) ||
-                !pReader.ReadUInt32(ref FileAlignment) ||
-                !pReader.ReadUInt16(ref MajorOperatingSystemVersion) ||
-                !pReader.ReadUInt16(ref MinorOperatingSystemVersion) ||
-                !pReader.ReadUInt16(ref MajorImageVersion) ||
-                !pReader.ReadUInt16(ref MinorImageVersion) ||
-                !pReader.ReadUInt16(ref MajorSubsystemVersion) ||
-                !pReader.ReadUInt16(ref MinorSubsystemVersion) ||
-                !pReader.ReadUInt32(ref Reserved) ||
-                !pReader.ReadUInt32(ref SizeOfImage) ||
-                !pReader.ReadUInt32(ref SizeOfHeaders) ||
-                !pReader.ReadUInt32(ref Checksum) ||
-                !pReader.ReadUInt16(ref Subsystem) ||
-                !pReader.ReadUInt16(ref DllCharacteristics) ||
-                !pReader.ReadUInt32(ref SizeOfStackReserve) ||
-                !pReader.ReadUInt32(ref SizeOfStackCommit) ||
-                !pReader.ReadUInt32(ref SizeOfHeapReserve) ||
-                !pReader.ReadUInt32(ref SizeOfHeapCommit) ||
-                !pReader.ReadUInt32(ref LoaderFlags) ||
-                !pReader.ReadUInt32(ref NumberOfRVAAndSizes) ||
-                !DataDirectories[0].Read(pReader) ||
-                !DataDirectories[1].Read(pReader) ||
-                !DataDirectories[2].Read(pReader) ||
-                !DataDirectories[3].Read(pReader) ||
-                !DataDirectories[4].Read(pReader) ||
-                !DataDirectories[5].Read(pReader) ||
-                !DataDirectories[6].Read(pReader) ||
-                !DataDirectories[7].Read(pReader) ||
-                !DataDirectories[8].Read(pReader) ||
-                !DataDirectories[9].Read(pReader) ||
-                !DataDirectories[10].Read(pReader) ||
-                !DataDirectories[11].Read(pReader) ||
-                !DataDirectories[12].Read(pReader) ||
-                !DataDirectories[13].Read(pReader) ||
-                !DataDirectories[14].Read(pReader) ||
-                !DataDirectories[15].Read(pReader)) return false;
+            Magic = pFile.ReadUInt16();
+            MajorLinkerVersion = pFile.ReadByte();
+            MinorLinkerVersion = pFile.ReadByte();
+            SizeOfCode = pFile.ReadUInt32();
+            SizeOfInitializedData = pFile.ReadUInt32();
+            SizeOfUninitializedData = pFile.ReadUInt32();
+            AddressOfEntryPoint = pFile.ReadUInt32();
+            BaseOfCode = pFile.ReadUInt32();
+            BaseOfData = pFile.ReadUInt32();
+            ImageBase = pFile.ReadUInt32();
+            SectionAlignment = pFile.ReadUInt32();
+            FileAlignment = pFile.ReadUInt32();
+            MajorOperatingSystemVersion = pFile.ReadUInt16();
+            MinorOperatingSystemVersion = pFile.ReadUInt16();
+            MajorImageVersion = pFile.ReadUInt16();
+            MinorImageVersion = pFile.ReadUInt16();
+            MajorSubsystemVersion = pFile.ReadUInt16();
+            MinorSubsystemVersion = pFile.ReadUInt16();
+            Reserved = pFile.ReadUInt32();
+            SizeOfImage = pFile.ReadUInt32();
+            SizeOfHeaders = pFile.ReadUInt32();
+            Checksum = pFile.ReadUInt32();
+            Subsystem = pFile.ReadUInt16();
+            DllCharacteristics = pFile.ReadUInt16();
+            SizeOfStackReserve = pFile.ReadUInt32();
+            SizeOfStackCommit = pFile.ReadUInt32();
+            SizeOfHeapReserve = pFile.ReadUInt32();
+            SizeOfHeapCommit = pFile.ReadUInt32();
+            LoaderFlags = pFile.ReadUInt32();
+            NumberOfRVAAndSizes = pFile.ReadUInt32();
+            for (int index = 0; index < DataDirectories.Length; ++index)
+            {
+                DataDirectories[index] = new DataDirectory();
+                DataDirectories[index].Read(pFile);
+            }
             return true;
         }
     }

@@ -47,6 +47,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Fusion.CLI\Fusion.CLI.csproj">
+      <Project>{7F18843B-948B-4C13-AB1F-C09DD1FB5D09}</Project>
+      <Name>Fusion.CLI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Fusion.PE\Fusion.PE.csproj">
       <Project>{1BBCA9CF-29B6-4C37-BE4C-DA34FEB55F8D}</Project>
       <Name>Fusion.PE</Name>

@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7F18843B-948B-4C13-AB1F-C09DD1FB5D09}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Fusion.CLI</RootNamespace>
+    <AssemblyName>Fusion.CLI</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CLIFile.cs" />
+    <Compile Include="CLIHeader.cs" />
+    <Compile Include="CLIHeapOffsetSize.cs" />
+    <Compile Include="CLIMetadataHeader.cs" />
+    <Compile Include="CLIMetadataStreamHeader.cs" />
+    <Compile Include="CLIMetadataTables.cs" />
+    <Compile Include="CLIMetadataTablesHeader.cs" />
+    <Compile Include="Metadata\AssemblyData.cs" />
+    <Compile Include="Metadata\AssemblyOSData.cs" />
+    <Compile Include="Metadata\AssemblyProcessorData.cs" />
+    <Compile Include="Metadata\AssemblyRefData.cs" />
+    <Compile Include="Metadata\AssemblyRefOSData.cs" />
+    <Compile Include="Metadata\AssemblyRefProcessorData.cs" />
+    <Compile Include="Metadata\Attributes.cs" />
+    <Compile Include="Metadata\ClassLayoutData.cs" />
+    <Compile Include="Metadata\ConstantData.cs" />
+    <Compile Include="Metadata\CustomAttributeData.cs" />
+    <Compile Include="Metadata\DeclSecurityData.cs" />
+    <Compile Include="Metadata\EventData.cs" />
+    <Compile Include="Metadata\EventMapData.cs" />
+    <Compile Include="Metadata\ExportedTypeData.cs" />
+    <Compile Include="Metadata\FieldData.cs" />
+    <Compile Include="Metadata\FieldLayoutData.cs" />
+    <Compile Include="Metadata\FieldMarshalData.cs" />
+    <Compile Include="Metadata\FieldRVAData.cs" />
+    <Compile Include="Metadata\FileData.cs" />
+    <Compile Include="Metadata\GenericParamConstraintData.cs" />
+    <Compile Include="Metadata\GenericParamData.cs" />
+    <Compile Include="Metadata\ImplMapData.cs" />
+    <Compile Include="Metadata\InterfaceImplData.cs" />
+    <Compile Include="Metadata\ManifestResourceData.cs" />
+    <Compile Include="Metadata\MemberRefData.cs" />
+    <Compile Include="Metadata\MetadataToken.cs" />
+    <Compile Include="Metadata\MethodDefData.cs" />
+    <Compile Include="Metadata\MethodImplData.cs" />
+    <Compile Include="Metadata\MethodSemanticsData.cs" />
+    <Compile Include="Metadata\MethodSpecData.cs" />
+    <Compile Include="Metadata\ModuleData.cs" />
+    <Compile Include="Metadata\ModuleRefData.cs" />
+    <Compile Include="Metadata\NestedClassData.cs" />
+    <Compile Include="Metadata\ParamData.cs" />
+    <Compile Include="Metadata\PropertyData.cs" />
+    <Compile Include="Metadata\PropertyMapData.cs" />
+    <Compile Include="Metadata\StandAloneSigData.cs" />
+    <Compile Include="Metadata\TableIndex.cs" />
+    <Compile Include="Metadata\TypeDefData.cs" />
+    <Compile Include="Metadata\TypeRefData.cs" />
+    <Compile Include="Metadata\TypeSpecData.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Signature\CallingConvention.cs" />
+    <Compile Include="Signature\CustomAttribSig.cs" />
+    <Compile Include="Signature\FieldSig.cs" />
+    <Compile Include="Signature\LocalVarSig.cs" />
+    <Compile Include="Signature\MethodSig.cs" />
+    <Compile Include="Signature\MethodSpecSig.cs" />
+    <Compile Include="Signature\PropertySig.cs" />
+    <Compile Include="Signature\SigArg.cs" />
+    <Compile Include="Signature\SigArgType.cs" />
+    <Compile Include="Signature\SigArrayShape.cs" />
+    <Compile Include="Signature\SigCustomMod.cs" />
+    <Compile Include="Signature\SigElem.cs" />
+    <Compile Include="Signature\SigElementType.cs" />
+    <Compile Include="Signature\SigLocalVar.cs" />
+    <Compile Include="Signature\SigParam.cs" />
+    <Compile Include="Signature\SigRetType.cs" />
+    <Compile Include="Signature\SigType.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Fusion.PE\Fusion.PE.csproj">
+      <Project>{1BBCA9CF-29B6-4C37-BE4C-DA34FEB55F8D}</Project>
+      <Name>Fusion.PE</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

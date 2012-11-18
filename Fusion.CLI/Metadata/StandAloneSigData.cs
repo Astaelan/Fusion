@@ -1,0 +1,51 @@
+﻿using Fusion.PE;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using Fusion.CLI.Signature;
+
+namespace Fusion.CLI.Metadata
+{
+    public sealed class StandAloneSigData
+    {
+        public static void Initialize(CLIFile pFile)
+        {
+            if ((pFile.CLIMetadataTablesHeader.PresentTables & (1ul << CLIMetadataTables.StandAloneSig)) != 0)
+            {
+                pFile.StandAloneSigTable = new StandAloneSigData[pFile.ReadInt32()];
+                for (int index = 0; index < pFile.StandAloneSigTable.Length; ++index) pFile.StandAloneSigTable[index] = new StandAloneSigData() { CLIFile = pFile, TableIndex = index };
+            }
+            else pFile.StandAloneSigTable = new StandAloneSigData[0];
+        }
+
+        public static void Load(CLIFile pFile)
+        {
+            for (int index = 0; index < pFile.StandAloneSigTable.Length; ++index) pFile.StandAloneSigTable[index].LoadData(pFile);
+        }
+
+        public static void Link(CLIFile pFile)
+        {
+            for (int index = 0; index < pFile.StandAloneSigTable.Length; ++index) pFile.StandAloneSigTable[index].LinkData(pFile);
+        }
+
+        public CLIFile CLIFile = null;
+
+        public int TableIndex = 0;
+        public byte[] Signature = null;
+
+        public MethodSig ExpandedMethodSignature = null;
+        public LocalVarSig ExpandedLocalVarSignature = null;
+
+        private void LoadData(CLIFile pFile)
+        {
+            Signature = pFile.ReadBlobHeap(pFile.ReadHeapIndex(CLIHeapOffsetSize.Blob32Bit));
+        }
+
+        private void LinkData(CLIFile pFile)
+        {
+            int cursor = 0;
+            if (Signature[0] == 0x07) ExpandedLocalVarSignature = new LocalVarSig(pFile, Signature, ref cursor);
+            else ExpandedMethodSignature = new MethodSig(pFile, Signature, ref cursor);
+        }
+    }
+}

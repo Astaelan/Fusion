@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Fusion.PE;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Fusion.PE
+namespace Fusion.CLI
 {
     public sealed class CLIHeader
     {
@@ -21,22 +22,21 @@ namespace Fusion.PE
         public DataDirectory ExportAddressTableJumps = new DataDirectory();
         public DataDirectory ManagedNativeHeader = new DataDirectory();
 
-        public bool Read(PEReader pReader)
+        public void Read(PEFile pFile)
         {
-            if (!pReader.ReadUInt32(ref SizeOfHeader) ||
-                !pReader.ReadUInt16(ref MajorRuntimeVersion) ||
-                !pReader.ReadUInt16(ref MinorRuntimeVersion) ||
-                !Metadata.Read(pReader) ||
-                !pReader.ReadUInt32(ref Flags) ||
-                !pReader.ReadUInt32(ref EntryPointToken) ||
-                !pReader.ReadUInt16(ref EntryPointRVA) ||
-                !Resources.Read(pReader) ||
-                !StrongNameSignature.Read(pReader) ||
-                !CodeManagerTable.Read(pReader) ||
-                !VTableFixups.Read(pReader) ||
-                !ExportAddressTableJumps.Read(pReader) ||
-                !ManagedNativeHeader.Read(pReader)) return false;
-            return true;
+            SizeOfHeader = pFile.ReadUInt32();
+            MajorRuntimeVersion = pFile.ReadUInt16();
+            MinorRuntimeVersion = pFile.ReadUInt16();
+            Metadata.Read(pFile);
+            Flags = pFile.ReadUInt32();
+            EntryPointToken = pFile.ReadUInt32();
+            EntryPointRVA = pFile.ReadUInt16();
+            Resources.Read(pFile);
+            StrongNameSignature.Read(pFile);
+            CodeManagerTable.Read(pFile);
+            VTableFixups.Read(pFile);
+            ExportAddressTableJumps.Read(pFile);
+            ManagedNativeHeader.Read(pFile);
         }
     }
 }

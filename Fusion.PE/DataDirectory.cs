@@ -10,11 +10,10 @@ namespace Fusion.PE
         public uint VirtualAddress;
         public uint Size;
 
-        public bool Read(PEReader pReader)
+        public void Read(PEFile pFile)
         {
-            if (!pReader.ReadUInt32(ref VirtualAddress) ||
-                !pReader.ReadUInt32(ref Size)) return false;
-            return true;
+            VirtualAddress = pFile.ReadUInt32();
+            Size = pFile.ReadUInt32();
         }
     }
 }

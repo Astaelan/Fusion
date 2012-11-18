@@ -1,6 +1,9 @@
 /Fusion/bin
 /Fusion/obj
 
+/Fusion.CLI/bin
+/Fusion.CLI/obj
+
 /Fusion.CORLibrary/bin
 /Fusion.CORLibrary/obj
 

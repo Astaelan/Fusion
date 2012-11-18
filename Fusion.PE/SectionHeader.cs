@@ -19,20 +19,18 @@ namespace Fusion.PE
         public ushort NumberOfLineNumbers;
         public uint Characteristics;
 
-        public bool Read(PEReader pReader)
+        public void Read(PEFile pFile)
         {
-            if (!pReader.ReadString(ref Name, 8) ||
-                !pReader.ReadUInt32(ref PhysicalAddress) ||
-                !pReader.ReadUInt32(ref VirtualAddress) ||
-                !pReader.ReadUInt32(ref SizeOfRawData) ||
-                !pReader.ReadUInt32(ref PointerToRawData) ||
-                !pReader.ReadUInt32(ref PointerToRelocations) ||
-                !pReader.ReadUInt32(ref PointerToLineNumbers) ||
-                !pReader.ReadUInt16(ref NumberOfRelocations) ||
-                !pReader.ReadUInt16(ref NumberOfLineNumbers) ||
-                !pReader.ReadUInt32(ref Characteristics)) return false;
-            VirtualSize = PhysicalAddress;
-            return true;
+            Name = pFile.ReadString(8);
+            PhysicalAddress = VirtualSize = pFile.ReadUInt32();
+            VirtualAddress = pFile.ReadUInt32();
+            SizeOfRawData = pFile.ReadUInt32();
+            PointerToRawData = pFile.ReadUInt32();
+            PointerToRelocations = pFile.ReadUInt32();
+            PointerToLineNumbers = pFile.ReadUInt32();
+            NumberOfRelocations = pFile.ReadUInt16();
+            NumberOfLineNumbers = pFile.ReadUInt16();
+            Characteristics = pFile.ReadUInt32();
         }
     }
 }

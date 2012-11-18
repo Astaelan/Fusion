@@ -16,17 +16,16 @@ namespace Fusion.PE
         public ushort SizeOfOptionalHeader;
         public ushort Characteristics;
 
-        public bool Read(PEReader pReader)
+        public void Read(PEFile pFile)
         {
-            if (!pReader.ReadUInt32(ref Signature) ||
-                !pReader.ReadUInt16(ref Machine) ||
-                !pReader.ReadUInt16(ref NumberOfSections) ||
-                !pReader.ReadUInt32(ref Timestamp) ||
-                !pReader.ReadUInt32(ref PointerToSymbolTable) ||
-                !pReader.ReadUInt32(ref NumberOfSymbols) ||
-                !pReader.ReadUInt16(ref SizeOfOptionalHeader) ||
-                !pReader.ReadUInt16(ref Characteristics)) return false;
-            return true;
+            Signature = pFile.ReadUInt32();
+            Machine = pFile.ReadUInt16();
+            NumberOfSections = pFile.ReadUInt16();
+            Timestamp = pFile.ReadUInt32();
+            PointerToSymbolTable = pFile.ReadUInt32();
+            NumberOfSymbols = pFile.ReadUInt32();
+            SizeOfOptionalHeader = pFile.ReadUInt16();
+            Characteristics = pFile.ReadUInt16();
         }
     }
 }

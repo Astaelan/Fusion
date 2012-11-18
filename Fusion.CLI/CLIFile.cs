@@ -9,6 +9,7 @@ namespace Fusion.CLI
 {
     public sealed class CLIFile : PEFile
     {
+        public string ReferenceName = null;
         public CLIHeader CLIHeader = new CLIHeader();
         public uint CLIMetadataHeaderOffset = 0;
         public CLIMetadataHeader CLIMetadataHeader = new CLIMetadataHeader();
@@ -108,8 +109,8 @@ namespace Fusion.CLI
         public GenericParamData[] GenericParamTable = null;
         public MethodSpecData[] MethodSpecTable = null;
         public GenericParamConstraintData[] GenericParamConstraintTable = null;
-        
-        public CLIFile(byte[] pData) : base(pData) { }
+
+        public CLIFile(string pReferenceName, byte[] pData) : base(pData) { ReferenceName = pReferenceName; }
 
         public override void Load()
         {

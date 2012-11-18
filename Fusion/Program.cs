@@ -1,4 +1,4 @@
-﻿using Fusion.CLI;
+﻿using Fusion.IR;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,8 +11,7 @@ namespace Fusion
     {
         private static void Main(string[] pArguments)
         {
-            CLIFile file = new CLIFile(File.ReadAllBytes(pArguments[0]));
-            file.Load();
+            IRAppDomain appDomain = new IRAppDomain(pArguments[0]);
 
             Console.Write("Press any key to exit...");
             Console.ReadKey(true);

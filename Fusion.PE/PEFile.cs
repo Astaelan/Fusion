@@ -19,6 +19,17 @@ namespace Fusion.PE
         public PEFile(byte[] pData)
         {
             Data = pData;
+
+            DOSHeader.Read(this);
+            Cursor = DOSHeader.NextHeaderOffset;
+            PEHeader.Read(this);
+            OptionalHeader.Read(this);
+            SectionHeaders = new SectionHeader[PEHeader.NumberOfSections];
+            for (int index = 0; index < SectionHeaders.Length; ++index)
+            {
+                SectionHeaders[index] = new SectionHeader();
+                SectionHeaders[index].Read(this);
+            }
         }
 
         public byte ReadByte()
@@ -126,20 +137,6 @@ namespace Fusion.PE
             string value = Encoding.ASCII.GetString(Data, (int)Cursor, (int)pLength);
             Cursor += pLength;
             return value;
-        }
-
-        public virtual void Load()
-        {
-            DOSHeader.Read(this);
-            Cursor = DOSHeader.NextHeaderOffset;
-            PEHeader.Read(this);
-            OptionalHeader.Read(this);
-            SectionHeaders = new SectionHeader[PEHeader.NumberOfSections];
-            for (int index = 0; index < SectionHeaders.Length; ++index)
-            {
-                SectionHeaders[index] = new SectionHeader();
-                SectionHeaders[index].Read(this);
-            }
         }
 
         public SectionHeader GetSection(uint pVirtualAddress)

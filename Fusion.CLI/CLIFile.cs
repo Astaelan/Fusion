@@ -110,11 +110,10 @@ namespace Fusion.CLI
         public MethodSpecData[] MethodSpecTable = null;
         public GenericParamConstraintData[] GenericParamConstraintTable = null;
 
-        public CLIFile(string pReferenceName, byte[] pData) : base(pData) { ReferenceName = pReferenceName; }
-
-        public override void Load()
+        public CLIFile(string pReferenceName, byte[] pData)
+            : base(pData)
         {
-            base.Load();
+            ReferenceName = pReferenceName;
 
             DataDirectory headerDataDirectory = OptionalHeader.DataDirectories[14];
             SectionHeader headerSectionHeader = GetSection(headerDataDirectory.VirtualAddress);

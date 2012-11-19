@@ -1,5 +1,4 @@
-﻿using Fusion.IR;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,8 +10,6 @@ namespace Fusion
     {
         private static void Main(string[] pArguments)
         {
-            IRAppDomain appDomain = new IRAppDomain(pArguments[0]);
-
             Console.Write("Press any key to exit...");
             Console.ReadKey(true);
         }

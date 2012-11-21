@@ -2,9 +2,8 @@
 {
     public sealed class OperatingSystem : ICloneable
     {
-
-        private PlatformID platformID;
-        private Version version;
+        private PlatformID mPlatformID;
+        private Version mVersion;
 
         public OperatingSystem(PlatformID platformID, Version version)
         {
@@ -12,47 +11,23 @@
             {
                 throw new ArgumentNullException("version");
             }
-            this.platformID = platformID;
-            this.version = version;
+            mPlatformID = platformID;
+            mVersion = version;
         }
 
-        public PlatformID Platform
-        {
-            get
-            {
-                return this.platformID;
-            }
-        }
+        public PlatformID Platform { get { return mPlatformID; } }
 
-        public Version Version
-        {
-            get
-            {
-                return this.version;
-            }
-        }
+        public Version Version { get { return mVersion; } }
 
-        public string ServicePack
-        {
-            get
-            {
-                return String.Empty;
-            }
-        }
+        public string ServicePack { get { return String.Empty; } }
 
-        public string VersionString
-        {
-            get
-            {
-                return ToString();
-            }
-        }
+        public string VersionString { get { return ToString(); } }
 
         public override string ToString()
         {
             string str;
 
-            switch (this.platformID)
+            switch (mPlatformID)
             {
                 case PlatformID.Win32NT:
                     str = "Microsoft Windows NT";
@@ -74,14 +49,14 @@
                     break;
             }
 
-            return str + " " + this.version.ToString() + " (DNA)";
+            return str + " " + mVersion.ToString() + " (Fusion)";
         }
 
         #region ICloneable Members
 
         public object Clone()
         {
-            return (OperatingSystem)object.Clone(this);
+            return (OperatingSystem)object.MemberwiseClone(this);
         }
 
         #endregion

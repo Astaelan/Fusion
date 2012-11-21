@@ -3,20 +3,10 @@
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface)]
     public sealed class DefaultMemberAttribute : Attribute
     {
+        private string mMemberName;
 
-        private string memberName;
+        public DefaultMemberAttribute(string memberName) { mMemberName = memberName; }
 
-        public DefaultMemberAttribute(string memberName)
-        {
-            this.memberName = memberName;
-        }
-
-        public string MemberName
-        {
-            get
-            {
-                return this.memberName;
-            }
-        }
+        public string MemberName { get { return mMemberName; } }
     }
 }

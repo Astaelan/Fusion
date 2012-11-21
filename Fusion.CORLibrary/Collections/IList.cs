@@ -2,7 +2,6 @@
 {
     public interface IList : ICollection, IEnumerable
     {
-
         bool IsFixedSize { get; }
 
         bool IsReadOnly { get; }
@@ -22,6 +21,5 @@
         void Remove(object value);
 
         void RemoveAt(int index);
-
     }
 }

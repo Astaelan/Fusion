@@ -2,74 +2,39 @@
 {
     public unsafe struct IntPtr
     {
-
         public static readonly IntPtr Zero = new IntPtr(0);
 
-        private void* value;
+        private void* mValue;
 
-        public IntPtr(int value)
-        {
-            this.value = (void*)value;
-        }
+        public IntPtr(int value) { mValue = (void*)value; }
 
-        public IntPtr(long value)
-        {
-            this.value = (void*)value;
-        }
+        public IntPtr(long value) { mValue = (void*)value; }
 
-        public IntPtr(void* value)
-        {
-            this.value = value;
-        }
+        public IntPtr(void* value) { mValue = value; }
 
-        public static int Size
-        {
-            get
-            {
-                return sizeof(void*);
-            }
-        }
+        public static int Size { get { return sizeof(void*); } }
 
-        public int ToInt32()
-        {
-            return (int)this.value;
-        }
+        public int ToInt32() { return (int)mValue; }
 
-        public long ToInt64()
-        {
-            return (long)this.value;
-        }
+        public long ToInt64() { return (long)mValue; }
 
-        public override bool Equals(object obj)
-        {
-            return (obj is IntPtr && ((IntPtr)obj).value == this.value);
-        }
+        public void* ToPointer() { return mValue; }
 
-        public override int GetHashCode()
-        {
-            return (int)this.value;
-        }
+        public override bool Equals(object obj) { return (obj is IntPtr && ((IntPtr)obj).mValue == mValue); }
 
-        public static bool operator ==(IntPtr a, IntPtr b)
-        {
-            return a.value == b.value;
-        }
+        public override int GetHashCode() { return (int)mValue; }
 
-        public static bool operator !=(IntPtr a, IntPtr b)
-        {
-            return a.value != b.value;
-        }
+        public static bool operator ==(IntPtr a, IntPtr b) { return a.mValue == b.mValue; }
+
+        public static bool operator !=(IntPtr a, IntPtr b) { return a.mValue != b.mValue; }
 
         public override string ToString()
         {
             if (Size == 4)
             {
-                return string.Format("0x{0:x4}", (int)this.value);
+                return string.Format("0x{0:x4}", (int)mValue);
             }
-            else
-            {
-                return string.Format("0x{0:x8}", (long)this.value);
-            }
+            return string.Format("0x{0:x8}", (long)mValue);
         }
     }
 }

@@ -5,11 +5,50 @@ namespace System
 {
     public abstract class Type : MemberInfo
     {
+        internal unsafe struct TypeData
+        {
+            public sbyte* Namespace;
+            public int NamespaceLength;
+            public sbyte* Name;
+            public int NameLength;
+            public void** VirtualMethodTable;
+            //public MemberAttributes Attributes;
+            public uint Size;
+            public FieldData* Fields;
+            public int FieldCount;
+            public StaticFieldData* StaticFields;
+            public int StaticFieldCount;
+            public TypeData* EnumerationBaseType;
+            public EnumerationData* Enumerations;
+            public int EnumerationCount;
+            public TypeData* ArrayElementType;
+        }
+        internal unsafe struct FieldData
+        {
+            public TypeData* Type;
+            public int Offset;
+        }
+        internal unsafe struct StaticFieldData
+        {
+            public TypeData* Type;
+            public void* Data;
+        }
+        internal unsafe struct EnumerationData
+        {
+            public sbyte* Name;
+            public int NameLength;
+            public int Value;
+        }
 
         public static readonly Type[] EmptyTypes = new Type[0];
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern public static Type GetTypeFromHandle(RuntimeTypeHandle handle);
+        internal RuntimeTypeHandle mHandle;
+
+        protected Type() { }
+
+        public static Type GetTypeFromHandle(RuntimeTypeHandle handle) { return new RuntimeType(handle); }
+
+        internal unsafe TypeData* GetTypeDataPointer() { return (TypeData*)mHandle.Value.ToPointer(); }
 
         public abstract Type BaseType
         {
@@ -40,15 +79,17 @@ namespace System
 
         public abstract Type[] GetGenericArguments();
 
-        extern public bool IsValueType
+        public extern bool IsValueType
         {
             [MethodImpl(MethodImplOptions.InternalCall)]
             get;
         }
 
+        public bool Equals(Type o) { return mHandle.Value == o.mHandle.Value; }
+
         public override string ToString()
         {
-            return this.FullName;
+            return FullName;
         }
     }
 }

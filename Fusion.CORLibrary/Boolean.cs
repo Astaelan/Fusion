@@ -2,26 +2,16 @@
 {
     public struct Boolean : IComparable, IComparable<bool>, IEquatable<bool>
     {
-
         public static readonly string TrueString = "True";
         public static readonly string FalseString = "False";
 
-        internal bool m_value;
+        private bool mValue;
 
-        public override string ToString()
-        {
-            return this.m_value ? TrueString : FalseString;
-        }
+        public override string ToString() { return mValue ? TrueString : FalseString; }
 
-        public override bool Equals(object obj)
-        {
-            return (obj is bool) && ((bool)obj).m_value == this.m_value;
-        }
+        public override bool Equals(object obj) { return (obj is bool) && ((bool)obj).mValue == mValue; }
 
-        public override int GetHashCode()
-        {
-            return (this.m_value) ? 1 : 0;
-        }
+        public override int GetHashCode() { return mValue ? 1 : 0; }
 
         public static bool Parse(string value)
         {
@@ -41,8 +31,6 @@
             throw new FormatException("Value is not a valid boolean");
         }
 
-        #region IComparable Members
-
         public int CompareTo(object obj)
         {
             if (obj == null)
@@ -53,28 +41,11 @@
             {
                 throw new ArgumentException();
             }
-            return this.CompareTo((bool)obj);
+            return CompareTo((bool)obj);
         }
 
-        #endregion
+        public int CompareTo(bool value) { return mValue == value ? 0 : (mValue ? 1 : -1); }
 
-        #region IComparable<bool> Members
-
-        public int CompareTo(bool x)
-        {
-            return (this.m_value == x) ? 0 : ((this.m_value) ? 1 : -1);
-        }
-
-        #endregion
-
-        #region IEquatable<bool> Members
-
-        public bool Equals(bool x)
-        {
-            return this.m_value == x;
-        }
-
-        #endregion
-
+        public bool Equals(bool obj) { return mValue == obj; }
     }
 }

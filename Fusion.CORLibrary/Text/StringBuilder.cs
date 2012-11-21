@@ -8,9 +8,9 @@ namespace System.Text
         private const int defaultMaxCapacity = int.MaxValue;
         private const int defaultInitialCapacity = 16;
 
-        private int length;
-        private int capacity;
-        private char[] data;
+        private int mLength;
+        private int mCapacity;
+        private char[] mData;
 
         #region Constructors
 
@@ -20,9 +20,9 @@ namespace System.Text
 
         public StringBuilder(int initialCapacity, int maxCapacity)
         {
-            this.capacity = Math.Max(initialCapacity, 2);
-            this.length = 0;
-            this.data = new char[this.capacity];
+            this.mCapacity = Math.Max(initialCapacity, 2);
+            this.mLength = 0;
+            this.mData = new char[this.mCapacity];
         }
 
         public StringBuilder(string value)
@@ -61,29 +61,29 @@ namespace System.Text
 
         public override string ToString()
         {
-            return new string(this.data, 0, this.length);
+            return new string(this.mData, 0, this.mLength);
         }
 
         public string ToString(int startIndex, int length)
         {
-            if (startIndex < 0 || length < 0 || startIndex + length > this.length)
+            if (startIndex < 0 || length < 0 || startIndex + length > this.mLength)
             {
                 throw new ArgumentOutOfRangeException();
             }
-            return new string(this.data, startIndex, length);
+            return new string(this.mData, startIndex, length);
         }
 
         private void EnsureSpace(int space)
         {
-            if (this.length + space > this.capacity)
+            if (this.mLength + space > this.mCapacity)
             {
                 do
                 {
-                    this.capacity <<= 1;
-                } while (this.capacity < this.length + space);
-                char[] newData = new char[capacity];
-                Array.Copy(this.data, 0, newData, 0, this.length);
-                this.data = newData;
+                    this.mCapacity <<= 1;
+                } while (this.mCapacity < this.mLength + space);
+                char[] newData = new char[mCapacity];
+                Array.Copy(this.mData, 0, newData, 0, this.mLength);
+                this.mData = newData;
             }
         }
 
@@ -91,7 +91,7 @@ namespace System.Text
         {
             get
             {
-                return this.length;
+                return this.mLength;
             }
             set
             {
@@ -99,15 +99,15 @@ namespace System.Text
                 {
                     throw new ArgumentOutOfRangeException();
                 }
-                if (value > this.length)
+                if (value > this.mLength)
                 {
-                    this.EnsureSpace(this.length - value);
-                    for (int i = this.length; i < value; i++)
+                    this.EnsureSpace(this.mLength - value);
+                    for (int i = this.mLength; i < value; i++)
                     {
-                        this.data[i] = '\x0000';
+                        this.mData[i] = '\x0000';
                     }
                 }
-                this.length = value;
+                this.mLength = value;
             }
         }
 
@@ -115,7 +115,7 @@ namespace System.Text
         {
             get
             {
-                return this.capacity;
+                return this.mCapacity;
             }
         }
 
@@ -124,19 +124,19 @@ namespace System.Text
         {
             get
             {
-                if (index < 0 || index >= this.length)
+                if (index < 0 || index >= this.mLength)
                 {
                     throw new IndexOutOfRangeException();
                 }
-                return this.data[index];
+                return this.mData[index];
             }
             set
             {
-                if (index < 0 || index >= this.length)
+                if (index < 0 || index >= this.mLength)
                 {
                     throw new IndexOutOfRangeException();
                 }
-                this.data[index] = value;
+                this.mData[index] = value;
             }
         }
 
@@ -147,30 +147,30 @@ namespace System.Text
                 throw new ArgumentNullException("destination");
             }
             if (srcIndex < 0 || count < 0 || dstIndex < 0 ||
-                srcIndex + count > this.length || dstIndex + count > dst.Length)
+                srcIndex + count > this.mLength || dstIndex + count > dst.Length)
             {
                 throw new ArgumentOutOfRangeException();
             }
-            Array.Copy(this.data, srcIndex, dst, dstIndex, count);
+            Array.Copy(this.mData, srcIndex, dst, dstIndex, count);
         }
 
         public void EnsureCapacity(int capacity)
         {
-            if (this.capacity < capacity)
+            if (this.mCapacity < capacity)
             {
                 // This is not quite right, as it will often over-allocate memory
-                this.EnsureSpace(capacity - this.capacity);
+                this.EnsureSpace(capacity - this.mCapacity);
             }
         }
 
         public StringBuilder Remove(int startIndex, int length)
         {
-            if (startIndex < 0 || length < 0 || startIndex + length > this.length)
+            if (startIndex < 0 || length < 0 || startIndex + length > this.mLength)
             {
                 throw new ArgumentOutOfRangeException();
             }
-            Array.Copy(this.data, startIndex + length, this.data, startIndex, this.length - length - startIndex);
-            this.length -= length;
+            Array.Copy(this.mData, startIndex + length, this.mData, startIndex, this.mLength - length - startIndex);
+            this.mLength -= length;
             return this;
         }
 
@@ -182,7 +182,7 @@ namespace System.Text
             this.EnsureSpace(len);
             for (int i = 0; i < len; i++)
             {
-                this.data[this.length++] = value[i];
+                this.mData[this.mLength++] = value[i];
             }
             return this;
         }
@@ -200,7 +200,7 @@ namespace System.Text
             this.EnsureSpace(count);
             for (int i = 0; i < count; i++)
             {
-                this.data[this.length++] = value[startIndex + i];
+                this.mData[this.mLength++] = value[startIndex + i];
             }
             return this;
         }
@@ -208,7 +208,7 @@ namespace System.Text
         public StringBuilder Append(char value)
         {
             EnsureSpace(1);
-            data[length++] = value;
+            mData[mLength++] = value;
             return this;
         }
 
@@ -221,7 +221,7 @@ namespace System.Text
             EnsureSpace(repeatCount);
             for (int i = 0; i < repeatCount; i++)
             {
-                this.data[this.length++] = value;
+                this.mData[this.mLength++] = value;
             }
             return this;
         }
@@ -234,8 +234,8 @@ namespace System.Text
             }
             int addLen = value.Length;
             this.EnsureSpace(addLen);
-            Array.Copy(value, 0, this.data, this.length, addLen);
-            this.length += addLen;
+            Array.Copy(value, 0, this.mData, this.mLength, addLen);
+            this.mLength += addLen;
             return this;
         }
 
@@ -250,8 +250,8 @@ namespace System.Text
                 throw new ArgumentOutOfRangeException();
             }
             this.EnsureSpace(charCount);
-            Array.Copy(value, startIndex, this.data, this.length, charCount);
-            this.length += charCount;
+            Array.Copy(value, startIndex, this.mData, this.mLength, charCount);
+            this.mLength += charCount;
             return this;
         }
 
@@ -378,7 +378,7 @@ namespace System.Text
 
         public StringBuilder Insert(int index, string value)
         {
-            if (index < 0 || index > this.length)
+            if (index < 0 || index > this.mLength)
             {
                 throw new ArgumentOutOfRangeException();
             }
@@ -388,12 +388,12 @@ namespace System.Text
             }
             int len = value.Length;
             EnsureSpace(len);
-            Array.Copy(this.data, index, this.data, index + len, this.length - index);
+            Array.Copy(this.mData, index, this.mData, index + len, this.mLength - index);
             for (int i = 0; i < len; i++)
             {
-                this.data[index + i] = value[i];
+                this.mData[index + i] = value[i];
             }
-            this.length += len;
+            this.mLength += len;
             return this;
         }
 
@@ -509,25 +509,25 @@ namespace System.Text
 
         public StringBuilder Replace(char oldChar, char newChar)
         {
-            return this.Replace(oldChar, newChar, 0, this.length);
+            return this.Replace(oldChar, newChar, 0, this.mLength);
         }
 
         public StringBuilder Replace(string oldValue, string newValue)
         {
-            return this.Replace(oldValue, newValue, 0, this.length);
+            return this.Replace(oldValue, newValue, 0, this.mLength);
         }
 
         public StringBuilder Replace(char oldChar, char newChar, int startIndex, int count)
         {
-            if (startIndex < 0 || count < 0 || startIndex + count > this.length)
+            if (startIndex < 0 || count < 0 || startIndex + count > this.mLength)
             {
                 throw new ArgumentOutOfRangeException();
             }
             for (int i = 0; i < count; i++)
             {
-                if (this.data[startIndex + i] == oldChar)
+                if (this.mData[startIndex + i] == oldChar)
                 {
-                    this.data[startIndex + i] = newChar;
+                    this.mData[startIndex + i] = newChar;
                 }
             }
             return this;

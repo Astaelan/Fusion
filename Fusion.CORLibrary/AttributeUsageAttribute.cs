@@ -1,49 +1,18 @@
-﻿using System;
-
-namespace System
+﻿namespace System
 {
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class AttributeUsageAttribute : Attribute
     {
-        private AttributeTargets validOn;
-        private bool allowMultiple = false;
-        private bool inherited = true;
+        private AttributeTargets mValidOn;
+        private bool mAllowMultiple = false;
+        private bool mInherited = true;
 
-        public AttributeUsageAttribute(AttributeTargets validOn)
-        {
-            this.validOn = validOn;
-        }
+        public AttributeUsageAttribute(AttributeTargets validOn) { mValidOn = validOn; }
 
-        public bool AllowMultiple
-        {
-            get
-            {
-                return allowMultiple;
-            }
-            set
-            {
-                allowMultiple = value;
-            }
-        }
+        public bool AllowMultiple { get { return mAllowMultiple; } set { mAllowMultiple = value; } }
 
-        public bool Inherited
-        {
-            get
-            {
-                return inherited;
-            }
-            set
-            {
-                inherited = value;
-            }
-        }
+        public bool Inherited { get { return mInherited; } set { mInherited = value; } }
 
-        public AttributeTargets ValidOn
-        {
-            get
-            {
-                return validOn;
-            }
-        }
+        public AttributeTargets ValidOn { get { return mValidOn; } }
     }
 }

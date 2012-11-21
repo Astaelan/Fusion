@@ -5,190 +5,105 @@ namespace System.Globalization
 {
     public class NumberFormatInfo : IFormatProvider
     {
-
-        #region Static Methods/Properties
-
         private static string[] defaultNativeDigits = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
-        public static NumberFormatInfo CurrentInfo
-        {
-            get
-            {
-                NumberFormatInfo nfi = Thread.CurrentThread.CurrentCulture.NumberFormat;
-                return nfi;
-            }
-        }
+        public static NumberFormatInfo CurrentInfo { get { return CultureInfo.CurrentCulture.NumberFormat; } } 
 
-        public static NumberFormatInfo InvariantInfo
-        {
-            get
-            {
-                NumberFormatInfo nfi = new NumberFormatInfo();
-                nfi.isReadOnly = true;
-                return nfi;
-            }
-        }
+        public static NumberFormatInfo InvariantInfo { get { return new NumberFormatInfo(); } }
 
-        public static NumberFormatInfo GetInstance(IFormatProvider provider)
-        {
-            if (provider != null)
-            {
-                NumberFormatInfo nfi;
-                nfi = (NumberFormatInfo)provider.GetFormat(typeof(NumberFormatInfo));
-                if (nfi != null)
-                {
-                    return nfi;
-                }
-            }
+        public static NumberFormatInfo GetInstance(IFormatProvider provider) { return CurrentInfo; }
 
-            return CurrentInfo;
-        }
-
-        #endregion
-
-        private bool isReadOnly;
-        private int currencyDecimalDigits;
-        private string currencyDecimalSeparator;
-        private string currencyGroupSeparator;
-        private int[] currencyGroupSizes;
-        private int currencyNegativePattern;
-        private int currencyPositivePattern;
-        private string currencySymbol;
-        private DigitShapes digitSubstitution;
-        private string naNSymbol;
-        private string[] nativeDigits;
-        private string negativeInfinitySymbol;
-        private string negativeSign;
-        private int numberDecimalDigits;
-        private string numberDecimalSeparator;
-        private string numberGroupSeparator;
-        private int[] numberGroupSizes;
-        private int numberNegativePattern;
-        private int percentDecimalDigits;
-        private string percentDecimalSeparator;
-        private string percentGroupSeparator;
-        private int[] percentGroupSizes;
-        private int percentNegativePattern;
-        private int percentPositivePattern;
-        private string percentSymbol;
-        private string perMilleSymbol;
-        private string positiveInfinitySymbol;
-        private string positiveSign;
-
-        private static int[] ConvertToIntArray(string s)
-        {
-            string[] list = s.Split(',');
-            int listLen = list.Length;
-            int[] ret = new int[listLen];
-            for (int i = 0; i < listLen; i++)
-            {
-                ret[i] = int.Parse(list[i]);
-            }
-            return ret;
-        }
-
-        internal NumberFormatInfo(StreamReader s)
-        {
-            this.isReadOnly = true;
-            // Sets up information from stream
-            this.currencyDecimalDigits = int.Parse(s.ReadLine());
-            this.currencyDecimalSeparator = s.ReadLine();
-            this.currencyGroupSeparator = s.ReadLine();
-            this.currencyGroupSizes = ConvertToIntArray(s.ReadLine());
-            this.currencyNegativePattern = int.Parse(s.ReadLine());
-            this.currencyPositivePattern = int.Parse(s.ReadLine());
-            this.currencySymbol = s.ReadLine();
-            this.digitSubstitution = (DigitShapes)int.Parse(s.ReadLine());
-            this.naNSymbol = s.ReadLine();
-            this.nativeDigits = s.ReadLine().Split(',');
-            this.negativeInfinitySymbol = s.ReadLine();
-            this.negativeSign = s.ReadLine();
-            this.numberDecimalDigits = int.Parse(s.ReadLine());
-            this.numberDecimalSeparator = s.ReadLine();
-            this.numberGroupSeparator = s.ReadLine();
-            this.numberGroupSizes = ConvertToIntArray(s.ReadLine());
-            this.numberNegativePattern = int.Parse(s.ReadLine());
-            this.percentDecimalDigits = int.Parse(s.ReadLine());
-            this.percentDecimalSeparator = s.ReadLine();
-            this.percentGroupSeparator = s.ReadLine();
-            this.percentGroupSizes = ConvertToIntArray(s.ReadLine());
-            this.percentNegativePattern = int.Parse(s.ReadLine());
-            this.percentPositivePattern = int.Parse(s.ReadLine());
-            this.percentSymbol = s.ReadLine();
-            this.perMilleSymbol = s.ReadLine();
-            this.positiveInfinitySymbol = s.ReadLine();
-            this.positiveSign = s.ReadLine();
-        }
+        private bool mIsReadOnly;
+        private int mCurrencyDecimalDigits;
+        private string mCurrencyDecimalSeparator;
+        private string mCurrencyGroupSeparator;
+        private int[] mCurrencyGroupSizes;
+        private int mCurrencyNegativePattern;
+        private int mCurrencyPositivePattern;
+        private string mCurrencySymbol;
+        private DigitShapes mDigitSubstitution;
+        private string mNaNSymbol;
+        private string[] mNativeDigits;
+        private string mNegativeInfinitySymbol;
+        private string mNegativeSign;
+        private int mNumberDecimalDigits;
+        private string mNumberDecimalSeparator;
+        private string mNumberGroupSeparator;
+        private int[] mNumberGroupSizes;
+        private int mNumberNegativePattern;
+        private int mPercentDecimalDigits;
+        private string mPercentDecimalSeparator;
+        private string mPercentGroupSeparator;
+        private int[] mPercentGroupSizes;
+        private int mPercentNegativePattern;
+        private int mPercentPositivePattern;
+        private string mPercentSymbol;
+        private string mPerMilleSymbol;
+        private string mPositiveInfinitySymbol;
+        private string mPositiveSign;
 
         public NumberFormatInfo()
         {
-            this.isReadOnly = true;
             // Set up defaults for invariant culture
-            this.currencyDecimalDigits = 2;
-            this.currencyDecimalSeparator = ".";
-            this.currencyGroupSeparator = ",";
-            this.currencyGroupSizes = new int[] { 3 };
-            this.currencyNegativePattern = 0;
-            this.currencyPositivePattern = 0;
-            this.currencySymbol = "$";
-            this.digitSubstitution = DigitShapes.None;
-            this.naNSymbol = "NaN";
-            this.nativeDigits = defaultNativeDigits;
-            this.negativeInfinitySymbol = "-Infinity";
-            this.negativeSign = "-";
-            this.numberDecimalDigits = 2;
-            this.numberDecimalSeparator = ".";
-            this.numberGroupSeparator = ",";
-            this.numberGroupSizes = new int[] { 3 };
-            this.numberNegativePattern = 1;
-            this.percentDecimalDigits = 2;
-            this.percentDecimalSeparator = ".";
-            this.percentGroupSeparator = ",";
-            this.percentGroupSizes = new int[] { 3 };
-            this.percentNegativePattern = 0;
-            this.percentPositivePattern = 0;
-            this.percentSymbol = "%";
-            this.perMilleSymbol = "\x2030";
-            this.positiveInfinitySymbol = "Infinity";
-            this.positiveSign = "+";
+            mIsReadOnly = true;
+            mCurrencyDecimalDigits = 2;
+            mCurrencyDecimalSeparator = ".";
+            mCurrencyGroupSeparator = ",";
+            mCurrencyGroupSizes = new int[] { 3 };
+            mCurrencyNegativePattern = 0;
+            mCurrencyPositivePattern = 0;
+            mCurrencySymbol = "$";
+            mDigitSubstitution = DigitShapes.None;
+            mNaNSymbol = "NaN";
+            mNativeDigits = defaultNativeDigits;
+            mNegativeInfinitySymbol = "-Infinity";
+            mNegativeSign = "-";
+            mNumberDecimalDigits = 2;
+            mNumberDecimalSeparator = ".";
+            mNumberGroupSeparator = ",";
+            mNumberGroupSizes = new int[] { 3 };
+            mNumberNegativePattern = 1;
+            mPercentDecimalDigits = 2;
+            mPercentDecimalSeparator = ".";
+            mPercentGroupSeparator = ",";
+            mPercentGroupSizes = new int[] { 3 };
+            mPercentNegativePattern = 0;
+            mPercentPositivePattern = 0;
+            mPercentSymbol = "%";
+            mPerMilleSymbol = "\x2030";
+            mPositiveInfinitySymbol = "Infinity";
+            mPositiveSign = "+";
         }
 
-        public bool IsReadOnly { get { return this.isReadOnly; } }
-        public int CurrencyDecimalDigits { get { return this.currencyDecimalDigits; } }
-        public string CurrencyDecimalSeparator { get { return this.currencyDecimalSeparator; } }
-        public string CurrencyGroupSeparator { get { return this.currencyGroupSeparator; } }
-        public int[] CurrencyGroupSizes { get { return this.currencyGroupSizes; } }
-        public int CurrencyNegativePattern { get { return this.currencyNegativePattern; } }
-        public int CurrencyPositivePattern { get { return this.currencyPositivePattern; } }
-        public string CurrencySymbol { get { return this.currencySymbol; } }
-        public DigitShapes DigitSubstitution { get { return this.digitSubstitution; } }
-        public string NaNSymbol { get { return this.naNSymbol; } }
-        public string[] NativeDigits { get { return this.nativeDigits; } }
-        public string NegativeInfinitySymbol { get { return this.negativeInfinitySymbol; } }
-        public string NegativeSign { get { return this.negativeSign; } }
-        public int NumberDecimalDigits { get { return this.numberDecimalDigits; } }
-        public string NumberDecimalSeparator { get { return this.numberDecimalSeparator; } }
-        public string NumberGroupSeparator { get { return this.numberGroupSeparator; } }
-        public int[] NumberGroupSizes { get { return this.numberGroupSizes; } }
-        public int NumberNegativePattern { get { return this.numberNegativePattern; } }
-        public int PercentDecimalDigits { get { return this.percentDecimalDigits; } }
-        public string PercentDecimalSeparator { get { return this.percentDecimalSeparator; } }
-        public string PercentGroupSeparator { get { return this.percentGroupSeparator; } }
-        public int[] PercentGroupSizes { get { return this.percentGroupSizes; } }
-        public int PercentNegativePattern { get { return this.percentNegativePattern; } }
-        public int PercentPositivePattern { get { return this.percentPositivePattern; } }
-        public string PercentSymbol { get { return this.percentSymbol; } }
-        public string PerMilleSymbol { get { return this.perMilleSymbol; } }
-        public string PositiveInfinitySymbol { get { return this.positiveInfinitySymbol; } }
-        public string PositiveSign { get { return this.positiveSign; } }
+        public bool IsReadOnly { get { return mIsReadOnly; } }
+        public int CurrencyDecimalDigits { get { return mCurrencyDecimalDigits; } }
+        public string CurrencyDecimalSeparator { get { return mCurrencyDecimalSeparator; } }
+        public string CurrencyGroupSeparator { get { return mCurrencyGroupSeparator; } }
+        public int[] CurrencyGroupSizes { get { return mCurrencyGroupSizes; } }
+        public int CurrencyNegativePattern { get { return mCurrencyNegativePattern; } }
+        public int CurrencyPositivePattern { get { return mCurrencyPositivePattern; } }
+        public string CurrencySymbol { get { return mCurrencySymbol; } }
+        public DigitShapes DigitSubstitution { get { return mDigitSubstitution; } }
+        public string NaNSymbol { get { return mNaNSymbol; } }
+        public string[] NativeDigits { get { return mNativeDigits; } }
+        public string NegativeInfinitySymbol { get { return mNegativeInfinitySymbol; } }
+        public string NegativeSign { get { return mNegativeSign; } }
+        public int NumberDecimalDigits { get { return mNumberDecimalDigits; } }
+        public string NumberDecimalSeparator { get { return mNumberDecimalSeparator; } }
+        public string NumberGroupSeparator { get { return mNumberGroupSeparator; } }
+        public int[] NumberGroupSizes { get { return mNumberGroupSizes; } }
+        public int NumberNegativePattern { get { return mNumberNegativePattern; } }
+        public int PercentDecimalDigits { get { return mPercentDecimalDigits; } }
+        public string PercentDecimalSeparator { get { return mPercentDecimalSeparator; } }
+        public string PercentGroupSeparator { get { return mPercentGroupSeparator; } }
+        public int[] PercentGroupSizes { get { return mPercentGroupSizes; } }
+        public int PercentNegativePattern { get { return mPercentNegativePattern; } }
+        public int PercentPositivePattern { get { return mPercentPositivePattern; } }
+        public string PercentSymbol { get { return mPercentSymbol; } }
+        public string PerMilleSymbol { get { return mPerMilleSymbol; } }
+        public string PositiveInfinitySymbol { get { return mPositiveInfinitySymbol; } }
+        public string PositiveSign { get { return mPositiveSign; } }
 
-        #region IFormatProvider Members
-
-        public object GetFormat(Type formatType)
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-
-        #endregion
+        public object GetFormat(Type formatType) { throw new Exception("The method or operation is not implemented."); }
     }
 }

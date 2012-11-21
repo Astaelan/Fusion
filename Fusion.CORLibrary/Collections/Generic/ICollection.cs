@@ -2,19 +2,9 @@
 {
     public interface ICollection<T> : IEnumerable<T>
     {
+        int Count { get; }
 
-        // DO NOT change the order of these method definitions.
-        // The auto-generated ICollection<T> interface on Array relies on the order.
-
-        int Count
-        {
-            get;
-        }
-
-        bool IsReadOnly
-        {
-            get;
-        }
+        bool IsReadOnly { get; }
 
         void Add(T item);
 
@@ -25,6 +15,5 @@
         void CopyTo(T[] array, int arrayIndex);
 
         bool Remove(T item);
-
     }
 }

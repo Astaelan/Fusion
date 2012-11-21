@@ -5,73 +5,41 @@ namespace System
 {
     public sealed class CharEnumerator : ICloneable, IEnumerator, IEnumerator<char>
     {
-
-        private string str;
-        private int index;
-        private int length;
+        private string mString;
+        private int mIndex;
+        private int mLength;
 
         internal CharEnumerator(string s)
         {
-            this.str = s;
-            this.index = -1;
-            this.length = s.Length;
+            mString = s;
+            mIndex = -1;
+            mLength = s.Length;
         }
 
-        #region IClonable Members
+        public object Clone() { return object.MemberwiseClone(this); }
 
-        public object Clone()
-        {
-            return object.Clone(this);
-        }
-
-        #endregion
-
-        #region IEnumerator Members
-
-        object IEnumerator.Current
-        {
-            get
-            {
-                return Current;
-            }
-        }
+        object IEnumerator.Current { get { return Current; } }
 
         public bool MoveNext()
         {
-            this.index++;
-            return (this.index < this.length);
+            mIndex++;
+            return (mIndex < mLength);
         }
 
-        public void Reset()
-        {
-            this.index = -1;
-        }
-
-        #endregion
-
-        #region IEnumerator<char> Members
+        public void Reset() { mIndex = -1; }
 
         public char Current
         {
             get
             {
-                if (index == -1 || index >= length)
+                if (mIndex == -1 || mIndex >= mLength)
                 {
                     throw new InvalidOperationException("The position is not valid.");
                 }
-                return str[index];
+                return mString[mIndex];
             }
         }
 
-        #endregion
-
-        #region IDisposable Members
-
-        public void Dispose()
-        {
-            // Nothing needed
-        }
-
-        #endregion
+        public void Dispose() { }
     }
 }

@@ -2,12 +2,9 @@
 {
     public abstract class Delegate
     {
-
-        // These must be the same as defined in the interpreter
-        // If/when reflection is implemented, this IntPtr may change to MethodInfo
-        private object targetObj = null;
-        private IntPtr targetMethod = IntPtr.Zero;
-        protected Delegate pNext = null;
+        private object mTargetObj = null;
+        private IntPtr mTargetMethod = IntPtr.Zero;
+        protected Delegate mNext = null;
 
         public override bool Equals(object obj)
         {
@@ -16,15 +13,15 @@
             {
                 return false;
             }
-            return d.targetObj == this.targetObj && d.targetMethod.Equals(this.targetMethod);
+            return d.mTargetObj == mTargetObj && d.mTargetMethod.Equals(mTargetMethod);
         }
 
         public override int GetHashCode()
         {
-            int ret = targetMethod.GetHashCode();
-            if (targetObj != null)
+            int ret = mTargetMethod.GetHashCode();
+            if (mTargetObj != null)
             {
-                ret ^= targetObj.GetHashCode();
+                ret ^= mTargetObj.GetHashCode();
             }
             return ret;
         }

@@ -2,12 +2,8 @@
 {
     public abstract class MemberInfo
     {
-
-        protected MemberInfo()
-        {
-        }
+        protected MemberInfo() { }
 
         public abstract string Name { get; }
-
     }
 }

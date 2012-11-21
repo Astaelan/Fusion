@@ -5,15 +5,15 @@
 
         public const int ADEra = 1;
 
-        private GregorianCalendarTypes type;
+        private GregorianCalendarTypes mType;
 
         public GregorianCalendar() : this(GregorianCalendarTypes.Localized) { }
 
         public GregorianCalendar(GregorianCalendarTypes type)
         {
-            base.eraNames = new string[] { "A.D." };
-            base.eraAbbrNames = new string[] { "AD" };
-            this.type = type;
+            mEraNames = new string[] { "A.D." };
+            mEraAbbrNames = new string[] { "AD" };
+            mType = type;
         }
 
         public override int[] Eras

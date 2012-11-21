@@ -4,7 +4,6 @@ namespace System
 {
     public struct Single : IFormattable, IComparable, IComparable<float>, IEquatable<float>
     {
-
         public const float Epsilon = 1.4e-45f;
         public const float MaxValue = 3.40282346638528859e38f;
         public const float MinValue = -3.40282346638528859e38f;
@@ -12,71 +11,41 @@ namespace System
         public const float PositiveInfinity = 1.0f / 0.0f;
         public const float NegativeInfinity = -1.0f / 0.0f;
 
-        private float m_value;
+        private float mValue;
 
-        public static bool IsNaN(float f)
-        {
-#pragma warning disable 1718
-            return (f != f);
-#pragma warning restore
-        }
+        public static bool IsNaN(float f) { return f != f; }
 
-        public static bool IsNegativeInfinity(float f)
-        {
-            return (f < 0.0f && (f == NegativeInfinity || f == PositiveInfinity));
-        }
+        public static bool IsNegativeInfinity(float f) { return (f < 0.0f && (f == NegativeInfinity || f == PositiveInfinity)); }
 
-        public static bool IsPositiveInfinity(float f)
-        {
-            return (f > 0.0f && (f == NegativeInfinity || f == PositiveInfinity));
-        }
+        public static bool IsPositiveInfinity(float f) { return (f > 0.0f && (f == NegativeInfinity || f == PositiveInfinity)); }
 
-        public static bool IsInfinity(float f)
-        {
-            return (f == PositiveInfinity || f == NegativeInfinity);
-        }
+        public static bool IsInfinity(float f) { return (f == PositiveInfinity || f == NegativeInfinity); }
 
-        public override bool Equals(object o)
+        public override bool Equals(object obj)
         {
-            if (!(o is Single))
+            if (!(obj is Single))
             {
                 return false;
             }
-            if (IsNaN((float)o))
+            if (IsNaN((float)obj))
             {
                 return IsNaN(this);
             }
-            return ((float)o).m_value == this.m_value;
+            return ((float)obj).mValue == mValue;
         }
 
         public unsafe override int GetHashCode()
         {
-            float f = this.m_value;
-            return (*((int*)&f)).GetHashCode();
+            fixed (float* ptr = &mValue) return (*(int*)ptr).GetHashCode();
         }
 
-        public override string ToString()
-        {
-            return ToString(null, null);
-        }
+        public override string ToString() { return ToString(null, null); }
 
-        public string ToString(IFormatProvider provider)
-        {
-            return ToString(null, provider);
-        }
+        public string ToString(IFormatProvider provider) { return ToString(null, provider); }
 
-        public string ToString(string format)
-        {
-            return ToString(format, null);
-        }
+        public string ToString(string format) { return ToString(format, null); }
 
-        public string ToString(string format, IFormatProvider provider)
-        {
-            NumberFormatInfo nfi = NumberFormatInfo.GetInstance(provider);
-            return NumberFormatter.NumberToString(format, this.m_value, nfi);
-        }
-
-        #region IComparable Members
+        public string ToString(string format, IFormatProvider provider) { return NumberFormatter.NumberToString(format, mValue, NumberFormatInfo.GetInstance(provider)); }
 
         public int CompareTo(object obj)
         {
@@ -88,40 +57,29 @@ namespace System
             {
                 throw new ArgumentException();
             }
-            return this.CompareTo((float)obj);
+            return CompareTo((float)obj);
         }
 
-        #endregion
-
-        #region IComparable<float> Members
-
-        public int CompareTo(float x)
+        public int CompareTo(float value)
         {
-            if (float.IsNaN(this.m_value))
+            if (IsNaN(mValue))
             {
-                return float.IsNaN(x) ? 0 : -1;
+                return IsNaN(value) ? 0 : -1;
             }
-            if (float.IsNaN(x))
+            if (IsNaN(value))
             {
                 return 1;
             }
-            return (this.m_value > x) ? 1 : ((this.m_value < x) ? -1 : 0);
+            return mValue > value ? 1 : (mValue < value ? -1 : 0);
         }
 
-        #endregion
-
-        #region IEquatable<float> Members
-
-        public bool Equals(float x)
+        public bool Equals(float obj)
         {
-            if (float.IsNaN(this.m_value))
+            if (IsNaN(mValue))
             {
-                return float.IsNaN(x);
+                return IsNaN(obj);
             }
-            return this.m_value == x;
+            return mValue == obj;
         }
-
-        #endregion
-
     }
 }

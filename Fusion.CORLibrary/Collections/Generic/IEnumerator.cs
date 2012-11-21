@@ -2,11 +2,6 @@
 {
     public interface IEnumerator<T> : IDisposable, IEnumerator
     {
-
-        new T Current
-        {
-            get;
-        }
-
+        new T Current { get; }
     }
 }

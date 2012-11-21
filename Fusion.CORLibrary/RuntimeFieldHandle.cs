@@ -2,19 +2,10 @@
 {
     public struct RuntimeFieldHandle
     {
-        private IntPtr value;
+        private IntPtr mValue;
 
-        internal RuntimeFieldHandle(IntPtr v)
-        {
-            value = v;
-        }
+        internal RuntimeFieldHandle(IntPtr v) { mValue = v; }
 
-        public IntPtr Value
-        {
-            get
-            {
-                return value;
-            }
-        }
+        public IntPtr Value { get { return mValue; } }
     }
 }

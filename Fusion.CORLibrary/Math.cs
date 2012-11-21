@@ -224,19 +224,19 @@ namespace System
 
         #endregion
 
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        public extern static double Sin(double x);
+        //[MethodImplAttribute(MethodImplOptions.InternalCall)]
+        //public extern static double Sin(double x);
 
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        public extern static double Cos(double x);
+        //[MethodImplAttribute(MethodImplOptions.InternalCall)]
+        //public extern static double Cos(double x);
 
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        public extern static double Tan(double x);
+        //[MethodImplAttribute(MethodImplOptions.InternalCall)]
+        //public extern static double Tan(double x);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         public extern static double Pow(double x, double y);
 
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        public extern static double Sqrt(double x);
+        //[MethodImplAttribute(MethodImplOptions.InternalCall)]
+        //public extern static double Sqrt(double x);
     }
 }

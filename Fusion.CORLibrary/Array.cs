@@ -8,216 +8,209 @@ namespace System
     {
         private class NonGenericEnumerator : IEnumerator
         {
-
-            private Array array;
-            private int index, length;
+            private Array mArray;
+            private int mIndex;
+            private int mLength;
 
             public NonGenericEnumerator(Array array)
             {
-                this.array = array;
-                this.index = -1;
-                this.length = array.length;
+                mArray = array;
+                mIndex = -1;
+                mLength = array.mLength;
             }
 
             public object Current
             {
                 get
                 {
-                    if (index < 0)
+                    if (mIndex < 0)
                     {
                         throw new InvalidOperationException("Enumeration has not started");
                     }
-                    if (index >= length)
+                    if (mIndex >= mLength)
                     {
                         throw new InvalidOperationException("Enumeration has finished");
                     }
-                    return array.GetValue(index);
+                    return mArray.GetValue(mIndex);
                 }
             }
 
             public bool MoveNext()
             {
-                index++;
-                return (index < length);
+                mIndex++;
+                return (mIndex < mLength);
             }
 
-            public void Reset()
-            {
-                index = -1;
-            }
-
+            public void Reset() { mIndex = -1; }
         }
 
         private struct GenericEnumerator<T> : IEnumerator<T>
         {
-
-            private Array array;
-            private int index, length;
+            private Array mArray;
+            private int mIndex;
+            private int mLength;
 
             public GenericEnumerator(Array array)
             {
-                this.array = array;
-                this.index = -1;
-                this.length = array.length;
+                mArray = array;
+                mIndex = -1;
+                mLength = array.mLength;
             }
 
             public T Current
             {
                 get
                 {
-                    if (index < 0)
+                    if (mIndex < 0)
                     {
                         throw new InvalidOperationException("Enumeration has not started");
                     }
-                    if (index >= length)
+                    if (mIndex >= mLength)
                     {
                         throw new InvalidOperationException("Enumeration has finished");
                     }
-                    return (T)array.GetValue(index);
+                    return (T)mArray.GetValue(mIndex);
                 }
             }
 
-            public void Dispose()
-            {
-            }
+            public void Dispose() { }
 
-            object IEnumerator.Current
-            {
-                get
-                {
-                    return this.Current;
-                }
-            }
+            object IEnumerator.Current { get { return Current; } }
 
             public bool MoveNext()
             {
-                index++;
-                return (index < length);
+                mIndex++;
+                return (mIndex < mLength);
             }
 
-            public void Reset()
+            public void Reset() { mIndex = -1; }
+        }
+
+        private int mLength;
+
+        private Array() { }
+
+        private IEnumerator<T> Internal_GetGenericEnumerator<T>() { return new GenericEnumerator<T>(this); }
+
+        private bool Internal_GenericIsReadOnly() { return true; }
+
+        private void Internal_GenericAdd<T>(T item) { throw new NotSupportedException("Collection is read-only"); }
+
+        private void Internal_GenericClear() { Array.Clear(this, 0, mLength); }
+
+        private bool Internal_GenericContains<T>(T item) { return Array.IndexOf(this, (object)item) >= 0; }
+
+        private void Internal_GenericCopyTo<T>(T[] array, int arrayIndex) { Array.Copy(this, 0, (Array)array, arrayIndex, mLength); }
+
+        private bool Internal_GenericRemove<T>(T item) { throw new NotSupportedException("Collection is read-only"); }
+
+        private int Internal_GenericIndexOf<T>(T item) { return IndexOf(this, (object)item); }
+
+        private void Internal_GenericInsert<T>(int index, T item) { throw new NotSupportedException("List is read-only"); }
+
+        private void Internal_GenericRemoveAt(int index) { throw new NotSupportedException("List is read-only"); }
+
+        private T Internal_GenericGetItem<T>(int index) { return (T)GetValue(index); }
+
+        private void Internal_GenericSetItem<T>(int index, T value) { SetValue((object)value, index); }
+
+        public int Length { get { return mLength; } }
+
+        internal static unsafe object GetValue(Array array, int index)
+        {
+            Type.TypeData* typeData = array.GetType().GetTypeDataPointer()->ArrayElementType;
+            void* startOfArrayElement = (void*)((byte*)array.Internal_ReferenceToPointer() + sizeof(int) + (typeData->Size * index));
+            Type type = Type.GetTypeFromHandle(new RuntimeTypeHandle(new IntPtr(typeData)));
+            if (!type.IsValueType)
             {
-                this.index = -1;
+                // TODO: GC support for getting an object, from an existing pointer to an object
+                return null;
             }
+            // TODO: GC support to Allocate boxed value type based on typeData
+            return null;
         }
 
-        private Array()
+        internal static unsafe bool SetValue(Array array, object value, int index)
         {
-        }
-
-        #region Generic interface methods
-
-        // The name of these methods are important. They are directly referenced in the interpreter.
-        private IEnumerator<T> Internal_GetGenericEnumerator<T>()
-        {
-            return new GenericEnumerator<T>(this);
-        }
-
-        private bool Internal_GenericIsReadOnly()
-        {
+            Type.TypeData* typeData = array.GetType().GetTypeDataPointer()->ArrayElementType;
+            if (value.GetType().GetTypeDataPointer() != typeData) return false;
+            void* startOfArrayElement = (void*)((byte*)array.Internal_ReferenceToPointer() + sizeof(int) + (typeData->Size * index));
+            void* startOfValue = value.Internal_ReferenceToPointer();
+            Type type = Type.GetTypeFromHandle(new RuntimeTypeHandle(new IntPtr(typeData)));
+            if (!type.IsValueType)
+            {
+                *((void**)startOfArrayElement) = value.Internal_ReferenceToPointer();
+                return true;
+            }
+            Internal_FastCopy(startOfValue, startOfArrayElement, (int)typeData->Size);
             return true;
         }
 
-        private void Internal_GenericAdd<T>(T item)
+        public static unsafe void Clear(Array array, int index, int length)
         {
-            throw new NotSupportedException("Collection is read-only");
-        }
-
-        private void Internal_GenericClear()
-        {
-            Array.Clear(this, 0, this.length);
-        }
-
-        private bool Internal_GenericContains<T>(T item)
-        {
-            return Array.IndexOf(this, (object)item) >= 0;
-        }
-
-        private void Internal_GenericCopyTo<T>(T[] array, int arrayIndex)
-        {
-            Array.Copy(this, 0, (Array)array, arrayIndex, this.length);
-        }
-
-        private bool Internal_GenericRemove<T>(T item)
-        {
-            throw new NotSupportedException("Collection is read-only");
-        }
-
-        private int Internal_GenericIndexOf<T>(T item)
-        {
-            return IndexOf(this, (object)item);
-        }
-
-        private void Internal_GenericInsert<T>(int index, T item)
-        {
-            throw new NotSupportedException("List is read-only");
-        }
-
-        private void Internal_GenericRemoveAt(int index)
-        {
-            throw new NotSupportedException("List is read-only");
-        }
-
-        private T Internal_GenericGetItem<T>(int index)
-        {
-            return (T)GetValue(index);
-        }
-
-        private void Internal_GenericSetItem<T>(int index, T value)
-        {
-            SetValue((object)value, index);
-        }
-
-        #endregion
-
-        // This must be the only field, as it ties up with the Array definition in DNA
-#pragma warning disable 0169, 0649
-        private int length;
-#pragma warning restore 0169, 0649
-
-        public int Length
-        {
-            get
+            if (array == null)
             {
-                return this.length;
+                throw new ArgumentNullException();
+            }
+            if (index < 0 || length < 0 || (index + length) > array.Length)
+            {
+                throw new IndexOutOfRangeException();
+            }
+            void* startOfArrayData = (void*)((byte*)array.Internal_ReferenceToPointer() + sizeof(int));
+            Type.TypeData* typeData = array.GetType().GetTypeDataPointer()->ArrayElementType;
+            Internal_FastZero((void*)((byte*)startOfArrayData + (index * typeData->Size)), (int)(length * typeData->Size));
+        }
+
+        public static void Resize<T>(ref T[] array, int newSize)
+        {
+            if (newSize < 0)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            if (array == null)
+            {
+                array = new T[newSize];
+                return;
+            }
+            if (array.Length == newSize) return;
+
+            T[] oldArray = array;
+            array = new T[newSize];
+            int copySize = newSize > oldArray.Length ? oldArray.Length : newSize;
+            for (int i = 0; i < copySize; ++i) array[i] = oldArray[i];
+        }
+
+        public static void Reverse(Array array, int index, int length)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException();
+            }
+            if (index < 0 || length < 0)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            if (index + length > array.mLength)
+            {
+                throw new ArgumentException();
+            }
+            if (length > 1)
+            {
+                int swapped = length >> 1;
+                for (int i = 0; i < swapped; ++i)
+                {
+                    object obj = array.GetValue(index + i);
+                    array.SetValue(array.GetValue(index + (length - 1) - i), index + i);
+                    array.SetValue(obj, index + (length - 1) - i);
+                }
             }
         }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern private object Internal_GetValue(int index);
+        public static void Reverse(Array array) { Reverse(array, 0, array.mLength); }
 
-        /// <summary>
-        /// Returns true if the value set ok, returns false if the Type was wrong
-        /// </summary>
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern public bool Internal_SetValue(object value, int index);
+        public static int IndexOf(Array array, object value) { return IndexOf(array, value, 0, array.mLength); }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern public static void Clear(Array array, int index, int length);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern private static bool Internal_Copy(Array src, int srcIndex, Array dst, int dstIndex, int length);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern public static void Resize<T>(ref T[] array, int newSize);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern public static void Reverse(Array array, int index, int length);
-
-        public static void Reverse(Array array)
-        {
-            Reverse(array, 0, array.length);
-        }
-
-        public static int IndexOf(Array array, object value)
-        {
-            return IndexOf(array, value, 0, array.length);
-        }
-
-        public static int IndexOf(Array array, object value, int startIndex)
-        {
-            return IndexOf(array, value, startIndex, array.length - startIndex);
-        }
+        public static int IndexOf(Array array, object value, int startIndex) { return IndexOf(array, value, startIndex, array.mLength - startIndex); }
 
         public static int IndexOf(Array array, object value, int startIndex, int count)
         {
@@ -226,7 +219,7 @@ namespace System
                 throw new ArgumentNullException("array");
             }
             int max = startIndex + count;
-            if (startIndex < 0 || max > array.length)
+            if (startIndex < 0 || max > array.mLength)
             {
                 throw new ArgumentOutOfRangeException();
             }
@@ -250,14 +243,9 @@ namespace System
             {
                 throw new ArgumentOutOfRangeException();
             }
-            if (srcIndex + length > srcArray.length || dstIndex + length > dstArray.length)
+            if (srcIndex + length > srcArray.mLength || dstIndex + length > dstArray.mLength)
             {
                 throw new ArgumentException();
-            }
-            if (Internal_Copy(srcArray, srcIndex, dstArray, dstIndex, length))
-            {
-                // When src element type can always be cast to dst element type, then can do a really fast copy.
-                return;
             }
 
             int start, inc, end;
@@ -281,54 +269,36 @@ namespace System
             }
         }
 
-        public static void Copy(Array srcArray, Array dstArray, int length)
-        {
-            Copy(srcArray, 0, dstArray, 0, length);
-        }
+        public static void Copy(Array srcArray, Array dstArray, int length) { Copy(srcArray, 0, dstArray, 0, length); }
 
-        public static int IndexOf<T>(T[] array, T value)
-        {
-            return IndexOf((Array)array, (object)value);
-        }
+        public static int IndexOf<T>(T[] array, T value) { return IndexOf((Array)array, (object)value); }
 
-        public static int IndexOf<T>(T[] array, T value, int startIndex)
-        {
-            return IndexOf((Array)array, (object)value, startIndex);
-        }
+        public static int IndexOf<T>(T[] array, T value, int startIndex) { return IndexOf((Array)array, (object)value, startIndex); }
 
-        public static int IndexOf<T>(T[] array, T value, int startIndex, int count)
-        {
-            return IndexOf((Array)array, (object)value, startIndex, count);
-        }
+        public static int IndexOf<T>(T[] array, T value, int startIndex, int count) { return IndexOf((Array)array, (object)value, startIndex, count); }
 
         public object GetValue(int index)
         {
-            if (index < 0 || index >= this.length)
+            if (index < 0 || index >= mLength)
             {
                 throw new IndexOutOfRangeException();
             }
-            return Internal_GetValue(index);
+            return GetValue(this, index);
         }
 
         public void SetValue(object value, int index)
         {
-            if (index < 0 || index >= this.length)
+            if (index < 0 || index >= mLength)
             {
                 throw new IndexOutOfRangeException();
             }
-            if (!Internal_SetValue(value, index))
+            if (!SetValue(this, value, index))
             {
                 throw new InvalidCastException();
             }
         }
 
-        public int Rank
-        {
-            get
-            {
-                return 1;
-            }
-        }
+        public int Rank { get { return 1; } }
 
         public int GetLength(int dimension)
         {
@@ -336,7 +306,7 @@ namespace System
             {
                 throw new IndexOutOfRangeException();
             }
-            return this.length;
+            return mLength;
         }
 
         public int GetLowerBound(int dimension)
@@ -354,7 +324,7 @@ namespace System
             {
                 throw new IndexOutOfRangeException();
             }
-            return this.length - 1;
+            return mLength - 1;
         }
 
         public static TOutput[] ConvertAll<TInput, TOutput>(TInput[] array, Converter<TInput, TOutput> converter)
@@ -379,34 +349,17 @@ namespace System
         }
 
 
-        #region Interface Members
+        public object Clone() { return object.MemberwiseClone(this); }
 
-        public object Clone()
-        {
-            return object.Clone(this);
-        }
+        public bool IsFixedSize { get { return true; } }
 
-        public bool IsFixedSize
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        public bool IsReadOnly
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool IsReadOnly { get { return false; } }
 
         object IList.this[int index]
         {
             get
             {
-                if (index < 0 || index >= this.length)
+                if (index < 0 || index >= mLength)
                 {
                     throw new ArgumentOutOfRangeException("index");
                 }
@@ -414,7 +367,7 @@ namespace System
             }
             set
             {
-                if (index < 0 || index >= this.length)
+                if (index < 0 || index >= mLength)
                 {
                     throw new ArgumentOutOfRangeException("index");
                 }
@@ -422,80 +375,30 @@ namespace System
             }
         }
 
-        int IList.Add(object value)
-        {
-            throw new NotSupportedException("Collection is read-only");
-        }
+        int IList.Add(object value) { throw new NotSupportedException("Collection is read-only"); }
 
-        void IList.Clear()
-        {
-            Array.Clear(this, 0, this.length);
-        }
+        void IList.Clear() { Array.Clear(this, 0, mLength); }
 
-        bool IList.Contains(object value)
-        {
-            return (IndexOf(this, value) >= 0);
-        }
+        bool IList.Contains(object value) { return (IndexOf(this, value) >= 0); }
 
-        int IList.IndexOf(object value)
-        {
-            return IndexOf(this, value);
-        }
+        int IList.IndexOf(object value) { return IndexOf(this, value); }
 
-        void IList.Insert(int index, object value)
-        {
-            throw new NotSupportedException("Collection is read-only");
-        }
+        void IList.Insert(int index, object value) { throw new NotSupportedException("Collection is read-only"); }
 
-        void IList.Remove(object value)
-        {
-            throw new NotSupportedException("Collection is read-only");
-        }
+        void IList.Remove(object value) { throw new NotSupportedException("Collection is read-only"); }
 
-        void IList.RemoveAt(int index)
-        {
-            throw new NotSupportedException("Collection is read-only");
-        }
+        void IList.RemoveAt(int index) { throw new NotSupportedException("Collection is read-only"); }
 
-        int ICollection.Count
-        {
-            get
-            {
-                return this.length;
-            }
-        }
+        int ICollection.Count { get { return mLength; } }
 
-        public bool IsSynchronized
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool IsSynchronized { get { return false; } }
 
-        public object SyncRoot
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public object SyncRoot { get { return this; } }
 
-        public void CopyTo(Array array, int index)
-        {
-            Copy(this, 0, array, index, this.length);
-        }
+        public void CopyTo(Array array, int index) { Copy(this, 0, array, index, this.mLength); }
 
-        public IEnumerator GetEnumerator()
-        {
-            return new NonGenericEnumerator(this);
-        }
+        public IEnumerator GetEnumerator() { return new NonGenericEnumerator(this); }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        #endregion
+        IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
     }
 }

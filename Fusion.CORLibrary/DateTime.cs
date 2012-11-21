@@ -13,8 +13,8 @@ namespace System
         [MethodImpl(MethodImplOptions.InternalCall)]
         extern private static long InternalUtcNow();
 
-        private TimeSpan ticks;
-        private DateTimeKind kind;
+        private TimeSpan mTicks;
+        private DateTimeKind mKind;
 
         private static readonly int[] daysMonth = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
         private static readonly int[] daysMonthLeap = { 0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -33,14 +33,14 @@ namespace System
 
         public DateTime(long ticks)
         {
-            this.ticks = new TimeSpan(ticks);
-            this.kind = DateTimeKind.Unspecified;
+            mTicks = new TimeSpan(ticks);
+            mKind = DateTimeKind.Unspecified;
         }
 
         public DateTime(long ticks, DateTimeKind kind)
         {
-            this.ticks = new TimeSpan(ticks);
-            this.kind = kind;
+            mTicks = new TimeSpan(ticks);
+            mKind = kind;
         }
 
         public DateTime(int year, int month, int day)
@@ -65,15 +65,15 @@ namespace System
 
         public DateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, DateTimeKind kind)
         {
-            ticks = new TimeSpan(AbsoluteDays(year, month, day), hour, minute, second, millisecond);
-            this.kind = kind;
+            mTicks = new TimeSpan(AbsoluteDays(year, month, day), hour, minute, second, millisecond);
+            mKind = kind;
         }
 
         public DateTime Date
         {
             get
             {
-                return new DateTime(this.Year, this.Month, this.Day, 0, 0, 0, this.kind);
+                return new DateTime(Year, Month, Day, 0, 0, 0, mKind);
             }
         }
 
@@ -81,7 +81,7 @@ namespace System
         {
             get
             {
-                return this.FromTicks(Which.Day);
+                return FromTicks(Which.Day);
             }
         }
 
@@ -89,7 +89,7 @@ namespace System
         {
             get
             {
-                return (DayOfWeek)((this.ticks.Days + 1) % 7);
+                return (DayOfWeek)((mTicks.Days + 1) % 7);
             }
         }
 
@@ -97,7 +97,7 @@ namespace System
         {
             get
             {
-                return this.FromTicks(Which.DayYear);
+                return FromTicks(Which.DayYear);
             }
         }
 
@@ -105,7 +105,7 @@ namespace System
         {
             get
             {
-                return this.ticks.Hours;
+                return mTicks.Hours;
             }
         }
 
@@ -113,7 +113,7 @@ namespace System
         {
             get
             {
-                return this.kind;
+                return mKind;
             }
         }
 
@@ -121,7 +121,7 @@ namespace System
         {
             get
             {
-                return this.ticks.MilliSeconds;
+                return mTicks.MilliSeconds;
             }
         }
 
@@ -129,7 +129,7 @@ namespace System
         {
             get
             {
-                return this.ticks.Minutes;
+                return mTicks.Minutes;
             }
         }
 
@@ -137,7 +137,7 @@ namespace System
         {
             get
             {
-                return this.FromTicks(Which.Month);
+                return FromTicks(Which.Month);
             }
         }
 
@@ -145,7 +145,7 @@ namespace System
         {
             get
             {
-                return this.ticks.Seconds;
+                return mTicks.Seconds;
             }
         }
 
@@ -153,7 +153,7 @@ namespace System
         {
             get
             {
-                return this.ticks.Ticks;
+                return mTicks.Ticks;
             }
         }
 
@@ -161,7 +161,7 @@ namespace System
         {
             get
             {
-                return new TimeSpan(this.ticks.Ticks % TimeSpan.TicksPerDay);
+                return new TimeSpan(mTicks.Ticks % TimeSpan.TicksPerDay);
             }
         }
 
@@ -169,7 +169,7 @@ namespace System
         {
             get
             {
-                return this.FromTicks(Which.Year);
+                return FromTicks(Which.Year);
             }
         }
 
@@ -191,47 +191,47 @@ namespace System
 
         public DateTime Add(TimeSpan ts)
         {
-            return new DateTime(this.ticks.Ticks + ts.Ticks, this.kind);
+            return new DateTime(mTicks.Ticks + ts.Ticks, mKind);
         }
 
         public TimeSpan Subtract(DateTime dt)
         {
-            return this.ticks - dt.ticks;
+            return mTicks - dt.mTicks;
         }
 
         public DateTime Subtract(TimeSpan ts)
         {
-            return new DateTime(this.ticks.Ticks - ts.Ticks, this.kind);
+            return new DateTime(mTicks.Ticks - ts.Ticks, mKind);
         }
 
         public DateTime AddDays(double days)
         {
-            return this.AddTicks((long)(days * (double)TimeSpan.TicksPerDay));
+            return AddTicks((long)(days * (double)TimeSpan.TicksPerDay));
         }
 
         public DateTime AddHours(double hours)
         {
-            return this.AddTicks((long)(hours * (double)TimeSpan.TicksPerHour));
+            return AddTicks((long)(hours * (double)TimeSpan.TicksPerHour));
         }
 
         public DateTime AddMilliseconds(double ms)
         {
-            return this.AddTicks((long)(ms * (double)TimeSpan.TicksPerMillisecond));
+            return AddTicks((long)(ms * (double)TimeSpan.TicksPerMillisecond));
         }
 
         public DateTime AddMinutes(double mins)
         {
-            return this.AddTicks((long)(mins * (double)TimeSpan.TicksPerMinute));
+            return AddTicks((long)(mins * (double)TimeSpan.TicksPerMinute));
         }
 
         public DateTime AddSeconds(double seconds)
         {
-            return this.AddTicks((long)(seconds * (double)TimeSpan.TicksPerSecond));
+            return AddTicks((long)(seconds * (double)TimeSpan.TicksPerSecond));
         }
 
         public DateTime AddTicks(long ticks)
         {
-            return new DateTime(this.ticks.Ticks + ticks, this.kind);
+            return new DateTime(mTicks.Ticks + ticks, mKind);
         }
 
         public DateTime AddMonths(int months)
@@ -239,9 +239,9 @@ namespace System
             int day, month, year, maxday;
             DateTime temp;
 
-            day = this.Day;
-            month = this.Month + (months % 12);
-            year = this.Year + months / 12;
+            day = Day;
+            month = Month + (months % 12);
+            year = Year + months / 12;
 
             if (month < 1)
             {
@@ -258,13 +258,13 @@ namespace System
                 day = maxday;
 
             temp = new DateTime(year, month, day);
-            temp.kind = kind;
-            return temp.Add(this.TimeOfDay);
+            temp.mKind = mKind;
+            return temp.Add(TimeOfDay);
         }
 
         public DateTime AddYears(int years)
         {
-            return this.AddMonths(years * 12);
+            return AddMonths(years * 12);
         }
 
         public static DateTime operator +(DateTime d, TimeSpan t)
@@ -284,32 +284,32 @@ namespace System
 
         public static bool operator ==(DateTime d1, DateTime d2)
         {
-            return d1.ticks == d2.ticks;
+            return d1.mTicks == d2.mTicks;
         }
 
         public static bool operator !=(DateTime d1, DateTime d2)
         {
-            return d1.ticks != d2.ticks;
+            return d1.mTicks != d2.mTicks;
         }
 
         public static bool operator >(DateTime d1, DateTime d2)
         {
-            return d1.ticks > d2.ticks;
+            return d1.mTicks > d2.mTicks;
         }
 
         public static bool operator >=(DateTime d1, DateTime d2)
         {
-            return d1.ticks >= d2.ticks;
+            return d1.mTicks >= d2.mTicks;
         }
 
         public static bool operator <(DateTime d1, DateTime d2)
         {
-            return d1.ticks < d2.ticks;
+            return d1.mTicks < d2.mTicks;
         }
 
         public static bool operator <=(DateTime d1, DateTime d2)
         {
-            return d1.ticks <= d2.ticks;
+            return d1.mTicks <= d2.mTicks;
         }
 
         private const int dp400 = 146097;
@@ -327,7 +327,7 @@ namespace System
             int M = 1;
 
             int[] days = daysMonth;
-            int totaldays = this.ticks.Days;
+            int totaldays = mTicks.Days;
 
             num400 = (totaldays / dp400);
             totaldays -= num400 * dp400;
@@ -393,29 +393,29 @@ namespace System
             {
                 return false;
             }
-            return ((DateTime)obj).ticks == ticks;
+            return ((DateTime)obj).mTicks == mTicks;
         }
 
         public override int GetHashCode()
         {
-            return this.ticks.GetHashCode();
+            return mTicks.GetHashCode();
         }
 
         #region ToString() stuff
 
         public override string ToString()
         {
-            return this.ToString("G", null);
+            return ToString("G", null);
         }
 
         public string ToString(IFormatProvider fp)
         {
-            return this.ToString(null, fp);
+            return ToString(null, fp);
         }
 
         public string ToString(string format)
         {
-            return this.ToString(format, null);
+            return ToString(format, null);
         }
 
         public string ToString(string format, IFormatProvider fp)
@@ -433,7 +433,7 @@ namespace System
                 format = GetStandardPattern(format[0], dtf, out useUtc, out useInvariant);
             }
 
-            return this.ToString2(format, dtf);
+            return ToString2(format, dtf);
         }
 
         #region ToString helper functions
@@ -470,7 +470,7 @@ namespace System
                         // hour, [1, 12]
                         tokLen = CountRepeat(format, i, ch);
 
-                        int hr = this.Hour % 12;
+                        int hr = Hour % 12;
                         if (hr == 0)
                             hr = 12;
 
@@ -479,17 +479,17 @@ namespace System
                     case 'H':
                         // hour, [0, 23]
                         tokLen = CountRepeat(format, i, ch);
-                        ZeroPad(result, this.Hour, tokLen == 1 ? 1 : 2);
+                        ZeroPad(result, Hour, tokLen == 1 ? 1 : 2);
                         break;
                     case 'm':
                         // minute, [0, 59]
                         tokLen = CountRepeat(format, i, ch);
-                        ZeroPad(result, this.Minute, tokLen == 1 ? 1 : 2);
+                        ZeroPad(result, Minute, tokLen == 1 ? 1 : 2);
                         break;
                     case 's':
                         // second [0, 29]
                         tokLen = CountRepeat(format, i, ch);
-                        ZeroPad(result, this.Second, tokLen == 1 ? 1 : 2);
+                        ZeroPad(result, Second, tokLen == 1 ? 1 : 2);
                         break;
                     case 'F':
                         omitZeros = true;
@@ -502,7 +502,7 @@ namespace System
                         if (tokLen > 7)
                             throw new FormatException("Invalid Format String");
 
-                        int dec = (int)((long)(this.Ticks % TimeSpan.TicksPerSecond) / (long)Math.Pow(10, 7 - tokLen));
+                        int dec = (int)((long)(Ticks % TimeSpan.TicksPerSecond) / (long)Math.Pow(10, 7 - tokLen));
                         int startLen = result.Length;
                         ZeroPad(result, dec, tokLen);
 
@@ -519,7 +519,7 @@ namespace System
                     case 't':
                         // AM/PM. t == first char, tt+ == full
                         tokLen = CountRepeat(format, i, ch);
-                        string desig = this.Hour < 12 ? dfi.AMDesignator : dfi.PMDesignator;
+                        string desig = Hour < 12 ? dfi.AMDesignator : dfi.PMDesignator;
 
                         if (tokLen == 1)
                         {
@@ -557,7 +557,7 @@ namespace System
                     break;*/
                     case 'K': // 'Z' (UTC) or zzz (Local)
                         tokLen = 1;
-                        switch (kind)
+                        switch (mKind)
                         {
                             case DateTimeKind.Utc:
                                 result.Append('Z');
@@ -820,7 +820,7 @@ namespace System
             {
                 throw new ArgumentException();
             }
-            return this.CompareTo((DateTime)obj);
+            return CompareTo((DateTime)obj);
         }
 
         #endregion
@@ -829,7 +829,7 @@ namespace System
 
         public int CompareTo(DateTime x)
         {
-            return this.ticks.CompareTo(x.ticks);
+            return mTicks.CompareTo(x.mTicks);
         }
 
         #endregion
@@ -838,7 +838,7 @@ namespace System
 
         public bool Equals(DateTime x)
         {
-            return this.ticks.Equals(x.ticks);
+            return mTicks.Equals(x.mTicks);
         }
 
         #endregion

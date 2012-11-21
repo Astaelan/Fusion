@@ -34,6 +34,10 @@
     <NoStdLib>true</NoStdLib>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) $(SolutionDir)Fusion\$(OutDir)$(TargetFileName)</PostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="ArgumentException.cs" />
     <Compile Include="ArgumentNullException.cs" />
@@ -48,29 +52,15 @@
     <Compile Include="Byte.cs" />
     <Compile Include="Char.cs" />
     <Compile Include="CharEnumerator.cs" />
-    <Compile Include="Collections\DictionaryEntry.cs" />
-    <Compile Include="Collections\Generic\Dictionary.cs" />
-    <Compile Include="Collections\Generic\EqualityComparer.cs" />
     <Compile Include="Collections\Generic\ICollection.cs" />
-    <Compile Include="Collections\Generic\IDictionary.cs" />
     <Compile Include="Collections\Generic\IEnumerable.cs" />
     <Compile Include="Collections\Generic\IEnumerator.cs" />
-    <Compile Include="Collections\Generic\IEqualityComparer.cs" />
     <Compile Include="Collections\Generic\IList.cs" />
-    <Compile Include="Collections\Generic\KeyNotFoundException.cs" />
-    <Compile Include="Collections\Generic\KeyValuePair.cs" />
     <Compile Include="Collections\Generic\List.cs" />
     <Compile Include="Collections\ICollection.cs" />
-    <Compile Include="Collections\IDictionary.cs" />
-    <Compile Include="Collections\IDictionaryEnumerator.cs" />
     <Compile Include="Collections\IEnumerable.cs" />
     <Compile Include="Collections\IEnumerator.cs" />
-    <Compile Include="Collections\IEqualityComparer.cs" />
     <Compile Include="Collections\IList.cs" />
-    <Compile Include="Console.cs" />
-    <Compile Include="ConsoleKey.cs" />
-    <Compile Include="ConsoleKeyInfo.cs" />
-    <Compile Include="ConsoleModifiers.cs" />
     <Compile Include="Converter.cs" />
     <Compile Include="DateTime.cs" />
     <Compile Include="DateTimeKind.cs" />
@@ -83,6 +73,7 @@
     <Compile Include="Exception.cs" />
     <Compile Include="FlagsAttribute.cs" />
     <Compile Include="FormatException.cs" />
+    <Compile Include="GC.cs" />
     <Compile Include="Globalization\Calendar.cs" />
     <Compile Include="Globalization\CalendarWeekRule.cs" />
     <Compile Include="Globalization\CalendricalCalculations.cs" />
@@ -110,36 +101,15 @@
     <Compile Include="IntPtr.cs" />
     <Compile Include="InvalidCastException.cs" />
     <Compile Include="InvalidOperationException.cs" />
-    <Compile Include="IO\CheckArgument.cs" />
-    <Compile Include="IO\Directory.cs" />
-    <Compile Include="IO\DirectoryInfo.cs" />
-    <Compile Include="IO\DirectoryNotFoundException.cs" />
-    <Compile Include="IO\File.cs" />
-    <Compile Include="IO\FileAccess.cs" />
-    <Compile Include="IO\FileAttributes.cs" />
-    <Compile Include="IO\FileInfo.cs" />
-    <Compile Include="IO\FileInternal.cs" />
-    <Compile Include="IO\FileMode.cs" />
-    <Compile Include="IO\FileNotFoundException.cs" />
-    <Compile Include="IO\FileShare.cs" />
-    <Compile Include="IO\FileStream.cs" />
-    <Compile Include="IO\FileSystemInfo.cs" />
-    <Compile Include="IO\IOException.cs" />
-    <Compile Include="IO\Path.cs" />
-    <Compile Include="IO\SearchPattern.cs" />
-    <Compile Include="IO\SeekOrigin.cs" />
-    <Compile Include="IO\Stream.cs" />
-    <Compile Include="IO\StreamReader.cs" />
-    <Compile Include="IO\TextReader.cs" />
-    <Compile Include="MarshalByRefObject.cs" />
     <Compile Include="Math.cs" />
     <Compile Include="MulticastDelegate.cs" />
     <Compile Include="MulticastNotSupportedException.cs" />
     <Compile Include="NotImplementedException.cs" />
     <Compile Include="NotSupportedException.cs" />
     <Compile Include="NumberFormatter.cs" />
-    <Compile Include="Object.cs" />
-    <Compile Include="ObjectDisposedException.cs" />
+    <Compile Include="Object.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="OperatingSystem.cs" />
     <Compile Include="OverflowException.cs" />
     <Compile Include="ParamArrayAttribute.cs" />
@@ -148,6 +118,7 @@
     <Compile Include="Reflection\DefaultMemberAttribute.cs" />
     <Compile Include="Reflection\MemberInfo.cs" />
     <Compile Include="RuntimeFieldHandle.cs" />
+    <Compile Include="RuntimeType.cs" />
     <Compile Include="RuntimeTypeHandle.cs" />
     <Compile Include="Runtime\CompilerServices\IndexerNameAttribute.cs" />
     <Compile Include="Runtime\CompilerServices\MethodImplAttribute.cs" />
@@ -161,16 +132,7 @@
     <Compile Include="String.cs" />
     <Compile Include="StringHelper.cs" />
     <Compile Include="SystemException.cs" />
-    <Compile Include="Text\Decoder.cs" />
-    <Compile Include="Text\Encoding.cs" />
     <Compile Include="Text\StringBuilder.cs" />
-    <Compile Include="Text\UnicodeEncoding.cs" />
-    <Compile Include="Text\UTF8Encoding.cs" />
-    <Compile Include="Threading\Monitor.cs" />
-    <Compile Include="Threading\ParameterizedThreadStart.cs" />
-    <Compile Include="Threading\Thread.cs" />
-    <Compile Include="Threading\ThreadStart.cs" />
-    <Compile Include="Threading\ThreadState.cs" />
     <Compile Include="TimeSpan.cs" />
     <Compile Include="Type.cs" />
     <Compile Include="UInt16.cs" />
@@ -182,13 +144,8 @@
     <Compile Include="Void.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="CoreLib.csproj" />
-    <Content Include="CoreLib.csproj.user" />
+    <Reference Include="System" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>copy $(TargetPath) $(SolutionDir)Fusion\$(OutDir)$(TargetFileName)</PostBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -5,7 +5,6 @@ namespace System
 {
     internal static class ParseHelper
     {
-
         private static bool CheckStyle(NumberStyles style, bool tryParse, ref Exception exc)
         {
             if ((style & NumberStyles.AllowHexSpecifier) != 0)
@@ -134,10 +133,7 @@ namespace System
             return Char.IsDigit(e);
         }
 
-        private static Exception GetFormatException()
-        {
-            return new FormatException("Input string was not in the correct format");
-        }
+        private static Exception GetFormatException() { return new FormatException("Input string was not in the correct format"); }
 
         internal static bool Parse(string s, NumberStyles style, IFormatProvider fp, bool tryParse, out int result, out Exception exc)
         {
@@ -179,7 +175,7 @@ namespace System
             }
             else
             {
-                nfi = Thread.CurrentThread.CurrentCulture.NumberFormat;
+                nfi = CultureInfo.CurrentCulture.NumberFormat;
             }
             if (!CheckStyle(style, tryParse, ref exc))
             {

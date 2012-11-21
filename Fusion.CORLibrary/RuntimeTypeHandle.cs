@@ -2,19 +2,10 @@
 {
     public struct RuntimeTypeHandle
     {
-        private IntPtr value;
+        private IntPtr mValue;
 
-        internal RuntimeTypeHandle(IntPtr v)
-        {
-            value = v;
-        }
+        internal RuntimeTypeHandle(IntPtr v) { mValue = v; }
 
-        public IntPtr Value
-        {
-            get
-            {
-                return value;
-            }
-        }
+        public IntPtr Value { get { return mValue; } }
     }
 }

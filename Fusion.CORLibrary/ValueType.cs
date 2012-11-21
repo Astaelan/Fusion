@@ -4,26 +4,17 @@ namespace System
 {
     public abstract class ValueType
     {
-        protected ValueType()
-        {
-        }
+        protected ValueType() { }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern private static object[] GetFields(object o1, object o2);
-
-        public override bool Equals(object obj)
+        internal static bool Equals(object objA, object objB)
         {
-            if (obj == null || this.GetType() != obj.GetType())
+            if (objA == null || objB == null || objA.GetType() != objB.GetType()) return false;
+            object[] objAFields = objA.GetFields();
+            object[] objBFields = objB.GetFields();
+            int len = objAFields.Length;
+            for (int i = 0; i < len; ++i)
             {
-                return false;
-            }
-            object[] fields = GetFields(this, obj);
-            int len = fields.Length;
-            for (int i = 0; i < len; i += 2)
-            {
-                object meVal = fields[i];
-                object youVal = fields[i + 1];
-                if (!object.Equals(meVal, youVal))
+                if (!object.Equals(objAFields[i], objBFields[i]))
                 {
                     return false;
                 }
@@ -31,9 +22,11 @@ namespace System
             return true;
         }
 
-        public override int GetHashCode()
+        public override bool Equals(object obj) { return Equals(this, obj); }
+
+        internal static int GetHashCode(object obj)
         {
-            object[] fields = GetFields(this, null);
+            object[] fields = obj.GetFields();
 
             int hash = 0;
             int len = fields.Length;
@@ -43,5 +36,7 @@ namespace System
             }
             return hash;
         }
+
+        public override int GetHashCode() { return GetHashCode(this); }
     }
 }

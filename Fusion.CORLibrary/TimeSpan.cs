@@ -15,26 +15,26 @@ namespace System
         public const long TicksPerMinute = 600000000L;
         public const long TicksPerSecond = 10000000L;
 
-        private long ticks;
+        private long mTicks;
 
         public TimeSpan(long ticks)
         {
-            this.ticks = ticks;
+            mTicks = ticks;
         }
 
         public TimeSpan(int hours, int minutes, int seconds)
         {
-            this.ticks = CalcTicks(0, hours, minutes, seconds, 0);
+            mTicks = CalcTicks(0, hours, minutes, seconds, 0);
         }
 
         public TimeSpan(int days, int hours, int minutes, int seconds)
         {
-            this.ticks = CalcTicks(days, hours, minutes, seconds, 0);
+            mTicks = CalcTicks(days, hours, minutes, seconds, 0);
         }
 
         public TimeSpan(int days, int hours, int minutes, int seconds, int milliseconds)
         {
-            this.ticks = CalcTicks(days, hours, minutes, seconds, milliseconds);
+            mTicks = CalcTicks(days, hours, minutes, seconds, milliseconds);
         }
 
         private static long CalcTicks(int days, int hours, int minutes, int seconds, int millis)
@@ -50,7 +50,7 @@ namespace System
         {
             get
             {
-                return (int)(this.ticks / TicksPerDay);
+                return (int)(mTicks / TicksPerDay);
             }
         }
 
@@ -58,7 +58,7 @@ namespace System
         {
             get
             {
-                return (int)((this.ticks % TicksPerDay) / TicksPerHour);
+                return (int)((mTicks % TicksPerDay) / TicksPerHour);
             }
         }
 
@@ -66,7 +66,7 @@ namespace System
         {
             get
             {
-                return (int)((this.ticks % TicksPerHour) / TicksPerMinute);
+                return (int)((mTicks % TicksPerHour) / TicksPerMinute);
             }
         }
 
@@ -74,7 +74,7 @@ namespace System
         {
             get
             {
-                return (int)((this.ticks % TicksPerMinute) / TicksPerSecond);
+                return (int)((mTicks % TicksPerMinute) / TicksPerSecond);
             }
         }
 
@@ -82,7 +82,7 @@ namespace System
         {
             get
             {
-                return (int)((this.ticks % TicksPerSecond) / TicksPerMillisecond);
+                return (int)((mTicks % TicksPerSecond) / TicksPerMillisecond);
             }
         }
 
@@ -90,7 +90,7 @@ namespace System
         {
             get
             {
-                return this.ticks;
+                return mTicks;
             }
         }
 
@@ -98,7 +98,7 @@ namespace System
         {
             get
             {
-                return ((double)this.ticks) / ((double)TicksPerDay);
+                return ((double)mTicks) / ((double)TicksPerDay);
             }
         }
 
@@ -106,7 +106,7 @@ namespace System
         {
             get
             {
-                return ((double)this.ticks) / ((double)TicksPerHour);
+                return ((double)mTicks) / ((double)TicksPerHour);
             }
         }
 
@@ -114,7 +114,7 @@ namespace System
         {
             get
             {
-                return ((double)this.ticks) / ((double)TicksPerMinute);
+                return ((double)mTicks) / ((double)TicksPerMinute);
             }
         }
 
@@ -122,7 +122,7 @@ namespace System
         {
             get
             {
-                return ((double)this.ticks) / ((double)TicksPerSecond);
+                return ((double)mTicks) / ((double)TicksPerSecond);
             }
         }
 
@@ -130,37 +130,37 @@ namespace System
         {
             get
             {
-                return ((double)this.ticks) / ((double)TicksPerMillisecond);
+                return ((double)mTicks) / ((double)TicksPerMillisecond);
             }
         }
 
         public TimeSpan Add(TimeSpan ts)
         {
-            return new TimeSpan(this.ticks + ts.ticks);
+            return new TimeSpan(mTicks + ts.mTicks);
         }
 
         public TimeSpan Subtract(TimeSpan ts)
         {
-            return new TimeSpan(this.ticks - ts.ticks);
+            return new TimeSpan(mTicks - ts.mTicks);
         }
 
         public TimeSpan Negate(TimeSpan ts)
         {
-            return new TimeSpan(-this.ticks);
+            return new TimeSpan(-mTicks);
         }
 
         public TimeSpan Duration()
         {
-            return new TimeSpan(Math.Abs(this.ticks));
+            return new TimeSpan(Math.Abs(mTicks));
         }
 
         public static int Compare(TimeSpan t1, TimeSpan t2)
         {
-            if (t1.ticks < t2.ticks)
+            if (t1.mTicks < t2.mTicks)
             {
                 return -1;
             }
-            if (t1.ticks > t2.ticks)
+            if (t1.mTicks > t2.mTicks)
             {
                 return 1;
             }
@@ -197,14 +197,14 @@ namespace System
 
         public bool Equals(TimeSpan x)
         {
-            return this.ticks == x.ticks;
+            return mTicks == x.mTicks;
         }
 
         #endregion
 
         public override int GetHashCode()
         {
-            return this.ticks.GetHashCode();
+            return mTicks.GetHashCode();
         }
 
         public override bool Equals(object obj)
@@ -213,33 +213,33 @@ namespace System
             {
                 return false;
             }
-            return this.ticks == ((TimeSpan)obj).ticks;
+            return mTicks == ((TimeSpan)obj).mTicks;
         }
 
         public static bool Equals(TimeSpan t1, TimeSpan t2)
         {
-            return t1.ticks == t2.ticks;
+            return t1.mTicks == t2.mTicks;
         }
 
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder(14);
 
-            if (this.ticks < 0)
+            if (mTicks < 0)
             {
                 sb.Append('-');
             }
-            if (this.Days != 0)
+            if (Days != 0)
             {
-                sb.Append(Math.Abs(this.Days));
+                sb.Append(Math.Abs(Days));
                 sb.Append('.');
             }
             sb.AppendFormat("{0:D2}:{1:D2}:{2:D2}",
-                Math.Abs(this.Hours), Math.Abs(this.Minutes), Math.Abs(this.Seconds));
-            if (this.MilliSeconds != 0)
+                Math.Abs(Hours), Math.Abs(Minutes), Math.Abs(Seconds));
+            if (MilliSeconds != 0)
             {
                 sb.Append('.');
-                sb.AppendFormat("{0:D7}", Math.Abs(this.MilliSeconds) * (int)TicksPerMillisecond);
+                sb.AppendFormat("{0:D7}", Math.Abs(MilliSeconds) * (int)TicksPerMillisecond);
             }
 
             return sb.ToString();
@@ -247,42 +247,42 @@ namespace System
 
         public static TimeSpan operator +(TimeSpan t1, TimeSpan t2)
         {
-            return new TimeSpan(t1.ticks + t2.ticks);
+            return new TimeSpan(t1.mTicks + t2.mTicks);
         }
 
         public static TimeSpan operator -(TimeSpan t1, TimeSpan t2)
         {
-            return new TimeSpan(t1.ticks - t2.ticks);
+            return new TimeSpan(t1.mTicks - t2.mTicks);
         }
 
         public static bool operator ==(TimeSpan t1, TimeSpan t2)
         {
-            return t1.ticks == t2.ticks;
+            return t1.mTicks == t2.mTicks;
         }
 
         public static bool operator !=(TimeSpan t1, TimeSpan t2)
         {
-            return t1.ticks != t2.ticks;
+            return t1.mTicks != t2.mTicks;
         }
 
         public static bool operator >(TimeSpan t1, TimeSpan t2)
         {
-            return t1.ticks > t2.ticks;
+            return t1.mTicks > t2.mTicks;
         }
 
         public static bool operator >=(TimeSpan t1, TimeSpan t2)
         {
-            return t1.ticks >= t2.ticks;
+            return t1.mTicks >= t2.mTicks;
         }
 
         public static bool operator <(TimeSpan t1, TimeSpan t2)
         {
-            return t1.ticks < t2.ticks;
+            return t1.mTicks < t2.mTicks;
         }
 
         public static bool operator <=(TimeSpan t1, TimeSpan t2)
         {
-            return t1.ticks <= t2.ticks;
+            return t1.mTicks <= t2.mTicks;
         }
 
         public static TimeSpan operator +(TimeSpan ts)
@@ -292,7 +292,7 @@ namespace System
 
         public static TimeSpan operator -(TimeSpan ts)
         {
-            return new TimeSpan(-ts.ticks);
+            return new TimeSpan(-ts.mTicks);
         }
     }
 }

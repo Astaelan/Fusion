@@ -5,39 +5,24 @@ namespace System
 {
     public static class Environment
     {
+        public static string NewLine { get { return (Platform == PlatformID.Unix) ? "\n" : "\r\n"; } }
 
-        public static string NewLine
-        {
-            get
-            {
-                return (Platform == PlatformID.Unix) ? "\n" : "\r\n";
-            }
-        }
-
-        extern public static int TickCount
+        public extern static int TickCount
         {
             [MethodImpl(MethodImplOptions.InternalCall)]
             get;
         }
 
-        internal static string CultureDirectory
-        {
-            get
-            {
-                return string.Format(".{0}Cultures", Path.DirectorySeparatorStr);
-            }
-        }
-
         private static OperatingSystem os = null;
 
-        internal static extern PlatformID Platform
+        internal extern static PlatformID Platform
         {
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
             get;
         }
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal static extern string GetOSVersionString();
+        internal extern static string GetOSVersionString();
 
         public static OperatingSystem OSVersion
         {

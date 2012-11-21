@@ -7,11 +7,17 @@ namespace System
 {
     public abstract class Enum : ValueType
     {
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern static private void Internal_GetInfo(Type enumType, out string[] names, out int[] values);
-
-        private static Dictionary<Type, EnumInfo> cache = new Dictionary<Type, EnumInfo>();
+        private static unsafe void Internal_GetInfo(Type enumType, out string[] names, out int[] values)
+        {
+            Type.TypeData* typeData = enumType.GetTypeDataPointer();
+            names = new string[typeData->EnumerationCount];
+            values = new int[typeData->EnumerationCount];
+            for (int i = 0; i < typeData->EnumerationCount; ++i)
+            {
+                names[i] = new string(typeData->Enumerations[i].Name, 0, typeData->Enumerations[i].NameLength);
+                values[i] = typeData->Enumerations[i].Value;
+            }
+        }
 
         public static string[] GetNames(Type enumType)
         {
@@ -34,17 +40,9 @@ namespace System
 
             public static EnumInfo GetInfo(Type enumType)
             {
-                lock (cache)
-                {
-                    EnumInfo info;
-                    if (!Enum.cache.TryGetValue(enumType, out info))
-                    {
-                        info = new EnumInfo();
-                        Enum.Internal_GetInfo(enumType, out info.names, out info.values);
-                        Enum.cache.Add(enumType, info);
-                    }
-                    return info;
-                }
+                EnumInfo info = new EnumInfo();
+                Enum.Internal_GetInfo(enumType, out info.names, out info.values);
+                return info;
             }
 
             public string GetName(int value)
@@ -91,7 +89,7 @@ namespace System
         protected Enum() { }
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern private int Internal_GetValue();
+        private extern int Internal_GetValue();
 
         public static string GetName(Type enumType, object value)
         {

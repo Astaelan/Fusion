@@ -2,7 +2,6 @@
 {
     public class ArgumentOutOfRangeException : ArgumentException
     {
-
         public ArgumentOutOfRangeException() : base("Argument is out of range.") { }
 
         public ArgumentOutOfRangeException(string paramName) : base("Argument is out of range.", paramName) { }

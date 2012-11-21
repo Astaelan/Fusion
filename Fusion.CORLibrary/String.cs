@@ -9,16 +9,12 @@ namespace System
     public class String : ICloneable, IEnumerable, IEnumerable<char>,
         IComparable, IComparable<string>, IEquatable<string>
     {
-
         public static readonly string Empty = "";
 
-        public static bool IsNullOrEmpty(string value)
-        {
-            return (value == null) || (value.length == 0);
-        }
+        public static bool IsNullOrEmpty(string value) { return (value == null) || (value.mLength == 0); }
 
         // This field must be the only field, to tie up with C code
-        private int length;
+        private int mLength;
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         extern public String(char c, int count);
@@ -28,6 +24,9 @@ namespace System
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         extern public String(char[] chars, int startIndex, int length);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern unsafe String(sbyte* value, int startIndex, int length);
 
         #region Private Internal Calls
 
@@ -52,13 +51,7 @@ namespace System
 
         #endregion
 
-        public virtual int Length
-        {
-            get
-            {
-                return this.length;
-            }
-        }
+        public virtual int Length { get { return mLength; } }
 
         [IndexerName("Chars")]
         extern virtual public char this[int index]
@@ -113,7 +106,7 @@ namespace System
                 int sepPos = this.IndexOfAny(separator, pos);
                 if (sepPos < 0)
                 {
-                    ret.Add(new string(this, pos, this.length - pos));
+                    ret.Add(new string(this, pos, this.mLength - pos));
                     break;
                 }
                 ret.Add(new string(this, pos, sepPos - pos));
@@ -125,12 +118,12 @@ namespace System
 
         public bool StartsWith(string str)
         {
-            return this.Substring(0, str.length) == str;
+            return this.Substring(0, str.mLength) == str;
         }
 
         public bool EndsWith(string str)
         {
-            return this.Substring(this.length - str.length, str.length) == str;
+            return this.Substring(this.mLength - str.mLength, str.mLength) == str;
         }
 
         #endregion
@@ -260,17 +253,17 @@ namespace System
 
         public string Substring(int startIndex)
         {
-            if (startIndex < 0 || startIndex > this.length)
+            if (startIndex < 0 || startIndex > this.mLength)
             {
                 throw new ArgumentOutOfRangeException();
             }
 
-            return new string(this, startIndex, this.length - startIndex);
+            return new string(this, startIndex, this.mLength - startIndex);
         }
 
         public string Substring(int startIndex, int length)
         {
-            if (startIndex < 0 || length < 0 || startIndex + length > this.length)
+            if (startIndex < 0 || length < 0 || startIndex + length > this.mLength)
             {
                 throw new ArgumentOutOfRangeException();
             }
@@ -329,7 +322,7 @@ namespace System
             {
                 throw new ArgumentException("oldValue is an empty string.");
             }
-            if (this.length == 0)
+            if (this.mLength == 0)
             {
                 return this;
             }
@@ -342,7 +335,7 @@ namespace System
 
         public string Remove(int startIndex)
         {
-            if (startIndex < 0 || startIndex >= this.length)
+            if (startIndex < 0 || startIndex >= this.mLength)
             {
                 throw new ArgumentOutOfRangeException("startIndex");
             }
@@ -351,12 +344,12 @@ namespace System
 
         public string Remove(int startIndex, int count)
         {
-            if (startIndex < 0 || count < 0 || startIndex + count >= this.length)
+            if (startIndex < 0 || count < 0 || startIndex + count >= this.mLength)
             {
                 throw new ArgumentOutOfRangeException();
             }
             int pos2 = startIndex + count;
-            return (new string(this, 0, startIndex)) + (new string(this, pos2, this.length - pos2));
+            return (new string(this, 0, startIndex)) + (new string(this, pos2, this.mLength - pos2));
         }
 
         #endregion
@@ -404,12 +397,12 @@ namespace System
 
         public int IndexOf(string value)
         {
-            return IndexOf(value, 0, this.length);
+            return IndexOf(value, 0, this.mLength);
         }
 
         public int IndexOf(string value, int startIndex)
         {
-            return IndexOf(value, startIndex, this.length - startIndex);
+            return IndexOf(value, startIndex, this.mLength - startIndex);
         }
 
         public int IndexOf(string value, int startIndex, int count)
@@ -418,15 +411,15 @@ namespace System
             {
                 throw new ArgumentNullException("value");
             }
-            if (startIndex < 0 || count < 0 || startIndex + count > this.length)
+            if (startIndex < 0 || count < 0 || startIndex + count > this.mLength)
             {
                 throw new ArgumentOutOfRangeException();
             }
-            if (value.length == 0)
+            if (value.mLength == 0)
             {
                 return startIndex;
             }
-            int valueLen = value.length;
+            int valueLen = value.mLength;
             int finalIndex = startIndex + count - valueLen + 1;
             char char0 = value[0];
             for (int i = startIndex; i < finalIndex; i++)
@@ -453,12 +446,12 @@ namespace System
 
         public int IndexOf(char value)
         {
-            return this.IndexOf(value, 0, this.length, true);
+            return this.IndexOf(value, 0, this.mLength, true);
         }
 
         public int IndexOf(char value, int startIndex)
         {
-            return this.IndexOf(value, startIndex, this.length - startIndex, true);
+            return this.IndexOf(value, startIndex, this.mLength - startIndex, true);
         }
 
         public int IndexOf(char value, int startIndex, int count)
@@ -468,12 +461,12 @@ namespace System
 
         public int LastIndexOf(char value)
         {
-            return this.IndexOf(value, 0, this.length, false);
+            return this.IndexOf(value, 0, this.mLength, false);
         }
 
         public int LastIndexOf(char value, int startIndex)
         {
-            return this.IndexOf(value, startIndex, this.length - startIndex, false);
+            return this.IndexOf(value, startIndex, this.mLength - startIndex, false);
         }
 
         public int LastIndexOf(char value, int startIndex, int count)
@@ -483,7 +476,7 @@ namespace System
 
         private int IndexOf(char value, int startIndex, int count, bool forwards)
         {
-            if (startIndex < 0 || count < 0 || startIndex + count > this.length)
+            if (startIndex < 0 || count < 0 || startIndex + count > this.mLength)
             {
                 throw new ArgumentOutOfRangeException();
             }
@@ -492,12 +485,12 @@ namespace System
 
         public int IndexOfAny(char[] anyOf)
         {
-            return this.IndexOfAny(anyOf, 0, this.length, true);
+            return this.IndexOfAny(anyOf, 0, this.mLength, true);
         }
 
         public int IndexOfAny(char[] anyOf, int startIndex)
         {
-            return this.IndexOfAny(anyOf, startIndex, this.length - startIndex, true);
+            return this.IndexOfAny(anyOf, startIndex, this.mLength - startIndex, true);
         }
 
         public int IndexOfAny(char[] anyOf, int startIndex, int count)
@@ -507,12 +500,12 @@ namespace System
 
         public int LastIndexOfAny(char[] anyOf)
         {
-            return this.IndexOfAny(anyOf, 0, this.length, false);
+            return this.IndexOfAny(anyOf, 0, this.mLength, false);
         }
 
         public int LastIndexOfAny(char[] anyOf, int startIndex)
         {
-            return this.IndexOfAny(anyOf, startIndex, this.length - startIndex, false);
+            return this.IndexOfAny(anyOf, startIndex, this.mLength - startIndex, false);
         }
 
         public int LastIndexOfAny(char[] anyOf, int startIndex, int count)
@@ -522,7 +515,7 @@ namespace System
 
         private int IndexOfAny(char[] anyOf, int startIndex, int count, bool forward)
         {
-            if (startIndex < 0 || count < 0 || startIndex + count > this.length)
+            if (startIndex < 0 || count < 0 || startIndex + count > this.mLength)
             {
                 throw new ArgumentOutOfRangeException();
             }
@@ -565,7 +558,7 @@ namespace System
 
         public string ToLowerInvariant()
         {
-            int len = this.length;
+            int len = this.mLength;
             StringBuilder sb = new StringBuilder(len);
             for (int i = 0; i < len; i++)
             {
@@ -594,7 +587,7 @@ namespace System
 
         public string ToUpperInvariant()
         {
-            int len = this.length;
+            int len = this.mLength;
             StringBuilder sb = new StringBuilder(len);
             for (int i = 0; i < len; i++)
             {

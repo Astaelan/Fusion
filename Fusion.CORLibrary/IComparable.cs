@@ -9,5 +9,4 @@
     {
         int CompareTo(T x);
     }
-
 }

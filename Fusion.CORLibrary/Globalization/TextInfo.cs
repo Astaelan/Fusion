@@ -5,31 +5,32 @@ namespace System.Globalization
 {
     public class TextInfo
     {
+        internal static TextInfo InvariantInfo { get { return new TextInfo(CultureInfo.InvariantCulture); } }
 
-        private int ansiCodePage;
-        private int ebcdicCodePage;
-        private bool isRightToLeft;
-        private string listSeparator;
-        private int macCodePage;
-        private int oemCodePage;
-        private CultureInfo ci;
+        private int mANSICodePage;
+        private int mEBCDICCodePage;
+        private bool mIsRightToLeft;
+        private string mListSeparator;
+        private int mMacCodePage;
+        private int mOEMCodePage;
+        private CultureInfo mCultureInfo;
 
-        internal TextInfo(CultureInfo ci, StreamReader s)
+        internal TextInfo(CultureInfo cultureInfo)
         {
-            this.ansiCodePage = int.Parse(s.ReadLine());
-            this.ebcdicCodePage = int.Parse(s.ReadLine());
-            this.isRightToLeft = bool.Parse(s.ReadLine());
-            this.listSeparator = s.ReadLine();
-            this.macCodePage = int.Parse(s.ReadLine());
-            this.oemCodePage = int.Parse(s.ReadLine());
-            this.ci = ci;
+            mANSICodePage = 1252;
+            mEBCDICCodePage = 37;
+            mIsRightToLeft = false;
+            mListSeparator = ",";
+            mMacCodePage = 10000;
+            mOEMCodePage = 437;
+            mCultureInfo = cultureInfo;
         }
 
         public virtual int ANSICodePage
         {
             get
             {
-                return this.ansiCodePage;
+                return this.mANSICodePage;
             }
         }
 
@@ -37,7 +38,7 @@ namespace System.Globalization
         {
             get
             {
-                return this.ci.Name;
+                return this.mCultureInfo.Name;
             }
         }
 
@@ -45,7 +46,7 @@ namespace System.Globalization
         {
             get
             {
-                return this.ebcdicCodePage;
+                return this.mEBCDICCodePage;
             }
         }
 
@@ -61,7 +62,7 @@ namespace System.Globalization
         {
             get
             {
-                return this.isRightToLeft;
+                return this.mIsRightToLeft;
             }
         }
 
@@ -69,7 +70,7 @@ namespace System.Globalization
         {
             get
             {
-                return this.ci.LCID;
+                return this.mCultureInfo.LCID;
             }
         }
 
@@ -77,7 +78,7 @@ namespace System.Globalization
         {
             get
             {
-                return this.listSeparator;
+                return this.mListSeparator;
             }
         }
 
@@ -85,7 +86,7 @@ namespace System.Globalization
         {
             get
             {
-                return this.macCodePage;
+                return this.mMacCodePage;
             }
         }
 
@@ -93,7 +94,7 @@ namespace System.Globalization
         {
             get
             {
-                return this.oemCodePage;
+                return this.mOEMCodePage;
             }
         }
 

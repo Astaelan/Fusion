@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Runtime.CompilerServices;
 
 namespace System
 {
@@ -8,46 +7,19 @@ namespace System
         public const uint MaxValue = 0xffffffff;
         public const uint MinValue = 0;
 
-#pragma warning disable 0169, 0649
-        internal uint m_value;
-#pragma warning restore 0169, 0649
+        private uint mValue;
 
-        public override bool Equals(object obj)
-        {
-            return (obj is uint) && ((uint)obj).m_value == this.m_value;
-        }
+        public override bool Equals(object obj) { return (obj is uint) && ((uint)obj).mValue == mValue; }
 
-        public override int GetHashCode()
-        {
-            return (int)this.m_value;
-        }
+        public override int GetHashCode() { return (int)mValue; }
 
-        #region ToString methods
+        public override string ToString() { return NumberFormatter.FormatGeneral(new NumberFormatter.NumberStore(mValue)); }
 
-        public override string ToString()
-        {
-            return NumberFormatter.FormatGeneral(new NumberFormatter.NumberStore(this.m_value));
-        }
+        public string ToString(IFormatProvider formatProvider) { return NumberFormatter.FormatGeneral(new NumberFormatter.NumberStore(mValue), formatProvider); }
 
-        public string ToString(IFormatProvider formatProvider)
-        {
-            return NumberFormatter.FormatGeneral(new NumberFormatter.NumberStore(this.m_value), formatProvider);
-        }
+        public string ToString(string format) { return ToString(format, null); }
 
-        public string ToString(string format)
-        {
-            return ToString(format, null);
-        }
-
-        public string ToString(string format, IFormatProvider formatProvider)
-        {
-            NumberFormatInfo nfi = NumberFormatInfo.GetInstance(formatProvider);
-            return NumberFormatter.NumberToString(format, m_value, nfi);
-        }
-
-        #endregion
-
-        #region IComparable Members
+        public string ToString(string format, IFormatProvider formatProvider) { return NumberFormatter.NumberToString(format, mValue, NumberFormatInfo.GetInstance(formatProvider)); }
 
         public int CompareTo(object obj)
         {
@@ -59,28 +31,11 @@ namespace System
             {
                 throw new ArgumentException();
             }
-            return this.CompareTo((uint)obj);
+            return CompareTo((uint)obj);
         }
 
-        #endregion
+        public int CompareTo(uint value) { return mValue > value ? 1 : (mValue < value ? -1 : 0); }
 
-        #region IComparable<uint> Members
-
-        public int CompareTo(uint x)
-        {
-            return (this.m_value > x) ? 1 : ((this.m_value < x) ? -1 : 0);
-        }
-
-        #endregion
-
-        #region IEquatable<uint> Members
-
-        public bool Equals(uint x)
-        {
-            return this.m_value == x;
-        }
-
-        #endregion
-
+        public bool Equals(uint obj) { return mValue == obj; }
     }
 }

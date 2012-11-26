@@ -189,7 +189,7 @@ namespace Fusion.IR
 
         public IRType ResolveType(TypeDefData pTypeDefData)
         {
-            if (pTypeDefData == null) return null;
+            if (pTypeDefData == null) throw new ArgumentNullException("pTypeDefData");
             return AssemblyFileLookup[pTypeDefData.CLIFile].Types[pTypeDefData.TableIndex];
         }
 
@@ -202,39 +202,43 @@ namespace Fusion.IR
                     case ImplementationIndex.ImplementationType.File:
                         {
                             IRAssembly assembly = null;
-                            if (AssemblyFileReferenceNameLookup.TryGetValue(pTypeRefData.ExportedType.Implementation.File.Name, out assembly))
-                                return Array.Find(assembly.Types, t => t.TypeDefData.TypeNamespace == pTypeRefData.TypeNamespace && t.TypeDefData.TypeName == pTypeRefData.TypeName);
-                            break;
+                            if (!AssemblyFileReferenceNameLookup.TryGetValue(pTypeRefData.ExportedType.Implementation.File.Name, out assembly)) throw new KeyNotFoundException();
+                            IRType type = Array.Find(assembly.Types, t => t.TypeDefData.TypeNamespace == pTypeRefData.TypeNamespace && t.TypeDefData.TypeName == pTypeRefData.TypeName);
+                            if (type == null) throw new NullReferenceException();
+                            return type;
                         }
                     case ImplementationIndex.ImplementationType.AssemblyRef:
                         {
                             IRAssembly assembly = null;
-                            if (AssemblyFileReferenceNameLookup.TryGetValue(pTypeRefData.ExportedType.Implementation.AssemblyRef.Name, out assembly))
-                                return Array.Find(assembly.Types, t => t.TypeDefData.TypeNamespace == pTypeRefData.TypeNamespace && t.TypeDefData.TypeName == pTypeRefData.TypeName);
-                            break;
+                            if (!AssemblyFileReferenceNameLookup.TryGetValue(pTypeRefData.ExportedType.Implementation.AssemblyRef.Name, out assembly)) throw new KeyNotFoundException();
+                            IRType type = Array.Find(assembly.Types, t => t.TypeDefData.TypeNamespace == pTypeRefData.TypeNamespace && t.TypeDefData.TypeName == pTypeRefData.TypeName);
+                            if (type == null) throw new NullReferenceException();
+                            return type;
                         }
                     default: break;
                 }
-                return null;
+                throw new NullReferenceException();
             }
             switch (pTypeRefData.ResolutionScope.Type)
             {
                 case ResolutionScopeIndex.ResolutionScopeType.AssemblyRef:
                     {
                         IRAssembly assembly = null;
-                        if (AssemblyFileReferenceNameLookup.TryGetValue(pTypeRefData.ResolutionScope.AssemblyRef.Name, out assembly))
-                            return Array.Find(assembly.Types, t => t.TypeDefData.TypeNamespace == pTypeRefData.TypeNamespace && t.TypeDefData.TypeName == pTypeRefData.TypeName);
-                        break;
+                        if (!AssemblyFileReferenceNameLookup.TryGetValue(pTypeRefData.ResolutionScope.AssemblyRef.Name, out assembly)) throw new KeyNotFoundException();
+                        IRType type = Array.Find(assembly.Types, t => t.TypeDefData.TypeNamespace == pTypeRefData.TypeNamespace && t.TypeDefData.TypeName == pTypeRefData.TypeName);
+                        if (type == null) throw new NullReferenceException();
+                        return type;
                     }
                 case ResolutionScopeIndex.ResolutionScopeType.TypeRef:
                     {
                         IRType type = ResolveType(pTypeRefData.ResolutionScope.TypeRef);
-                        if (type != null)
-                            return type.NestedTypes.Find(t => t.TypeDefData.TypeNamespace == pTypeRefData.TypeNamespace && t.TypeDefData.TypeName == pTypeRefData.TypeName);
-                        break;
+                        if (type == null) throw new NullReferenceException();
+                        type = type.NestedTypes.Find(t => t.TypeDefData.TypeNamespace == pTypeRefData.TypeNamespace && t.TypeDefData.TypeName == pTypeRefData.TypeName);
+                        if (type == null) throw new NullReferenceException();
+                        return type;
                     }
             }
-            return null;
+            throw new NullReferenceException();
         }
 
         public IRType ResolveType(TypeDefRefOrSpecIndex pTypeDefRefOrSpecIndex)
@@ -245,7 +249,7 @@ namespace Fusion.IR
                 case TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeRef: return ResolveType(pTypeDefRefOrSpecIndex.TypeRef);
                 default: break;
             }
-            return null;
+            throw new NullReferenceException();
         }
 
         public IRType ResolveType(MetadataToken pMetadataToken)
@@ -256,7 +260,7 @@ namespace Fusion.IR
                 case CLIMetadataTables.TypeRef: return ResolveType((TypeRefData)pMetadataToken.Data);
                 default: break;
             }
-            return null;
+            throw new NullReferenceException();
         }
 
         public IRType ResolveType(SigType pSigType)
@@ -305,6 +309,7 @@ namespace Fusion.IR
                 case SigElementType.Type: type = System_Type; break;
                 default: break;
             }
+            if (type == null) throw new NullReferenceException();
             return type;
         }
 
@@ -316,7 +321,7 @@ namespace Fusion.IR
 
         public IRMethod ResolveMethod(MethodDefData pMethodDefData)
         {
-            if (pMethodDefData == null) return null;
+            if (pMethodDefData == null) throw new ArgumentNullException("pMethodDefData");
             return AssemblyFileLookup[pMethodDefData.CLIFile].Methods[pMethodDefData.TableIndex];
         }
 
@@ -327,27 +332,27 @@ namespace Fusion.IR
                 case MemberRefParentIndex.MemberRefParentType.TypeDef:
                     {
                         IRType type = ResolveType(pMemberRefData.Class.TypeDef);
-                        if (pMemberRefData.IsFieldRef) return null;
+                        if (pMemberRefData.IsFieldRef) throw new ArgumentException();
                         foreach (IRMethod method in type.Methods)
                         {
                             if (method.MethodDefData.Name != pMemberRefData.Name) continue;
                             if (CompareSignatures(pMemberRefData.ExpandedMethodSignature, method.MethodDefData.ExpandedSignature)) return method;
                         }
-                        return null;
+                        throw new NullReferenceException();
                     }
                 case MemberRefParentIndex.MemberRefParentType.TypeRef:
                     {
                         IRType type = ResolveType(pMemberRefData.Class.TypeRef);
-                        if (pMemberRefData.IsFieldRef) return null;
+                        if (pMemberRefData.IsFieldRef) throw new ArgumentException();
                         foreach (IRMethod method in type.Methods)
                         {
                             if (method.MethodDefData.Name != pMemberRefData.Name) continue;
                             if (CompareSignatures(pMemberRefData.ExpandedMethodSignature, method.MethodDefData.ExpandedSignature)) return method;
                         }
-                        return null;
+                        throw new NullReferenceException();
                     }
             }
-            return null;
+            throw new NullReferenceException();
         }
 
         public IRMethod ResolveMethod(MetadataToken pMetadataToken)
@@ -358,7 +363,7 @@ namespace Fusion.IR
                 case CLIMetadataTables.MemberRef: return ResolveMethod((MemberRefData)pMetadataToken.Data);
                 default: break;
             }
-            return null;
+            throw new NullReferenceException();
         }
     }
 }

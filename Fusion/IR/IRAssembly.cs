@@ -50,7 +50,7 @@ namespace Fusion.IR
         {
             foreach (IRType type in Types)
             {
-                type.BaseType = AppDomain.ResolveType(type.TypeDefData.Extends);
+                if (type.TypeDefData.Extends.Type != TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeDef || type.TypeDefData.Extends.TypeDef != null) type.BaseType = AppDomain.ResolveType(type.TypeDefData.Extends);
                 foreach (IRField field in type.Fields) field.Type = AppDomain.ResolveType(field.FieldData.ExpandedSignature.Type);
                 foreach (IRInterfaceImplementation interfaceImplementation in type.InterfaceImplementations) interfaceImplementation.InterfaceType = AppDomain.ResolveType(interfaceImplementation.InterfaceTypeDefRefOrSpecIndex);
                 foreach (IRMethod method in type.Methods)

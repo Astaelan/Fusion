@@ -68,5 +68,21 @@ namespace Fusion.IL
             value |= ((ulong)mData[mCursor++] << 56);
             return value;
         }
+
+        public float ReadSingle()
+        {
+            if (Remaining < 4) throw new EndOfStreamException();
+            float value = BitConverter.ToSingle(mData, (int)mCursor);
+            mCursor += 4;
+            return value;
+        }
+
+        public double ReadDouble()
+        {
+            if (Remaining < 8) throw new EndOfStreamException();
+            double value = BitConverter.ToDouble(mData, (int)mCursor);
+            mCursor += 8;
+            return value;
+        }
     }
 }

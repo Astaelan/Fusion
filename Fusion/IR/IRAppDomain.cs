@@ -135,13 +135,65 @@ namespace Fusion.IR
             return type;
         }
 
-        public IRType Resolve(TypeDefData pTypeDefData)
+        public bool CompareSignatures(SigType pSigTypeA, SigType pSigTypeB)
+        {
+            IRType typeA = ResolveType(pSigTypeA);
+            IRType typeB = ResolveType(pSigTypeB);
+            if (typeA.ArrayType != null)
+            {
+                if (typeB.ArrayType == null) return false;
+                return typeA.ArrayType == typeB.ArrayType;
+            }
+            if (typeA.PointerType != null)
+            {
+                if (typeB.PointerType == null) return false;
+                return typeA.PointerType == typeB.PointerType;
+            }
+            if (typeA.IsGenericVarOrMVar || typeB.IsGenericVarOrMVar)
+            {
+                if (!typeA.IsGenericVarOrMVar || !typeB.IsGenericVarOrMVar) return false;
+                return typeA.TemporaryVarOrMVarIndex == typeB.TemporaryVarOrMVarIndex;
+            }
+            return typeA == typeB;
+        }
+
+        public bool CompareSignatures(MethodSig pMethodSigA, MethodSig pMethodSigB)
+        {
+            if (pMethodSigA.HasThis != pMethodSigB.HasThis) return false;
+            if (pMethodSigA.ExplicitThis != pMethodSigB.ExplicitThis) return false;
+            if (pMethodSigA.Default != pMethodSigB.Default) return false;
+            if (pMethodSigA.VarArg != pMethodSigB.VarArg) return false;
+            if (pMethodSigA.CCall != pMethodSigB.CCall) return false;
+            if (pMethodSigA.STDCall != pMethodSigB.STDCall) return false;
+            if (pMethodSigA.ThisCall != pMethodSigB.ThisCall) return false;
+            if (pMethodSigA.FastCall != pMethodSigB.FastCall) return false;
+            if (pMethodSigA.GenParamCount != pMethodSigB.GenParamCount) return false;
+            if (pMethodSigA.Params.Count != pMethodSigB.Params.Count) return false;
+            if (pMethodSigA.HasSentinel != pMethodSigB.HasSentinel) return false;
+            if (pMethodSigA.SentinelIndex != pMethodSigB.SentinelIndex) return false;
+            if (pMethodSigA.RetType.Void != pMethodSigB.RetType.Void) return false;
+            if (!pMethodSigA.RetType.Void)
+            {
+                if (pMethodSigA.RetType.ByRef != pMethodSigB.RetType.ByRef) return false;
+                if (pMethodSigA.RetType.TypedByRef != pMethodSigB.RetType.TypedByRef) return false;
+                if (!pMethodSigA.RetType.TypedByRef && !CompareSignatures(pMethodSigA.RetType.Type, pMethodSigB.RetType.Type)) return false;
+            }
+            for (int index = 0; index < pMethodSigA.Params.Count; ++index)
+            {
+                if (pMethodSigA.Params[index].ByRef != pMethodSigB.Params[index].ByRef) return false;
+                if (pMethodSigA.Params[index].TypedByRef != pMethodSigB.Params[index].TypedByRef) return false;
+                if (!pMethodSigA.Params[index].TypedByRef && !CompareSignatures(pMethodSigA.Params[index].Type, pMethodSigB.Params[index].Type)) return false;
+            }
+            return true;
+        }
+
+        public IRType ResolveType(TypeDefData pTypeDefData)
         {
             if (pTypeDefData == null) return null;
             return AssemblyFileLookup[pTypeDefData.CLIFile].Types[pTypeDefData.TableIndex];
         }
 
-        public IRType Resolve(TypeRefData pTypeRefData)
+        public IRType ResolveType(TypeRefData pTypeRefData)
         {
             if (pTypeRefData.ExportedType != null)
             {
@@ -176,7 +228,7 @@ namespace Fusion.IR
                     }
                 case ResolutionScopeIndex.ResolutionScopeType.TypeRef:
                     {
-                        IRType type = Resolve(pTypeRefData.ResolutionScope.TypeRef);
+                        IRType type = ResolveType(pTypeRefData.ResolutionScope.TypeRef);
                         if (type != null)
                             return type.NestedTypes.Find(t => t.TypeDefData.TypeNamespace == pTypeRefData.TypeNamespace && t.TypeDefData.TypeName == pTypeRefData.TypeName);
                         break;
@@ -185,29 +237,29 @@ namespace Fusion.IR
             return null;
         }
 
-        public IRType Resolve(TypeDefRefOrSpecIndex pTypeDefRefOrSpecIndex)
+        public IRType ResolveType(TypeDefRefOrSpecIndex pTypeDefRefOrSpecIndex)
         {
             switch (pTypeDefRefOrSpecIndex.Type)
             {
-                case TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeDef: return Resolve(pTypeDefRefOrSpecIndex.TypeDef);
-                case TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeRef: return Resolve(pTypeDefRefOrSpecIndex.TypeRef);
+                case TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeDef: return ResolveType(pTypeDefRefOrSpecIndex.TypeDef);
+                case TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeRef: return ResolveType(pTypeDefRefOrSpecIndex.TypeRef);
                 default: break;
             }
             return null;
         }
 
-        public IRType Resolve(MetadataToken pMetadataToken)
+        public IRType ResolveType(MetadataToken pMetadataToken)
         {
             switch (pMetadataToken.Table)
             {
-                case CLIMetadataTables.TypeDef: return Resolve((TypeDefData)pMetadataToken.Data);
-                case CLIMetadataTables.TypeRef: return Resolve((TypeRefData)pMetadataToken.Data);
+                case CLIMetadataTables.TypeDef: return ResolveType((TypeDefData)pMetadataToken.Data);
+                case CLIMetadataTables.TypeRef: return ResolveType((TypeRefData)pMetadataToken.Data);
                 default: break;
             }
             return null;
         }
 
-        public IRType Resolve(SigType pSigType)
+        public IRType ResolveType(SigType pSigType)
         {
             IRType type = null;
             switch (pSigType.ElementType)
@@ -229,23 +281,25 @@ namespace Fusion.IR
                 case SigElementType.Pointer:
                     {
                         if (pSigType.PtrVoid) type = CreatePointerType(System_Void);
-                        else type = CreatePointerType(Resolve(pSigType.PtrType));
+                        else type = CreatePointerType(ResolveType(pSigType.PtrType));
                         break;
                     }
-                case SigElementType.ValueType: type = Resolve(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.ValueTypeDefOrRefOrSpecToken)); break;
-                case SigElementType.Class: type = Resolve(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.ClassTypeDefOrRefOrSpecToken)); break;
+                case SigElementType.ValueType: type = ResolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.ValueTypeDefOrRefOrSpecToken)); break;
+                case SigElementType.Class: type = ResolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.ClassTypeDefOrRefOrSpecToken)); break;
                 case SigElementType.Var:
                     type = IRType.TemporaryVarType.Clone();
+                    type.IsGenericVarOrMVar = true;
                     type.TemporaryVarOrMVarIndex = pSigType.VarNumber;
                     break;
-                case SigElementType.Array: type = CreateArrayType(Resolve(pSigType.ArrayType)); break;
-                case SigElementType.GenericInstantiation: type = Resolve(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.GenericInstTypeDefOrRefOrSpecToken)); break;
+                case SigElementType.Array: type = CreateArrayType(ResolveType(pSigType.ArrayType)); break;
+                case SigElementType.GenericInstantiation: type = ResolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.GenericInstTypeDefOrRefOrSpecToken)); break;
                 case SigElementType.IPointer: type = System_IntPtr; break;
                 case SigElementType.UPointer: type = System_UIntPtr; break;
                 case SigElementType.Object: type = System_Object; break;
-                case SigElementType.SingleDimensionArray: type = CreateArrayType(Resolve(pSigType.SZArrayType)); break;
+                case SigElementType.SingleDimensionArray: type = CreateArrayType(ResolveType(pSigType.SZArrayType)); break;
                 case SigElementType.MethodVar:
                     type = IRType.TemporaryMVarType.Clone();
+                    type.IsGenericVarOrMVar = true;
                     type.TemporaryVarOrMVarIndex = pSigType.MVarNumber;
                     break;
                 case SigElementType.Type: type = System_Type; break;
@@ -254,10 +308,57 @@ namespace Fusion.IR
             return type;
         }
 
-        public IRType Resolve(SigRetType pSigRetType) { return pSigRetType.Void ? null : Resolve(pSigRetType.Type); }
+        public IRType ResolveType(SigRetType pSigRetType) { return pSigRetType.Void ? null : ResolveType(pSigRetType.Type); }
 
-        public IRType Resolve(SigParam pSigParam) { return Resolve(pSigParam.Type); }
+        public IRType ResolveType(SigParam pSigParam) { return ResolveType(pSigParam.Type); }
 
-        public IRType Resolve(SigLocalVar pSigLocalVar) { return Resolve(pSigLocalVar.Type); }
+        public IRType ResolveType(SigLocalVar pSigLocalVar) { return ResolveType(pSigLocalVar.Type); }
+
+        public IRMethod ResolveMethod(MethodDefData pMethodDefData)
+        {
+            if (pMethodDefData == null) return null;
+            return AssemblyFileLookup[pMethodDefData.CLIFile].Methods[pMethodDefData.TableIndex];
+        }
+
+        public IRMethod ResolveMethod(MemberRefData pMemberRefData)
+        {
+            switch (pMemberRefData.Class.Type)
+            {
+                case MemberRefParentIndex.MemberRefParentType.TypeDef:
+                    {
+                        IRType type = ResolveType(pMemberRefData.Class.TypeDef);
+                        if (pMemberRefData.IsFieldRef) return null;
+                        foreach (IRMethod method in type.Methods)
+                        {
+                            if (method.MethodDefData.Name != pMemberRefData.Name) continue;
+                            if (CompareSignatures(pMemberRefData.ExpandedMethodSignature, method.MethodDefData.ExpandedSignature)) return method;
+                        }
+                        return null;
+                    }
+                case MemberRefParentIndex.MemberRefParentType.TypeRef:
+                    {
+                        IRType type = ResolveType(pMemberRefData.Class.TypeRef);
+                        if (pMemberRefData.IsFieldRef) return null;
+                        foreach (IRMethod method in type.Methods)
+                        {
+                            if (method.MethodDefData.Name != pMemberRefData.Name) continue;
+                            if (CompareSignatures(pMemberRefData.ExpandedMethodSignature, method.MethodDefData.ExpandedSignature)) return method;
+                        }
+                        return null;
+                    }
+            }
+            return null;
+        }
+
+        public IRMethod ResolveMethod(MetadataToken pMetadataToken)
+        {
+            switch (pMetadataToken.Table)
+            {
+                case CLIMetadataTables.MethodDef: return ResolveMethod((MethodDefData)pMetadataToken.Data);
+                case CLIMetadataTables.MemberRef: return ResolveMethod((MemberRefData)pMetadataToken.Data);
+                default: break;
+            }
+            return null;
+        }
     }
 }

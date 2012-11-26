@@ -25,7 +25,7 @@
 * Link IRMethod parameter types
 * Link IRLocal types
 
-Decomposition of ILInstructions into IRInstructions, no stack or type analysis
+- Decomposition of ILInstructions into IRInstructions, no stack or type analysis
 
 Create IRGenericInstantiations for IRTypes
 Create IRGenericInstantiations for IRField types

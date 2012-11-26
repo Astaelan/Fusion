@@ -49,6 +49,7 @@
     <Compile Include="IL\ILReader.cs" />
     <Compile Include="IR\IRAppDomain.cs" />
     <Compile Include="IR\IRAssembly.cs" />
+    <Compile Include="IR\IRBranchCondition.cs" />
     <Compile Include="IR\IRInterfaceImplementation.cs" />
     <Compile Include="IR\IRLocal.cs" />
     <Compile Include="IR\IRParameter.cs" />

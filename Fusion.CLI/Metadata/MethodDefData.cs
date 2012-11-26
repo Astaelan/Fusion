@@ -32,7 +32,7 @@ namespace Fusion.CLI.Metadata
 
         public int TableIndex = 0;
         public uint RVA = 0;
-        public ushort ImplFlags = 0;
+        public MethodImplAttributes ImplFlags = 0;
         public MethodAttributes Flags = MethodAttributes.None;
         public string Name = null;
         public byte[] Signature = null;
@@ -46,7 +46,7 @@ namespace Fusion.CLI.Metadata
         private void LoadData(CLIFile pFile)
         {
             RVA = pFile.ReadUInt32();
-            ImplFlags = pFile.ReadUInt16();
+            ImplFlags = (MethodImplAttributes)pFile.ReadUInt16();
             Flags = (MethodAttributes)pFile.ReadUInt16();
             Name = pFile.ReadStringHeap(pFile.ReadHeapIndex(CLIHeapOffsetSize.Strings32Bit));
             Signature = pFile.ReadBlobHeap(pFile.ReadHeapIndex(CLIHeapOffsetSize.Blob32Bit));

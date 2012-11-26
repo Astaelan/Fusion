@@ -50,5 +50,8 @@ namespace Fusion.CLI.Metadata
             if (Signature[0] == 0x06) ExpandedFieldSignature = new FieldSig(pFile, Signature, ref cursor);
             else ExpandedMethodSignature = new MethodSig(pFile, Signature, ref cursor);
         }
+
+        public bool IsMethodRef { get { return ExpandedMethodSignature != null; } }
+        public bool IsFieldRef { get { return ExpandedFieldSignature != null; } }
     }
 }

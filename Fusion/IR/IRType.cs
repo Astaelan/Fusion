@@ -18,6 +18,7 @@ namespace Fusion.IR
         public IRType BaseType = null;
 
         // Dynamic Types
+        public bool IsGenericVarOrMVar = false;
         public uint TemporaryVarOrMVarIndex = 0;
         public IRType PointerType = null;
         public IRType ArrayType = null;

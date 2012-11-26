@@ -5,6 +5,41 @@ using System.Text;
 
 namespace Fusion.CLI.Metadata
 {
+    public enum TypeAttributes : uint
+    {
+        VisibilityMask = 0x00000007,
+        NotPublic = 0x00000000,
+        Public = 0x00000001,
+        NestedPublic = 0x00000002,
+        NestedPrivate = 0x00000003,
+        NestedFamily = 0x00000004,
+        NestedAssembly = 0x00000005,
+        NestedFamilyAndAssembly = 0x00000006,
+        NestedFamilyOrAssembly = 0x00000007,
+        LayoutMask = 0x00000018,
+        //AutoLayout										= 0x00000000,
+        SequentialLayout = 0x00000008,
+        ExplicitLayout = 0x00000010,
+        ClassSemanticsMask = 0x00000020,
+        //Class											= 0x00000000,
+        Interface = 0x00000020,
+        Abstract = 0x00000080,
+        Sealed = 0x00000100,
+        SpecialName = 0x00000400,
+        Import = 0x00001000,
+        Serializable = 0x00002000,
+        StringFormatMask = 0x00030000,
+        //AnsiClass										= 0x00000000,
+        UnicodeClass = 0x00010000,
+        AutoClass = 0x00020000,
+        CustomFormatClass = 0x00030000,
+        CustomStringFormatMask = 0x00C00000,
+        BeforeFieldInit = 0x00100000,
+        RTSpecialName = 0x00000800,
+        HasSecurity = 0x00040000,
+        IsTypeForwarder = 0x00200000,
+    }
+
     public enum FieldAttributes : ushort
     {
         None = 0,
@@ -65,5 +100,27 @@ namespace Fusion.CLI.Metadata
         RTSpecialName = 0x1000,
         HasSecurity = 0x4000,
         RequireSecObject = 0x8000,
+    }
+
+    [Flags]
+    public enum MethodImplAttributes : ushort
+    {
+        None = 0x0000,
+
+        CodeTypeMask = 0x0003,
+        //IL										= 0x0000,
+        Native = 0x0001,
+        OPTIL = 0x0002,
+        Runtime = 0x0003,
+        ManagedMask = 0x0004,
+        Unmanaged = 0x0004,
+        //Managed									= 0x0000,
+        ForwardReference = 0x0010,
+        PreserveSignature = 0x0080,
+        InternalCall = 0x1000,
+        Synchronized = 0x0020,
+        NoInlining = 0x0008,
+        MaxMethodImplementationValue = 0xFFFF,
+        NoOptimization = 0x0040,
     }
 }

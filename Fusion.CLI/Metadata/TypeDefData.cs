@@ -30,7 +30,7 @@ namespace Fusion.CLI.Metadata
         public CLIFile CLIFile = null;
 
         public int TableIndex = 0;
-        public uint Flags = 0;
+        public TypeAttributes Flags = 0;
         public string TypeName = null;
         public string TypeNamespace = null;
         public TypeDefRefOrSpecIndex Extends = new TypeDefRefOrSpecIndex();
@@ -44,7 +44,7 @@ namespace Fusion.CLI.Metadata
 
         private void LoadData(CLIFile pFile)
         {
-            Flags = pFile.ReadUInt32();
+            Flags = (TypeAttributes)pFile.ReadUInt32();
             TypeName = pFile.ReadStringHeap(pFile.ReadHeapIndex(CLIHeapOffsetSize.Strings32Bit));
             TypeNamespace = pFile.ReadStringHeap(pFile.ReadHeapIndex(CLIHeapOffsetSize.Strings32Bit));
             Extends.LoadData(pFile);

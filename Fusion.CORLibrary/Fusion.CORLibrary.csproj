@@ -101,6 +101,7 @@
     <Compile Include="IntPtr.cs" />
     <Compile Include="InvalidCastException.cs" />
     <Compile Include="InvalidOperationException.cs" />
+    <Compile Include="Kernel\Multiboot.cs" />
     <Compile Include="Math.cs" />
     <Compile Include="MulticastDelegate.cs" />
     <Compile Include="MulticastNotSupportedException.cs" />
@@ -142,9 +143,6 @@
     <Compile Include="ValueType.cs" />
     <Compile Include="Version.cs" />
     <Compile Include="Void.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

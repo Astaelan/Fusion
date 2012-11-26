@@ -81,6 +81,7 @@ namespace Fusion.CLI.Metadata
             public uint CodeRVA = 0;
 
             public StandAloneSigData LocalVarSignature = null;
+            public LocalVarSig ExpandedLocalVarSignature = null;
 
             public void LoadData(MethodDefData pMethodDef)
             {
@@ -111,7 +112,11 @@ namespace Fusion.CLI.Metadata
 
             public void LinkData(MethodDefData pMethodDef)
             {
-                if (LocalVarSigToken != 0) LocalVarSignature = (StandAloneSigData)pMethodDef.CLIFile.ExpandMetadataToken(LocalVarSigToken).Data;
+                if (LocalVarSigToken != 0)
+                {
+                    LocalVarSignature = (StandAloneSigData)pMethodDef.CLIFile.ExpandMetadataToken(LocalVarSigToken).Data;
+                    ExpandedLocalVarSignature = LocalVarSignature.ExpandedLocalVarSignature;
+                }
             }
         }
     }

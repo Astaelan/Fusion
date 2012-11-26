@@ -6,7 +6,7 @@ namespace System
     {
         protected ValueType() { }
 
-        internal static bool Equals(object objA, object objB)
+        internal static new bool Equals(object objA, object objB)
         {
             if (objA == null || objB == null || objA.GetType() != objB.GetType()) return false;
             object[] objAFields = objA.GetFields();
@@ -24,7 +24,7 @@ namespace System
 
         public override bool Equals(object obj) { return Equals(this, obj); }
 
-        internal static int GetHashCode(object obj)
+        internal static new int GetHashCode(object obj)
         {
             object[] fields = obj.GetFields();
 

@@ -32,7 +32,7 @@ namespace Fusion.CLI.Metadata
         public int TableIndex = 0;
         public ushort Flags = 0;
         public string Name = null;
-        public TypeDefOrRefIndex EventType = new TypeDefOrRefIndex();
+        public TypeDefRefOrSpecIndex EventType = new TypeDefRefOrSpecIndex();
 
         public EventMapData ParentEventMap = null;
 

@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-
-namespace System.Globalization
+﻿namespace System.Globalization
 {
     public class CultureInfo
     {

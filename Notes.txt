@@ -1,0 +1,51 @@
+- Started, = In Progress, * Completed
+
+* Create IRType table, no type linking
+* Create IRFields, link to owner IRType
+* Create IRInterfaceImplementations, link to owner IRType
+* Create IRMethods, link to owner IRType
+* Create IRParameters, link to owner IRMethod
+* Create IRLocals, link to owner IRMethod
+* Link nested IRTypes to enclosing IRType
+* Cache CORLibrary common IRTypes
+
+* Create Pointer dynamic IRTypes
+* Create Array dynamic IRTypes
+* Resolver for TypeDef to IRType
+* Resolver for TypeRef to IRType
+* Resolver for TypeDefRefOrSpecIndex to IRType, using uninstantiated generic placeholders
+* Resolver for MetadataToken to IRType, using uninstantiated generic placeholders
+* Resolver for SigType to IRType, using uninstantiated generic placeholders
+* Resolver for SigRetType to IRType, using uninstantiated generic placeholders
+* Resolver for SigParam to IRType, using uninstantiated generic placeholders
+* Link IRType to base IRType
+* Link IRField type
+* Link IRInterfaceImplementation type
+* Link IRMethod return type
+* Link IRMethod parameter types
+* Link IRLocal types
+
+Decomposition of ILInstructions into IRInstructions, no stack or type analysis
+
+Create IRGenericInstantiations for IRTypes
+Create IRGenericInstantiations for IRField types
+Create IRGenericInstantiations for IRMethod return and parameter types
+Create IRGenericInstantiations for IRLocal types
+
+Stack type analysis
+Transform IRInstructions that behave like other IRInstructions under certain conditions
+Stack target linearization
+
+Resolve internal calls
+Generate internal calls
+
+Layout IRField type sizes for IRTypes
+Layout IRLocal type sizes for IRMethods
+Resolve IRInterfaceImplementation methods
+Create virtual tree
+
+Optimizations
+
+Assemble IRInstructions
+
+Building binary output

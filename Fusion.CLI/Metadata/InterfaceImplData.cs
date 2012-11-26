@@ -31,7 +31,7 @@ namespace Fusion.CLI.Metadata
 
         public int TableIndex = 0;
         public TypeDefData Class = null;
-        public TypeDefOrRefIndex Interface = new TypeDefOrRefIndex();
+        public TypeDefRefOrSpecIndex Interface = new TypeDefRefOrSpecIndex();
 
         private void LoadData(CLIFile pFile)
         {

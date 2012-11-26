@@ -34,6 +34,8 @@ namespace Fusion.CLI.Metadata
         public string TypeName = null;
         public string TypeNamespace = null;
 
+        public ExportedTypeData ExportedType = null;
+
         private void LoadData(CLIFile pFile)
         {
             ResolutionScope.LoadData(pFile);
@@ -43,6 +45,7 @@ namespace Fusion.CLI.Metadata
 
         private void LinkData(CLIFile pFile)
         {
+            if (ResolutionScope.IsNull) ExportedType = Array.Find(CLIFile.ExportedTypeTable, e => e.TypeNamespace == TypeNamespace && e.TypeName == TypeName);
         }
     }
 }

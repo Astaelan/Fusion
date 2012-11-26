@@ -7,7 +7,9 @@ namespace System
         public const ulong MinValue = 0;
         public const ulong MaxValue = 0xffffffffffffffffL;
 
+#pragma warning disable 0649
         private ulong mValue;
+#pragma warning restore 0649
 
         public override bool Equals(object obj) { return (obj is ulong) && ((ulong)obj).mValue == mValue; }
 

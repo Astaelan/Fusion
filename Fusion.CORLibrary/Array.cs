@@ -86,7 +86,9 @@ namespace System
             public void Reset() { mIndex = -1; }
         }
 
+#pragma warning disable 0649
         private int mLength;
+#pragma warning restore 0649
 
         private Array() { }
 

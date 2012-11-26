@@ -33,13 +33,14 @@ namespace Fusion.CLI.Metadata
         public uint Flags = 0;
         public string TypeName = null;
         public string TypeNamespace = null;
-        public TypeDefOrRefIndex Extends = new TypeDefOrRefIndex();
+        public TypeDefRefOrSpecIndex Extends = new TypeDefRefOrSpecIndex();
         public int FieldListIndex = 0;
         public List<FieldData> FieldList = new List<FieldData>();
         public int MethodListIndex = 0;
         public List<MethodDefData> MethodList = new List<MethodDefData>();
 
-        public List<TypeDefOrRefIndex> InterfaceList = new List<TypeDefOrRefIndex>();
+        public List<TypeDefRefOrSpecIndex> InterfaceList = new List<TypeDefRefOrSpecIndex>();
+        public List<TypeDefData> NestedClassList = new List<TypeDefData>();
 
         private void LoadData(CLIFile pFile)
         {

@@ -47,6 +47,7 @@ namespace Fusion.CLI.Metadata
 
         private void LinkData(CLIFile pFile)
         {
+            EnclosingClass.NestedClassList.Add(NestedClass);
         }
     }
 }

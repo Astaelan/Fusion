@@ -275,20 +275,20 @@ namespace Fusion.CLI.Metadata
     }
 
     [StructLayout(LayoutKind.Explicit)]
-    public struct TypeDefOrRefIndex
+    public struct TypeDefRefOrSpecIndex
     {
-        public enum TypeDefOrRefType : int
+        public enum TypeDefRefOrSpecType : int
         {
             TypeDef = 0,
             TypeRef = 1,
             TypeSpec = 2
         }
-        public const byte TypeDefOrRefTypeBits = 2;
-        public const byte TypeDefOrRefTypeMask = ((1 << TypeDefOrRefTypeBits) - 1);
-        public const ushort TypeDefOrRefTypeMax16BitRows = (0xFFFF >> TypeDefOrRefTypeBits);
+        public const byte TypeDefRefOrSpecTypeBits = 2;
+        public const byte TypeDefRefOrSpecTypeMask = ((1 << TypeDefRefOrSpecTypeBits) - 1);
+        public const ushort TypeDefRefOrSpecTypeMax16BitRows = (0xFFFF >> TypeDefRefOrSpecTypeBits);
 
         [FieldOffset(0)]
-        public TypeDefOrRefType Type;
+        public TypeDefRefOrSpecType Type;
         [FieldOffset(4)]
         public TypeDefData TypeDef;
         [FieldOffset(4)]
@@ -299,20 +299,20 @@ namespace Fusion.CLI.Metadata
         public void LoadData(CLIFile pFile)
         {
             int token = 0;
-            if (pFile.TypeDefTable.Length > TypeDefOrRefTypeMax16BitRows ||
-                pFile.TypeRefTable.Length > TypeDefOrRefTypeMax16BitRows ||
-                pFile.TypeSpecTable.Length > TypeDefOrRefTypeMax16BitRows) token = pFile.ReadInt32();
+            if (pFile.TypeDefTable.Length > TypeDefRefOrSpecTypeMax16BitRows ||
+                pFile.TypeRefTable.Length > TypeDefRefOrSpecTypeMax16BitRows ||
+                pFile.TypeSpecTable.Length > TypeDefRefOrSpecTypeMax16BitRows) token = pFile.ReadInt32();
             else token = pFile.ReadUInt16();
-            Type = (TypeDefOrRefType)(token & TypeDefOrRefTypeMask);
-            token = (token >> TypeDefOrRefTypeBits) - 1;
+            Type = (TypeDefRefOrSpecType)(token & TypeDefRefOrSpecTypeMask);
+            token = (token >> TypeDefRefOrSpecTypeBits) - 1;
             if (token >= 0)
             {
                 switch (Type)
                 {
-                    case TypeDefOrRefType.TypeDef: TypeDef = pFile.TypeDefTable[token]; break;
-                    case TypeDefOrRefType.TypeRef: TypeRef = pFile.TypeRefTable[token]; break;
-                    case TypeDefOrRefType.TypeSpec: TypeSpec = pFile.TypeSpecTable[token]; break;
-                    default: throw new BadImageFormatException("TypeDefOrRef Type");
+                    case TypeDefRefOrSpecType.TypeDef: TypeDef = pFile.TypeDefTable[token]; break;
+                    case TypeDefRefOrSpecType.TypeRef: TypeRef = pFile.TypeRefTable[token]; break;
+                    case TypeDefRefOrSpecType.TypeSpec: TypeSpec = pFile.TypeSpecTable[token]; break;
+                    default: throw new BadImageFormatException("TypeDefRefOrSpec Type");
                 }
             }
         }
@@ -644,6 +644,21 @@ namespace Fusion.CLI.Metadata
         [FieldOffset(4)]
         public TypeRefData TypeRef;
 
+        public bool IsNull
+        {
+            get
+            {
+                switch (Type)
+                {
+                    case ResolutionScopeType.Module: return Module == null;
+                    case ResolutionScopeType.ModuleRef: return ModuleRef == null;
+                    case ResolutionScopeType.AssemblyRef: return AssemblyRef == null;
+                    case ResolutionScopeType.TypeRef: return TypeRef == null;
+                    default: break;
+                }
+                return true;
+            }
+        }
         public void LoadData(CLIFile pFile)
         {
             int token = 0;

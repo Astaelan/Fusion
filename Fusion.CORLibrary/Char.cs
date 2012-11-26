@@ -16,7 +16,9 @@ namespace System
 			(char) 0x2006, (char) 0x2007, (char) 0x2008, (char) 0x2009,
 			(char) 0x200A, (char) 0x200B, (char) 0x3000, (char) 0xFEFF };
 
+#pragma warning disable 0649
         private char mValue;
+#pragma warning restore 0649
 
         public override string ToString() { return new string(mValue, 1); }
 

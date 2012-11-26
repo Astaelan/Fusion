@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Kernel;
 
 namespace System
 {
@@ -38,7 +39,7 @@ namespace System
             public uint ActualSize;
         }
 
-        internal struct GCUsableMemory
+        private struct GCUsableMemory
         {
             public long Address;
             public long Size;
@@ -63,9 +64,9 @@ namespace System
         private static List<GCHeap> sSmallHeaps = null;
         private static List<GCHeap> sLargeHeaps = null;
 
-        internal static void Initialize(GCUsableMemory[] usableMemory)
+        internal static void Initialize(uint pMultibootMagic, MultibootHeader* pMultibootHeader)
         {
-            sUsableMemory = usableMemory;
+            //sUsableMemory = usableMemory;
         }
 
         internal static object Allocate(uint objectSize)

@@ -13,7 +13,9 @@ namespace System
 
         private double mValue;
 
+#pragma warning disable 1718
         public static bool IsNaN(double d) { return d != d; }
+#pragma warning restore 1718
 
         public static bool IsNegativeInfinity(double d) { return (d < 0.0d && (d == NegativeInfinity || d == PositiveInfinity)); }
 

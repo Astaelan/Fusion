@@ -7,7 +7,9 @@ namespace System
         public const ushort MaxValue = 0xffff;
         public const ushort MinValue = 0;
 
+#pragma warning disable 0649
         private ushort mValue;
+#pragma warning restore 0649
 
         public override bool Equals(object obj) { return (obj is ushort) && ((ushort)obj).mValue == mValue; }
 

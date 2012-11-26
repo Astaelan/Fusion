@@ -33,6 +33,7 @@ namespace Fusion.CLI.Metadata
         public int TableIndex = 0;
         public byte[] Signature = null;
 
+        public FieldSig ExpandedFieldSignature = null;
         public MethodSig ExpandedMethodSignature = null;
         public LocalVarSig ExpandedLocalVarSignature = null;
 
@@ -44,7 +45,8 @@ namespace Fusion.CLI.Metadata
         private void LinkData(CLIFile pFile)
         {
             int cursor = 0;
-            if (Signature[0] == 0x07) ExpandedLocalVarSignature = new LocalVarSig(pFile, Signature, ref cursor);
+            if (Signature[0] == 0x06) ExpandedFieldSignature = new FieldSig(pFile, Signature, ref cursor);
+            else if (Signature[0] == 0x07) ExpandedLocalVarSignature = new LocalVarSig(pFile, Signature, ref cursor);
             else ExpandedMethodSignature = new MethodSig(pFile, Signature, ref cursor);
         }
     }

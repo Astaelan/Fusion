@@ -13,7 +13,9 @@ namespace System
 
         private float mValue;
 
+#pragma warning disable 1718
         public static bool IsNaN(float f) { return f != f; }
+#pragma warning restore 1718
 
         public static bool IsNegativeInfinity(float f) { return (f < 0.0f && (f == NegativeInfinity || f == PositiveInfinity)); }
 

@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿#pragma warning disable 0649
+
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace System

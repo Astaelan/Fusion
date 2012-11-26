@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Fusion.CLI;
+using Fusion.IR;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,6 +12,8 @@ namespace Fusion
     {
         private static void Main(string[] pArguments)
         {
+            IRAppDomain appDomain = new IRAppDomain();
+            IRAssembly entryAssembly = appDomain.LoadEntryAssembly(new CLIFile(Path.GetFileNameWithoutExtension(pArguments[0]), File.ReadAllBytes(pArguments[0])));
             Console.Write("Press any key to exit...");
             Console.ReadKey(true);
         }

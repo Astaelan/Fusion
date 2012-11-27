@@ -6,16 +6,13 @@ namespace Fusion.IR
 {
     public sealed class IRField
     {
-        public IRAssembly Assembly;
-        public FieldData FieldData;
-        public IRType ParentType;
-        public IRType Type;
+        public IRAssembly Assembly = null;
+        public IRType ParentType = null;
+        public IRType Type = null;
 
-        public IRField(IRAssembly pAssembly, FieldData pFieldData, IRType pParentType)
+        public IRField(IRAssembly pAssembly)
         {
             Assembly = pAssembly;
-            FieldData = pFieldData;
-            ParentType = pParentType;
         }
     }
 }

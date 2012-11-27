@@ -8,16 +8,13 @@ namespace Fusion.IR
 {
     public sealed class IRInterfaceImplementation
     {
-        public readonly IRAssembly Assembly;
-        public readonly TypeDefRefOrSpecIndex InterfaceTypeDefRefOrSpecIndex;
-        public readonly IRType ParentType;
-        public IRType InterfaceType;
+        public IRAssembly Assembly = null;
+        public IRType ParentType = null;
+        public IRType InterfaceType = null;
 
-        public IRInterfaceImplementation(IRAssembly pAssembly, TypeDefRefOrSpecIndex pInterfaceTypeDefRefOrSpecIndex, IRType pParentType)
+        public IRInterfaceImplementation(IRAssembly pAssembly)
         {
             Assembly = pAssembly;
-            InterfaceTypeDefRefOrSpecIndex = pInterfaceTypeDefRefOrSpecIndex;
-            ParentType = pParentType;
         }
     }
 }

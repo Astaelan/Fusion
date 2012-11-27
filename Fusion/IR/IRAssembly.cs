@@ -8,40 +8,60 @@ namespace Fusion.IR
 {
     public sealed class IRAssembly
     {
-        public IRAppDomain AppDomain;
-        public CLIFile File;
-        public bool CORLibrary;
-        public IRType[] Types;
-        public IRMethod[] Methods;
+        public IRAppDomain AppDomain = null;
+        public CLIFile File = null;
+        public bool CORLibrary = false;
+        public List<IRType> Types = new List<IRType>();
+        public List<IRField> Fields = new List<IRField>();
+        public List<IRMethod> Methods = new List<IRMethod>();
 
         internal IRAssembly(IRAppDomain pAppDomain, CLIFile pCLIFile, bool pCORLibrary)
         {
             AppDomain = pAppDomain;
             File = pCLIFile;
             CORLibrary = pCORLibrary;
-            Types = new IRType[File.TypeDefTable.Length];
-            Methods = new IRMethod[File.MethodDefTable.Length];
         }
 
         internal void LoadStage1()
         {
-            for (int index = 0; index < Types.Length; ++index) Types[index] = new IRType(this, File.TypeDefTable[index]);
-            for (int index = 0; index < Methods.Length; ++index) Methods[index] = new IRMethod(this, File.MethodDefTable[index], Types[File.MethodDefTable[index].ParentTypeDef.TableIndex]);
-            foreach (IRType type in Types)
+            foreach (TypeDefData typeDefData in File.TypeDefTable) Types.Add(new IRType(this));
+            foreach (FieldData fieldData in File.FieldTable) Fields.Add(new IRField(this));
+            foreach (MethodDefData methodDefData in File.MethodDefTable) Methods.Add(new IRMethod(this));
+
+            for (int typeIndex = 0; typeIndex < Types.Count; ++typeIndex)
             {
-                foreach (FieldData fieldData in type.TypeDefData.FieldList) type.Fields.Add(new IRField(this, File.FieldTable[fieldData.TableIndex], type));
-                foreach (TypeDefRefOrSpecIndex typeDefRefOrSpecIndex in type.TypeDefData.InterfaceList) type.InterfaceImplementations.Add(new IRInterfaceImplementation(this, typeDefRefOrSpecIndex, type));
-                foreach (MethodDefData methodDefData in type.TypeDefData.MethodList)
+                IRType type = Types[typeIndex];
+                TypeDefData typeDefData = File.TypeDefTable[typeIndex];
+                foreach (FieldData fieldData in typeDefData.FieldList)
+                {
+                    IRField field = Fields[fieldData.TableIndex];
+                    field.ParentType = type;
+                    type.Fields.Add(field);
+                }
+                foreach (MethodDefData methodDefData in typeDefData.MethodList)
                 {
                     IRMethod method = Methods[methodDefData.TableIndex];
+                    method.ParentType = type;
                     type.Methods.Add(method);
-                    foreach (ParamData paramData in methodDefData.ParamList) method.Parameters.Add(new IRParameter(this, paramData, method));
+
+                    foreach (ParamData paramData in methodDefData.ParamList)
+                    {
+                        IRParameter parameter = new IRParameter(this);
+                        parameter.ParentMethod = method;
+                        method.Parameters.Add(parameter);
+                    }
+
                     if (methodDefData.Body != null && methodDefData.Body.ExpandedLocalVarSignature != null)
                     {
-                        for (uint localIndex = 0; localIndex < methodDefData.Body.ExpandedLocalVarSignature.LocalVars.Count; ++localIndex) method.Locals.Add(new IRLocal(this, localIndex, method));
+                        foreach (SigLocalVar sigLocalVar in methodDefData.Body.ExpandedLocalVarSignature.LocalVars)
+                        {
+                            IRLocal local = new IRLocal(this);
+                            local.ParentMethod = method;
+                            method.Locals.Add(local);
+                        }
                     }
                 }
-                foreach (TypeDefData typeDefData in type.TypeDefData.NestedClassList) type.NestedTypes.Add(Types[typeDefData.TableIndex]);
+                foreach (TypeDefData nestedTypeDefData in typeDefData.NestedClassList) type.NestedTypes.Add(Types[nestedTypeDefData.TableIndex]);
             }
             if (CORLibrary) AppDomain.CacheCORTypes(this);
         }

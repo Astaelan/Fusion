@@ -6,16 +6,13 @@ namespace Fusion.IR
 {
     public sealed class IRParameter
     {
-        public IRAssembly Assembly;
-        public ParamData ParamData;
-        public IRMethod ParentMethod;
+        public IRAssembly Assembly = null;
+        public IRMethod ParentMethod = null;
         public IRType Type = null;
 
-        public IRParameter(IRAssembly pAssembly, ParamData pParamData, IRMethod pParentMethod)
+        public IRParameter(IRAssembly pAssembly)
         {
             Assembly = pAssembly;
-            ParamData = pParamData;
-            ParentMethod = pParentMethod;
         }
     }
 }

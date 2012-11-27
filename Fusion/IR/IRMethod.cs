@@ -8,19 +8,16 @@ namespace Fusion.IR
 {
     public sealed class IRMethod
     {
-        public IRAssembly Assembly;
-        public MethodDefData MethodDefData;
-        public IRType ParentType;
+        public IRAssembly Assembly = null;
+        public IRType ParentType = null;
         public IRType ReturnType = null;
         public List<IRParameter> Parameters = new List<IRParameter>();
         public List<IRLocal> Locals = new List<IRLocal>();
         public List<IRInstruction> Instructions = new List<IRInstruction>();
 
-        public IRMethod(IRAssembly pAssembly, MethodDefData pMethodDefData, IRType pParentType)
+        public IRMethod(IRAssembly pAssembly)
         {
             Assembly = pAssembly;
-            MethodDefData = pMethodDefData;
-            ParentType = pParentType;
         }
 
         public IRInstruction AddInstruction(uint pILOffset, IROpcode pOpcode, params object[] pArguments)

@@ -7,16 +7,13 @@ namespace Fusion.IR
 {
     public sealed class IRLocal
     {
-        public IRAssembly Assembly;
-        public uint LocalIndex = 0;
-        public IRMethod ParentMethod;
+        public IRAssembly Assembly = null;
+        public IRMethod ParentMethod = null;
         public IRType Type = null;
 
-        public IRLocal(IRAssembly pAssembly, uint pLocalIndex, IRMethod pParentMethod)
+        public IRLocal(IRAssembly pAssembly)
         {
             Assembly = pAssembly;
-            LocalIndex = pLocalIndex;
-            ParentMethod = pParentMethod;
         }
     }
 }

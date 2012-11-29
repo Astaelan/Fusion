@@ -1,16 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRLoadParameterAddressInstruction : IRInstruction
+    public class IRLoadParameterAddressInstruction : IRInstruction
     {
-        public uint ParameterIndex = 0;
+        public uint ParameterIndex { get; private set; }
 
-        public IRLoadParameterAddressInstruction(uint pParameterIndex)
-            : base(IROpcode.LoadParameterAddress)
+        public IRLoadParameterAddressInstruction(uint pParameterIndex) : base(IROpcode.LoadParameterAddress)
         {
             ParameterIndex = pParameterIndex;
         }

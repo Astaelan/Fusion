@@ -8,10 +8,14 @@ namespace Fusion.IR.Instructions
 {
     public sealed class IRBoxInstruction : IRInstruction
     {
-        public IRType Type = null;
+        private IRType mType = null;
+        public IRType Type
+        {
+            get { return mType; }
+            private set { mType = value; }
+        }
 
-        public IRBoxInstruction(IRType pType)
-            : base(IROpcode.Box)
+        public IRBoxInstruction(IRType pType) : base(IROpcode.Box)
         {
             Type = pType;
         }

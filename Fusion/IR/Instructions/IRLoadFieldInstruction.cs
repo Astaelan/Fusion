@@ -1,17 +1,14 @@
-﻿using Fusion.CLI.Metadata;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Fusion.CLI.Metadata;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRLoadFieldInstruction : IRInstruction
+    public class IRLoadFieldInstruction : IRInstruction
     {
-        public IRField Field = null;
+        public IRField Field { get; private set; }
 
-        public IRLoadFieldInstruction(IRField pField)
-            : base(IROpcode.LoadField)
+        public IRLoadFieldInstruction(IRField pField) : base(IROpcode.LoadField)
         {
             Field = pField;
         }

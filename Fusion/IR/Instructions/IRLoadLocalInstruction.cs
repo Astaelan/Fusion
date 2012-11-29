@@ -1,16 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRLoadLocalInstruction : IRInstruction
+    public class IRLoadLocalInstruction : IRInstruction
     {
-        public uint LocalIndex = 0;
+        public uint LocalIndex { get; private set; }
 
-        public IRLoadLocalInstruction(uint pLocalIndex)
-            : base(IROpcode.LoadLocal)
+        public IRLoadLocalInstruction(uint pLocalIndex) : base(IROpcode.LoadLocal)
         {
             LocalIndex = pLocalIndex;
         }

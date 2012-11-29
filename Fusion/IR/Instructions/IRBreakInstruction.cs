@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRBreakInstruction : IRInstruction
+    public class IRBreakInstruction : IRInstruction
     {
         public IRBreakInstruction() : base(IROpcode.Break)
         {

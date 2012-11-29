@@ -7,8 +7,7 @@ namespace Fusion.IR.Instructions
 {
     public sealed class IRAndInstruction : IRInstruction
     {
-        public IRAndInstruction()
-            : base(IROpcode.And)
+        public IRAndInstruction() : base(IROpcode.And)
         {
         }
     }

@@ -6,19 +6,8 @@ namespace Fusion.IR.Instructions
 {
     public class IRCastInstruction : IRInstruction
     {
-        private IRType mType = null;
-        public IRType Type
-        {
-            get { return mType; }
-            private set { mType = value; }
-        }
-        
-        private bool mThrowExceptionOnFailure = false;
-        public bool ThrowExceptionOnFailure
-        {
-            get { return mThrowExceptionOnFailure; }
-            private set { mThrowExceptionOnFailure = value; }
-        }
+        public IRType Type { get; private set; }
+        public bool ThrowExceptionOnFailure { get; private set; }
 
         public IRCastInstruction(IRType pType, bool pThrowExceptionOnFailure) : base(IROpcode.Cast)
         {

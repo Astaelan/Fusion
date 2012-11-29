@@ -1,17 +1,14 @@
-﻿using Fusion.CLI.Metadata;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Fusion.CLI.Metadata;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRInitializeObjectInstruction : IRInstruction
+    public class IRInitializeObjectInstruction : IRInstruction
     {
-        public IRType Type = null;
+        public IRType Type { get; private set; }
 
-        public IRInitializeObjectInstruction(IRType pType)
-            : base(IROpcode.InitializeObject)
+        public IRInitializeObjectInstruction(IRType pType) : base(IROpcode.InitializeObject)
         {
             Type = pType;
         }

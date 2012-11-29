@@ -325,7 +325,7 @@ namespace Fusion.CLI
             switch (token.Table)
             {
                 case CLIMetadataTables.TypeDef: token.Data = TypeDefTable[index]; break;
-                case CLIMetadataTables.TypeRef: token.Data = TypeDefTable[index]; break;
+                case CLIMetadataTables.TypeRef: token.Data = TypeRefTable[index]; break;
                 case CLIMetadataTables.TypeSpec: token.Data = TypeSpecTable[index]; break;
                 default: break;
             }

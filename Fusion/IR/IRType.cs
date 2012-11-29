@@ -6,6 +6,21 @@ namespace Fusion.IR
 {
     public sealed class IRType
     {
+        public static List<IRType> VarPlaceholders = new List<IRType>();
+        public static List<IRType> MVarPlaceholders = new List<IRType>();
+
+        public static IRType GetVarPlaceholder(uint pIndex)
+        {
+            while (pIndex + 1 >= VarPlaceholders.Count) VarPlaceholders.Add(new IRType() { IsTemporaryVar = true, TemporaryVarOrMVarIndex = (uint)VarPlaceholders.Count });
+            return VarPlaceholders[(int)pIndex];
+        }
+
+        public static IRType GetMVarPlaceholder(uint pIndex)
+        {
+            while (pIndex + 1 >= MVarPlaceholders.Count) MVarPlaceholders.Add(new IRType() { IsTemporaryMVar = true, TemporaryVarOrMVarIndex = (uint)MVarPlaceholders.Count });
+            return MVarPlaceholders[(int)pIndex];
+        }
+
         public IRAssembly Assembly = null;
 
         public string Namespace = null;
@@ -26,6 +41,8 @@ namespace Fusion.IR
         public List<IRType> GenericParameters = new List<IRType>();
         public IRType PointerType = null;
         public IRType ArrayType = null;
+
+        private IRType() { }
 
         public IRType(IRAssembly pAssembly) { Assembly = pAssembly; }
 

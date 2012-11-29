@@ -717,6 +717,18 @@
 
         /*
             Description:
+                Jumps execution to the specified instruction unconditionally, ensures calling of related finally blocks
+
+            Stack:
+                ..., value1 (may not be present based on condition), value2 (may not be present based on condition) -> ...
+
+            Arguments:
+                uint/IRInstruction          The ILOffset of the target, resolves to an IRInstruction.
+        */
+        Leave,
+
+        /*
+            Description:
                 Call the specified method of the specified type, without overload checking.
 
             Stack:
@@ -764,21 +776,9 @@
 
             Arguments:
                 IRMethod                    The method.
+                bool                        True for virtual callsite based on the actual type, False for callsite based on token.
         */
         LoadFunction,
-
-        /*
-            Description:
-                Load the address of the method at the specified index in the specified type, with overload checking.
-
-            Stack:
-                ... -> ..., address
-
-            Arguments:
-                IRType                      The type.
-                uint                        The index of the method.
-        */
-        LoadVirtualFunction,
 
         /*
             Description:
@@ -805,7 +805,7 @@
                 IRType                      The type of the runtime handle.
                 IRType|IRField|IRMethod     The metadata.
         */
-        LoadHandle,
+        LoadRuntimeHandle,
 
         /*
             Description:
@@ -834,13 +834,12 @@
 
         /*
             Description:
-                Load the type token from a typed reference.
+                Load the RuntimeTypeHandle from a typed reference.
 
             Stack:
-                ..., typedRef -> ..., typeToken
+                ..., typedRef -> ..., handle
 
             Arguments:
-                IRType                      The type.
         */
         LoadTypedReferenceType,
 

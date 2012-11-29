@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Fusion.Test
 {
@@ -6,6 +7,8 @@ namespace Fusion.Test
     {
         private static void Main()
         {
+            List<int> s = new List<int>();
+            s.Add(1);
         }
     }
 }

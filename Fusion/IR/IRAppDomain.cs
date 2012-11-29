@@ -45,6 +45,7 @@ namespace Fusion.IR
         public Dictionary<IRType, IRType> PointerTypes = new Dictionary<IRType, IRType>();
         public Dictionary<IRType, IRType> ArrayTypes = new Dictionary<IRType, IRType>();
         public Dictionary<string, IRType> GenericTypes = new Dictionary<string, IRType>();
+        public Dictionary<IRMethod, Dictionary<string, IRMethod>> GenericMethods = new Dictionary<IRMethod, Dictionary<string, IRMethod>>();
 
         public IRAppDomain()
         {
@@ -174,6 +175,39 @@ namespace Fusion.IR
             return hashInput.ToString();
         }
 
+        public string CreateGenericMethodHash(IRMethod pGenericMethod, ref bool pGenericParameterTypesResolved, List<IRType> pGenericParameterTypes)
+        {
+            StringBuilder hashInput = new StringBuilder();
+            hashInput.AppendFormat("{0}<", pGenericMethod.Name);
+            bool firstParam = true;
+            foreach (IRType paramType in pGenericParameterTypes)
+            {
+                if (!firstParam) hashInput.Append(", ");
+                if (paramType.PointerType != null) hashInput.AppendFormat("{0}.{1}*", paramType.PointerType.Namespace, paramType.PointerType.Name);
+                else if (paramType.ArrayType != null) hashInput.AppendFormat("{0}.{1}[]", paramType.ArrayType.Namespace, paramType.ArrayType.Name);
+                else if (paramType.IsTemporaryVar)
+                {
+                    pGenericParameterTypesResolved = false;
+                    hashInput.AppendFormat("VAR({0})", paramType.TemporaryVarOrMVarIndex);
+                }
+                else if (paramType.IsTemporaryMVar)
+                {
+                    pGenericParameterTypesResolved = false;
+                    hashInput.AppendFormat("MVAR({0})", paramType.TemporaryVarOrMVarIndex);
+                }
+                else if (paramType.IsGeneric)
+                {
+                    bool genericParameterTypesResolved = true;
+                    hashInput.Append(CreateGenericTypeHash(paramType, ref genericParameterTypesResolved, paramType.GenericParameters));
+                    if (!genericParameterTypesResolved) pGenericParameterTypesResolved = false;
+                }
+                else hashInput.AppendFormat("{0}.{1}", paramType.Namespace, paramType.Name);
+                firstParam = false;
+            }
+            hashInput.Append(">");
+            return hashInput.ToString();
+        }
+
         public IRType CreateGenericType(IRType pGenericType, List<IRType> pGenericParameterTypes)
         {
             bool genericParameterTypesResolved = true;
@@ -190,6 +224,31 @@ namespace Fusion.IR
                 Console.WriteLine("Created: {0}", genericTypeHash);
             }
             return type;
+        }
+
+        public IRMethod CreateGenericMethod(IRMethod pGenericMethod, List<IRType> pGenericParameterTypes)
+        {
+            Dictionary<string, IRMethod> methods = null;
+            if (!GenericMethods.TryGetValue(pGenericMethod, out methods))
+            {
+                methods = new Dictionary<string, IRMethod>();
+                GenericMethods.Add(pGenericMethod, methods);
+            }
+
+            bool genericParameterTypesResolved = true;
+            string genericMethodHash = CreateGenericMethodHash(pGenericMethod, ref genericParameterTypesResolved, pGenericParameterTypes);
+            IRMethod method = null;
+            if (!methods.TryGetValue(genericMethodHash, out method))
+            {
+                method = new IRMethod(pGenericMethod);
+                method.IsGeneric = true;
+                method.GenericHash = genericMethodHash;
+                method.GenericParametersResolved = genericParameterTypesResolved;
+                method.GenericParameters.AddRange(pGenericParameterTypes);
+                methods.Add(genericMethodHash, method);
+                Console.WriteLine("Created: {0}", genericMethodHash);
+            }
+            return method;
         }
 
         public bool CompareSignatures(SigType pSigTypeA, SigType pSigTypeB)
@@ -303,6 +362,8 @@ namespace Fusion.IR
             throw new NullReferenceException();
         }
 
+        public IRType PresolveType(TypeSpecData pTypeSpecData) { return PresolveType(pTypeSpecData.ExpandedSignature); }
+
         public IRType PresolveType(TypeDefRefOrSpecIndex pTypeDefRefOrSpecIndex)
         {
             switch (pTypeDefRefOrSpecIndex.Type)
@@ -354,11 +415,7 @@ namespace Fusion.IR
                     }
                 case SigElementType.ValueType: type = PresolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.ValueTypeDefOrRefOrSpecToken)); break;
                 case SigElementType.Class: type = PresolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.ClassTypeDefOrRefOrSpecToken)); break;
-                case SigElementType.Var:
-                    type = new IRType(AssemblyFileLookup[pSigType.CLIFile]);
-                    type.IsTemporaryVar = true;
-                    type.TemporaryVarOrMVarIndex = pSigType.VarNumber;
-                    break;
+                case SigElementType.Var: type = IRType.GetVarPlaceholder(pSigType.VarNumber); break;
                 case SigElementType.Array: type = CreateArrayType(PresolveType(pSigType.ArrayType)); break;
                 case SigElementType.GenericInstantiation:
                     {
@@ -372,11 +429,7 @@ namespace Fusion.IR
                 case SigElementType.UPointer: type = System_UIntPtr; break;
                 case SigElementType.Object: type = System_Object; break;
                 case SigElementType.SingleDimensionArray: type = CreateArrayType(PresolveType(pSigType.SZArrayType)); break;
-                case SigElementType.MethodVar:
-                    type = new IRType(AssemblyFileLookup[pSigType.CLIFile]);
-                    type.IsTemporaryMVar = true;
-                    type.TemporaryVarOrMVarIndex = pSigType.MVarNumber;
-                    break;
+                case SigElementType.MethodVar: type = IRType.GetMVarPlaceholder(pSigType.MVarNumber); break;
                 case SigElementType.Type: type = System_Type; break;
                 default: break;
             }
@@ -421,6 +474,33 @@ namespace Fusion.IR
                         }
                         throw new NullReferenceException();
                     }
+                case MemberRefParentIndex.MemberRefParentType.TypeSpec:
+                    {
+                        IRType type = PresolveType(pMemberRefData.Class.TypeSpec);
+                        foreach (IRMethod method in type.Methods)
+                        {
+                            if (method.CompareSignature(pMemberRefData)) return method;
+                        }
+                        throw new NullReferenceException();
+                    }
+            }
+            throw new NullReferenceException();
+        }
+
+        public IRMethod PresolveMethod(MethodSpecData pMethodSpecData)
+        {
+            IRMethod genericMethod = PresolveMethod(pMethodSpecData.Method);
+            List<IRType> genericMethodParameters = new List<IRType>();
+            foreach (SigType paramType in pMethodSpecData.ExpandedInstantiation.GenArgs) genericMethodParameters.Add(PresolveType(paramType));
+            return CreateGenericMethod(genericMethod, genericMethodParameters);
+        }
+
+        public IRMethod PresolveMethod(MethodDefOrRefIndex pMethodDefOrRefIndex)
+        {
+            switch (pMethodDefOrRefIndex.Type)
+            {
+                case MethodDefOrRefIndex.MethodDefOrRefType.MethodDef: return PresolveMethod(pMethodDefOrRefIndex.MethodDef);
+                case MethodDefOrRefIndex.MethodDefOrRefType.MemberRef: return PresolveMethod(pMethodDefOrRefIndex.MemberRef);
             }
             throw new NullReferenceException();
         }
@@ -431,6 +511,7 @@ namespace Fusion.IR
             {
                 case CLIMetadataTables.MethodDef: return PresolveMethod((MethodDefData)pMetadataToken.Data);
                 case CLIMetadataTables.MemberRef: return PresolveMethod((MemberRefData)pMetadataToken.Data);
+                case CLIMetadataTables.MethodSpec: return PresolveMethod((MethodSpecData)pMetadataToken.Data);
                 default: break;
             }
             throw new NullReferenceException();

@@ -4,6 +4,7 @@ using Fusion.IL;
 using Fusion.IR.Instructions;
 using System;
 using System.Collections.Generic;
+using Fusion.CLI;
 
 namespace Fusion.IR
 {
@@ -19,9 +20,32 @@ namespace Fusion.IR
         public List<IRLocal> Locals = new List<IRLocal>();
         public List<IRInstruction> Instructions = new List<IRInstruction>();
 
+        // Dynamic Methods
+        public bool IsGeneric = false;
+        public string GenericHash = null;
+        public bool GenericParametersResolved = false;
+        public List<IRType> GenericParameters = new List<IRType>();
+
         public IRMethod(IRAssembly pAssembly)
         {
             Assembly = pAssembly;
+        }
+
+        public IRMethod(IRMethod pOriginalMethod)
+        {
+            Assembly = pOriginalMethod.Assembly;
+
+            Name = pOriginalMethod.Name;
+
+            ParentType = pOriginalMethod.ParentType;
+            ReturnType = pOriginalMethod.ReturnType;
+            Parameters.AddRange(pOriginalMethod.Parameters);
+            Locals.AddRange(pOriginalMethod.Locals);
+            // Don't copy instructions, they may not exist yet, do that later
+
+            IsGeneric = pOriginalMethod.IsGeneric;
+            GenericHash = pOriginalMethod.GenericHash;
+            GenericParameters.AddRange(pOriginalMethod.GenericParameters);
         }
 
         public bool CompareSignature(MethodSig pMethodSig)
@@ -54,10 +78,14 @@ namespace Fusion.IR
 
             ILReader reader = new ILReader(pMethodDefData.CLIFile.Data, pMethodDefData.Body.CodeRVA, pMethodDefData.Body.CodeSize);
             ILOpcode opcode = ILOpcode.Nop;
+            ILExtendedOpcode extendedOpcode = ILExtendedOpcode.ArgList;
             MethodSig methodSignature = pMethodDefData.ExpandedSignature;
+            IRPrefixFlags prefixFlags = IRPrefixFlags.None;
+            uint prefixConstrainedToken = 0;
 
             while (!reader.EndOfCode)
             {
+                bool clearFlags = true;
                 uint startOfInstruction = reader.Offset;
                 opcode = reader.ReadOpcode();
                 switch (opcode)
@@ -247,7 +275,31 @@ namespace Fusion.IR
                     case ILOpcode.RefAnyVal: AddInstruction(startOfInstruction, new IRLoadTypedReferenceAddressInstruction(Assembly.AppDomain.PresolveType(Assembly.File.ExpandMetadataToken(reader.ReadUInt32())))); break;
                     case ILOpcode.CkFinite: AddInstruction(startOfInstruction, new IRCheckFiniteInstruction()); break;
                     case ILOpcode.MkRefAny: AddInstruction(startOfInstruction, new IRLoadTypedReferenceInstruction(Assembly.AppDomain.PresolveType(Assembly.File.ExpandTypeDefRefOrSpecToken(reader.ReadUInt32())))); break;
-
+                    case ILOpcode.LdToken:
+                        {
+                            IRType type = null;
+                            IRMethod method = null;
+                            IRField field = null;
+                            MetadataToken token = Assembly.File.ExpandMetadataToken(reader.ReadUInt32());
+                            switch (token.Table)
+                            {
+                                case CLIMetadataTables.TypeDef: type = Assembly.AppDomain.PresolveType((TypeDefData)token.Data); break;
+                                case CLIMetadataTables.TypeRef: type = Assembly.AppDomain.PresolveType((TypeRefData)token.Data); break;
+                                case CLIMetadataTables.TypeSpec: type = Assembly.AppDomain.PresolveType((TypeSpecData)token.Data); break;
+                                case CLIMetadataTables.MethodDef: method = Assembly.AppDomain.PresolveMethod((MethodDefData)token.Data); break;
+                                case CLIMetadataTables.MethodSpec: method = Assembly.AppDomain.PresolveMethod((MethodSpecData)token.Data); break;
+                                case CLIMetadataTables.Field: field = Assembly.AppDomain.PresolveField((FieldData)token.Data); break;
+                                case CLIMetadataTables.MemberRef:
+                                    {
+                                        MemberRefData memberRefData = (MemberRefData)token.Data;
+                                        if (memberRefData.IsMethodRef) method = Assembly.AppDomain.PresolveMethod(memberRefData);
+                                        else field = Assembly.AppDomain.PresolveField(memberRefData);
+                                        break;
+                                    }
+                            }
+                            AddInstruction(startOfInstruction, new IRLoadRuntimeHandleInstruction(type, method, field));
+                            break;
+                        }
                     case ILOpcode.Conv_U2: AddInstruction(startOfInstruction, new IRConvertUncheckedInstruction(Assembly.AppDomain.System_UInt16)); break;
                     case ILOpcode.Conv_U1: AddInstruction(startOfInstruction, new IRConvertUncheckedInstruction(Assembly.AppDomain.System_Byte)); break;
                     case ILOpcode.Conv_I: AddInstruction(startOfInstruction, new IRConvertUncheckedInstruction(Assembly.AppDomain.System_IntPtr)); break;
@@ -259,10 +311,54 @@ namespace Fusion.IR
                     case ILOpcode.Mul_Ovf_Un: AddInstruction(startOfInstruction, new IRMultiplyInstruction(IROverflowType.Unsigned)); break;
                     case ILOpcode.Sub_Ovf: AddInstruction(startOfInstruction, new IRSubtractInstruction(IROverflowType.Signed)); break;
                     case ILOpcode.Sub_Ovf_Un: AddInstruction(startOfInstruction, new IRSubtractInstruction(IROverflowType.Unsigned)); break;
-
+                    case ILOpcode.EndFinally: throw new NotImplementedException("EndFinally");
+                    case ILOpcode.Leave: AddInstruction(startOfInstruction, new IRLeaveInstruction(reader.ReadUInt32() + reader.Offset)); break;
+                    case ILOpcode.Leave_S: AddInstruction(startOfInstruction, new IRLeaveInstruction((uint)(reader.ReadByte() + reader.Offset))); break;
+                    case ILOpcode.StInd_I: AddInstruction(startOfInstruction, new IRStoreIndirectInstruction(Assembly.AppDomain.System_IntPtr)); break;
                     case ILOpcode.Conv_U: AddInstruction(startOfInstruction, new IRConvertUncheckedInstruction(Assembly.AppDomain.System_UIntPtr)); break;
 
+                    case ILOpcode.Extended:
+                        {
+                            extendedOpcode = (ILExtendedOpcode)reader.ReadByte();
+                            switch (extendedOpcode)
+                            {
+                                case ILExtendedOpcode.ArgList: throw new NotImplementedException("ArgList");
+                                case ILExtendedOpcode.Ceq: AddInstruction(startOfInstruction, new IRCompareInstruction(IRCompareCondition.Equal)); break;
+                                case ILExtendedOpcode.Cgt: AddInstruction(startOfInstruction, new IRCompareInstruction(IRCompareCondition.GreaterThan)); break;
+                                case ILExtendedOpcode.Cgt_Un: AddInstruction(startOfInstruction, new IRCompareInstruction(IRCompareCondition.GreaterThanUnsigned)); break;
+                                case ILExtendedOpcode.Clt: AddInstruction(startOfInstruction, new IRCompareInstruction(IRCompareCondition.LessThan)); break;
+                                case ILExtendedOpcode.Clt_Un: AddInstruction(startOfInstruction, new IRCompareInstruction(IRCompareCondition.LessThanUnsigned)); break;
+                                case ILExtendedOpcode.LdFtn: AddInstruction(startOfInstruction, new IRLoadFunctionInstruction(Assembly.AppDomain.PresolveMethod(Assembly.File.ExpandMetadataToken(reader.ReadUInt32())), false)); break;
+                                case ILExtendedOpcode.LdVirtFtn: AddInstruction(startOfInstruction, new IRLoadFunctionInstruction(Assembly.AppDomain.PresolveMethod(Assembly.File.ExpandMetadataToken(reader.ReadUInt32())), true)); break;
+                                case ILExtendedOpcode.LdArg: AddInstruction(startOfInstruction, new IRLoadParameterInstruction(reader.ReadUInt16())); break;
+                                case ILExtendedOpcode.LdArgA: AddInstruction(startOfInstruction, new IRLoadParameterAddressInstruction(reader.ReadUInt16())); break;
+                                case ILExtendedOpcode.StArg: AddInstruction(startOfInstruction, new IRStoreParameterInstruction(reader.ReadUInt16())); break;
+                                case ILExtendedOpcode.LdLoc: AddInstruction(startOfInstruction, new IRLoadLocalInstruction(reader.ReadUInt16())); break;
+                                case ILExtendedOpcode.LdLocA: AddInstruction(startOfInstruction, new IRLoadLocalAddressInstruction(reader.ReadUInt16())); break;
+                                case ILExtendedOpcode.StLoc: AddInstruction(startOfInstruction, new IRStoreLocalInstruction(reader.ReadUInt16())); break;
+                                case ILExtendedOpcode.LocAlloc: AddInstruction(startOfInstruction, new IRStackAllocateInstruction()); break;
+                                case ILExtendedOpcode.EndFilter: throw new NotImplementedException("EndFilter");
+                                case ILExtendedOpcode.Unaligned__: prefixFlags |= IRPrefixFlags.Unaligned; clearFlags = false; break;
+                                case ILExtendedOpcode.Volatile__: prefixFlags |= IRPrefixFlags.Volatile; clearFlags = false; break;
+                                case ILExtendedOpcode.Tail__: prefixFlags |= IRPrefixFlags.Tail; clearFlags = false; break;
+                                case ILExtendedOpcode.InitObj: AddInstruction(startOfInstruction, new IRInitializeObjectInstruction(Assembly.AppDomain.PresolveType(Assembly.File.ExpandMetadataToken(reader.ReadUInt32())))); break;
+                                case ILExtendedOpcode.Constrained__: prefixConstrainedToken = reader.ReadUInt32(); prefixFlags |= IRPrefixFlags.Constrained; clearFlags = false; break;
+                                case ILExtendedOpcode.CpBlk: AddInstruction(startOfInstruction, new IRCopyBlockInstruction()); break;
+                                case ILExtendedOpcode.InitBlk: AddInstruction(startOfInstruction, new IRInitializeBlockInstruction()); break;
+                                case ILExtendedOpcode.No__: prefixFlags |= IRPrefixFlags.No; clearFlags = false; break;
+                                case ILExtendedOpcode.ReThrow: throw new NotImplementedException("ReThrow");
+                                case ILExtendedOpcode.SizeOf: AddInstruction(startOfInstruction, new IRSizeOfInstruction(Assembly.AppDomain.PresolveType(Assembly.File.ExpandMetadataToken(reader.ReadUInt32())))); break;
+                                case ILExtendedOpcode.RefAnyType: AddInstruction(startOfInstruction, new IRLoadTypedReferenceTypeInstruction()); break;
+                                case ILExtendedOpcode.ReadOnly__: prefixFlags |= IRPrefixFlags.ReadOnly; clearFlags = false; break;
+                            }
+                            break;
+                        }
                     default: break;
+                }
+                if (clearFlags)
+                {
+                    prefixFlags = IRPrefixFlags.None;
+                    prefixConstrainedToken = 0;
                 }
             }
         }

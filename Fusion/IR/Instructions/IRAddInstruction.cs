@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRAddInstruction : IRInstruction
+    public class IRAddInstruction : IRInstruction
     {
         private IROverflowType mOverflowType = IROverflowType.None;
         public IROverflowType OverflowType 

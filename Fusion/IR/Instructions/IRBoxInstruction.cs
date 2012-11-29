@@ -6,12 +6,7 @@ namespace Fusion.IR.Instructions
 {
     public class IRBoxInstruction : IRInstruction
     {
-        private IRType mType = null;
-        public IRType Type
-        {
-            get { return mType; }
-            private set { mType = value; }
-        }
+        public IRType Type { get; private set; }
 
         public IRBoxInstruction(IRType pType) : base(IROpcode.Box)
         {

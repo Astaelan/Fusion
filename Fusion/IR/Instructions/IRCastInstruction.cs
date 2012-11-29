@@ -1,18 +1,26 @@
-﻿using Fusion.CLI.Metadata;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Fusion.CLI.Metadata;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRCastInstruction : IRInstruction
+    public class IRCastInstruction : IRInstruction
     {
-        public IRType Type = null;
-        public bool ThrowExceptionOnFailure = false;
+        private IRType mType = null;
+        public IRType Type
+        {
+            get { return mType; }
+            private set { mType = value; }
+        }
+        
+        private bool mThrowExceptionOnFailure = false;
+        public bool ThrowExceptionOnFailure
+        {
+            get { return mThrowExceptionOnFailure; }
+            private set { mThrowExceptionOnFailure = value; }
+        }
 
-        public IRCastInstruction(IRType pType, bool pThrowExceptionOnFailure)
-            : base(IROpcode.Cast)
+        public IRCastInstruction(IRType pType, bool pThrowExceptionOnFailure) : base(IROpcode.Cast)
         {
             Type = pType;
             ThrowExceptionOnFailure = pThrowExceptionOnFailure;

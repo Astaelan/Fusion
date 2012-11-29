@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRBranchInstruction : IRInstruction
+    public class IRBranchInstruction : IRInstruction
     {
         private IRBranchCondition mBranchCondition = IRBranchCondition.Always;
         public IRBranchCondition BranchCondition

@@ -1,16 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRLeaveInstruction : IRInstruction
+    public class IRLeaveInstruction : IRInstruction
     {
-        public uint TargetILOffset = 0;
+        public uint TargetILOffset { get; private set; }
 
-        public IRLeaveInstruction(uint pTargetILOffset)
-            : base(IROpcode.Leave)
+        public IRLeaveInstruction(uint pTargetILOffset) : base(IROpcode.Leave)
         {
             TargetILOffset = pTargetILOffset;
         }

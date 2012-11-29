@@ -12,12 +12,7 @@ namespace Fusion.IR.Instructions
             set { mBranchCondition = value; }
         }
         
-        private uint mTargetILOffset = 0;
-        public uint TargetILOffset
-        {
-            get { return mTargetILOffset; }
-            set { mTargetILOffset = value; }
-        }
+        public uint TargetILOffset { get; set; }
 
         public IRBranchInstruction(IRBranchCondition pBranchCondition, uint pTargetILOffset) : base(IROpcode.Branch)
         {

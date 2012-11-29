@@ -1,16 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRCompareInstruction : IRInstruction
+    public class IRCompareInstruction : IRInstruction
     {
-        public IRCompareCondition CompareCondition = IRCompareCondition.Equal;
+        private IRCompareCondition mCompareCondition = IRCompareCondition.Equal;
+        public IRCompareCondition CompareCondition
+        {
+            get { return mCompareCondition; }
+            private set { mCompareCondition = value; }
+        }
 
-        public IRCompareInstruction(IRCompareCondition pCompareCondition)
-            : base(IROpcode.Compare)
+        public IRCompareInstruction(IRCompareCondition pCompareCondition) : base(IROpcode.Compare)
         {
             CompareCondition = pCompareCondition;
         }

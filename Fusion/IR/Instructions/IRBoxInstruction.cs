@@ -4,7 +4,7 @@ using Fusion.CLI.Metadata;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRBoxInstruction : IRInstruction
+    public class IRBoxInstruction : IRInstruction
     {
         private IRType mType = null;
         public IRType Type

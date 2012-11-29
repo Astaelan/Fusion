@@ -1,14 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRLoadTypedReferenceTypeInstruction : IRInstruction
+    public class IRLoadTypedReferenceTypeInstruction : IRInstruction
     {
-        public IRLoadTypedReferenceTypeInstruction()
-            : base(IROpcode.LoadTypedReferenceType)
+        public IRLoadTypedReferenceTypeInstruction() : base(IROpcode.LoadTypedReferenceType)
         {
         }
     }

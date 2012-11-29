@@ -4,7 +4,7 @@ using Fusion.CLI.Metadata;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRCallInstruction : IRInstruction
+    public class IRCallInstruction : IRInstruction
     {
         private IRMethod mTarget = null;
         public IRMethod Target

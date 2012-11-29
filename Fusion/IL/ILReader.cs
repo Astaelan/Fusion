@@ -19,7 +19,7 @@ namespace Fusion.IL
             mCursor = mStartOfCode;
         }
 
-        public bool EndOfCode { get { return mCursor >= mSizeOfCode; } }
+        public bool EndOfCode { get { return Offset >= mSizeOfCode; } }
 
         public uint Offset { get { return mCursor - mStartOfCode; } }
 

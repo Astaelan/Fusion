@@ -3,20 +3,18 @@ using System.Collections.Generic;
 
 namespace Fusion.IR
 {
-    public sealed class IRInstruction
+    public abstract class IRInstruction
     {
-        public readonly uint ILOffset;
-        public uint IRIndex;
-        public IROpcode Opcode;
-        public List<object> Arguments = new List<object>();
+        public uint ILOffset = 0;
+        public uint IRIndex = 0;
+        public IROpcode Opcode = IROpcode.Nop;
+
         // Instruction Linearization
         public List<IRTargetTypeAndData> Sources = new List<IRTargetTypeAndData>();
         public IRTargetTypeAndData Destination = null;
 
-        public IRInstruction(uint pILOffset, uint pIRIndex, IROpcode pOpcode)
+        protected IRInstruction(IROpcode pOpcode)
         {
-            ILOffset = pILOffset;
-            IRIndex = pIRIndex;
             Opcode = pOpcode;
         }
     }

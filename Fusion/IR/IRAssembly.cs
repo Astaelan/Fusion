@@ -32,15 +32,21 @@ namespace Fusion.IR
             {
                 IRType type = Types[typeIndex];
                 TypeDefData typeDefData = File.TypeDefTable[typeIndex];
+
+                type.Namespace = typeDefData.TypeNamespace;
+                type.Name = typeDefData.TypeName;
+
                 foreach (FieldData fieldData in typeDefData.FieldList)
                 {
                     IRField field = Fields[fieldData.TableIndex];
+                    field.Name = fieldData.Name;
                     field.ParentType = type;
                     type.Fields.Add(field);
                 }
                 foreach (MethodDefData methodDefData in typeDefData.MethodList)
                 {
                     IRMethod method = Methods[methodDefData.TableIndex];
+                    method.Name = methodDefData.Name;
                     method.ParentType = type;
                     type.Methods.Add(method);
 
@@ -61,32 +67,63 @@ namespace Fusion.IR
                         }
                     }
                 }
-                foreach (TypeDefData nestedTypeDefData in typeDefData.NestedClassList) type.NestedTypes.Add(Types[nestedTypeDefData.TableIndex]);
+            }
+            for (int typeIndex = 0; typeIndex < Types.Count; ++typeIndex)
+            {
+                IRType type = Types[typeIndex];
+                TypeDefData typeDefData = File.TypeDefTable[typeIndex];
+
+                foreach (TypeDefData nestedTypeDefData in typeDefData.NestedClassList)
+                {
+                    IRType nestedType = Types[nestedTypeDefData.TableIndex];
+                    nestedType.Namespace = type.Namespace + "." + type.Name;
+                    type.NestedTypes.Add(nestedType);
+                }
             }
             if (CORLibrary) AppDomain.CacheCORTypes(this);
         }
 
         internal void LoadStage2()
         {
-            foreach (IRType type in Types)
+            for (int typeIndex = 0; typeIndex < Types.Count; ++typeIndex)
             {
-                if (type.TypeDefData.Extends.Type != TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeDef || type.TypeDefData.Extends.TypeDef != null) type.BaseType = AppDomain.ResolveType(type.TypeDefData.Extends);
-                foreach (IRField field in type.Fields) field.Type = AppDomain.ResolveType(field.FieldData.ExpandedSignature.Type);
-                foreach (IRInterfaceImplementation interfaceImplementation in type.InterfaceImplementations) interfaceImplementation.InterfaceType = AppDomain.ResolveType(interfaceImplementation.InterfaceTypeDefRefOrSpecIndex);
-                foreach (IRMethod method in type.Methods)
+                IRType type = Types[typeIndex];
+                TypeDefData typeDefData = File.TypeDefTable[typeIndex];
+                if (typeDefData.Extends.Type != TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeDef || typeDefData.Extends.TypeDef != null) type.BaseType = AppDomain.PresolveType(typeDefData.Extends);
+                for (int fieldIndex = 0; fieldIndex < type.Fields.Count; ++fieldIndex)
                 {
-                    method.ReturnType = AppDomain.ResolveType(method.MethodDefData.ExpandedSignature.RetType);
-                    for (int index = 0; index < method.Parameters.Count; ++index) method.Parameters[index].Type = AppDomain.ResolveType(method.MethodDefData.ExpandedSignature.Params[index]);
-                    for (int index = 0; index < method.Locals.Count; ++index) method.Locals[index].Type = AppDomain.ResolveType(method.MethodDefData.Body.ExpandedLocalVarSignature.LocalVars[index]);
+                    IRField field = type.Fields[fieldIndex];
+                    field.Type = AppDomain.PresolveType(typeDefData.FieldList[fieldIndex].ExpandedSignature);
+                }
+                for (int methodIndex = 0; methodIndex < type.Methods.Count; ++methodIndex)
+                {
+                    IRMethod method = type.Methods[methodIndex];
+                    method.ReturnType = AppDomain.PresolveType(typeDefData.MethodList[methodIndex].ExpandedSignature.RetType);
+                    for (int parameterIndex = 0; parameterIndex < method.Parameters.Count; ++parameterIndex)
+                    {
+                        IRParameter parameter = method.Parameters[parameterIndex];
+                        parameter.Type = AppDomain.PresolveType(typeDefData.MethodList[methodIndex].ExpandedSignature.Params[parameterIndex]);
+                    }
+                    for (int localIndex = 0; localIndex < method.Locals.Count; ++localIndex)
+                    {
+                        IRLocal local = method.Locals[localIndex];
+                        local.Type = AppDomain.PresolveType(typeDefData.MethodList[methodIndex].Body.ExpandedLocalVarSignature.LocalVars[localIndex]);
+                    }
                 }
             }
         }
 
         internal void LoadStage3()
         {
-            foreach (IRType type in Types)
+            for (int typeIndex = 0; typeIndex < Types.Count; ++typeIndex)
             {
-                foreach (IRMethod method in type.Methods) method.ConvertInstructions();
+                IRType type = Types[typeIndex];
+                for (int methodIndex = 0; methodIndex < type.Methods.Count; ++methodIndex)
+                {
+                    IRMethod method = type.Methods[methodIndex];
+                    MethodDefData methodDefData = File.MethodDefTable[methodIndex];
+                    method.ConvertInstructions(methodDefData);
+                }
             }
         }
     }

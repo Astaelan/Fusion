@@ -4,6 +4,7 @@ using Fusion.CLI.Signature;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace Fusion.IR
 {
@@ -43,6 +44,7 @@ namespace Fusion.IR
         // Dynamic Types
         public Dictionary<IRType, IRType> PointerTypes = new Dictionary<IRType, IRType>();
         public Dictionary<IRType, IRType> ArrayTypes = new Dictionary<IRType, IRType>();
+        public Dictionary<string, IRType> GenericTypes = new Dictionary<string, IRType>();
 
         public IRAppDomain()
         {
@@ -70,9 +72,9 @@ namespace Fusion.IR
         {
             foreach (IRType type in pAssembly.Types)
             {
-                if (type.TypeDefData.TypeNamespace == "System")
+                if (type.Namespace == "System")
                 {
-                    switch (type.TypeDefData.TypeName)
+                    switch (type.Name)
                     {
                         case "Array": System_Array = type; break;
                         case "Boolean": System_Boolean = type; break;
@@ -118,27 +120,82 @@ namespace Fusion.IR
         public IRType CreatePointerType(IRType pPointerType)
         {
             IRType type = null;
-            if (PointerTypes.TryGetValue(pPointerType, out type)) return type;
-            type = System_IntPtr.Clone();
-            type.PointerType = pPointerType;
-            PointerTypes.Add(pPointerType, type);
+            if (!PointerTypes.TryGetValue(pPointerType, out type))
+            {
+                type = new IRType(System_IntPtr);
+                type.PointerType = pPointerType;
+                PointerTypes.Add(pPointerType, type);
+            }
             return type;
         }
 
         public IRType CreateArrayType(IRType pArrayType)
         {
             IRType type = null;
-            if (ArrayTypes.TryGetValue(pArrayType, out type)) return type;
-            type = System_Array.Clone();
-            type.ArrayType = pArrayType;
-            ArrayTypes.Add(pArrayType, type);
+            if (!ArrayTypes.TryGetValue(pArrayType, out type))
+            {
+                type = new IRType(System_Array);
+                type.ArrayType = pArrayType;
+                ArrayTypes.Add(pArrayType, type);
+            }
+            return type;
+        }
+
+        public string CreateGenericTypeHash(IRType pGenericType, ref bool pGenericParameterTypesResolved, List<IRType> pGenericParameterTypes)
+        {
+            StringBuilder hashInput = new StringBuilder();
+            hashInput.AppendFormat("{0}.{1}<", pGenericType.Namespace, pGenericType.Name);
+            bool firstParam = true;
+            foreach (IRType paramType in pGenericParameterTypes)
+            {
+                if (!firstParam) hashInput.Append(", ");
+                if (paramType.PointerType != null) hashInput.AppendFormat("{0}.{1}*", paramType.PointerType.Namespace, paramType.PointerType.Name);
+                else if (paramType.ArrayType != null) hashInput.AppendFormat("{0}.{1}[]", paramType.ArrayType.Namespace, paramType.ArrayType.Name);
+                else if (paramType.IsTemporaryVar)
+                {
+                    pGenericParameterTypesResolved = false;
+                    hashInput.AppendFormat("VAR({0})", paramType.TemporaryVarOrMVarIndex);
+                }
+                else if (paramType.IsTemporaryMVar)
+                {
+                    pGenericParameterTypesResolved = false;
+                    hashInput.AppendFormat("MVAR({0})", paramType.TemporaryVarOrMVarIndex);
+                }
+                else if (paramType.IsGeneric)
+                {
+                    bool genericParameterTypesResolved = true;
+                    hashInput.Append(CreateGenericTypeHash(paramType, ref genericParameterTypesResolved, paramType.GenericParameters));
+                    if (!genericParameterTypesResolved) pGenericParameterTypesResolved = false;
+                }
+                else hashInput.AppendFormat("{0}.{1}", paramType.Namespace, paramType.Name);
+                firstParam = false;
+            }
+            hashInput.Append(">");
+            return hashInput.ToString();
+        }
+
+        public IRType CreateGenericType(IRType pGenericType, List<IRType> pGenericParameterTypes)
+        {
+            bool genericParameterTypesResolved = true;
+            string genericTypeHash = CreateGenericTypeHash(pGenericType, ref genericParameterTypesResolved, pGenericParameterTypes);
+            IRType type = null;
+            if (!GenericTypes.TryGetValue(genericTypeHash, out type))
+            {
+                type = new IRType(pGenericType);
+                type.IsGeneric = true;
+                type.GenericHash = genericTypeHash;
+                type.GenericParametersResolved = genericParameterTypesResolved;
+                type.GenericParameters.AddRange(pGenericParameterTypes);
+                GenericTypes.Add(genericTypeHash, type);
+                Console.WriteLine("Created: {0}", genericTypeHash);
+            }
             return type;
         }
 
         public bool CompareSignatures(SigType pSigTypeA, SigType pSigTypeB)
         {
-            IRType typeA = ResolveType(pSigTypeA);
-            IRType typeB = ResolveType(pSigTypeB);
+            IRType typeA = PresolveType(pSigTypeA);
+            IRType typeB = PresolveType(pSigTypeB);
             if (typeA.ArrayType != null)
             {
                 if (typeB.ArrayType == null) return false;
@@ -149,9 +206,14 @@ namespace Fusion.IR
                 if (typeB.PointerType == null) return false;
                 return typeA.PointerType == typeB.PointerType;
             }
-            if (typeA.IsGenericVarOrMVar || typeB.IsGenericVarOrMVar)
+            if (typeA.IsTemporaryVar || typeB.IsTemporaryVar)
             {
-                if (!typeA.IsGenericVarOrMVar || !typeB.IsGenericVarOrMVar) return false;
+                if (!typeA.IsTemporaryVar || !typeB.IsTemporaryVar) return false;
+                return typeA.TemporaryVarOrMVarIndex == typeB.TemporaryVarOrMVarIndex;
+            }
+            if (typeA.IsTemporaryMVar || typeB.IsTemporaryMVar)
+            {
+                if (!typeA.IsTemporaryMVar || !typeB.IsTemporaryMVar) return false;
                 return typeA.TemporaryVarOrMVarIndex == typeB.TemporaryVarOrMVarIndex;
             }
             return typeA == typeB;
@@ -187,13 +249,13 @@ namespace Fusion.IR
             return true;
         }
 
-        public IRType ResolveType(TypeDefData pTypeDefData)
+        public IRType PresolveType(TypeDefData pTypeDefData)
         {
             if (pTypeDefData == null) throw new ArgumentNullException("pTypeDefData");
             return AssemblyFileLookup[pTypeDefData.CLIFile].Types[pTypeDefData.TableIndex];
         }
 
-        public IRType ResolveType(TypeRefData pTypeRefData)
+        public IRType PresolveType(TypeRefData pTypeRefData)
         {
             if (pTypeRefData.ExportedType != null)
             {
@@ -203,7 +265,7 @@ namespace Fusion.IR
                         {
                             IRAssembly assembly = null;
                             if (!AssemblyFileReferenceNameLookup.TryGetValue(pTypeRefData.ExportedType.Implementation.File.Name, out assembly)) throw new KeyNotFoundException();
-                            IRType type = Array.Find(assembly.Types, t => t.TypeDefData.TypeNamespace == pTypeRefData.TypeNamespace && t.TypeDefData.TypeName == pTypeRefData.TypeName);
+                            IRType type = assembly.Types.Find(t => t.Namespace == pTypeRefData.TypeNamespace && t.Name == pTypeRefData.TypeName);
                             if (type == null) throw new NullReferenceException();
                             return type;
                         }
@@ -211,7 +273,7 @@ namespace Fusion.IR
                         {
                             IRAssembly assembly = null;
                             if (!AssemblyFileReferenceNameLookup.TryGetValue(pTypeRefData.ExportedType.Implementation.AssemblyRef.Name, out assembly)) throw new KeyNotFoundException();
-                            IRType type = Array.Find(assembly.Types, t => t.TypeDefData.TypeNamespace == pTypeRefData.TypeNamespace && t.TypeDefData.TypeName == pTypeRefData.TypeName);
+                            IRType type = assembly.Types.Find(t => t.Namespace == pTypeRefData.TypeNamespace && t.Name == pTypeRefData.TypeName);
                             if (type == null) throw new NullReferenceException();
                             return type;
                         }
@@ -225,15 +287,15 @@ namespace Fusion.IR
                     {
                         IRAssembly assembly = null;
                         if (!AssemblyFileReferenceNameLookup.TryGetValue(pTypeRefData.ResolutionScope.AssemblyRef.Name, out assembly)) throw new KeyNotFoundException();
-                        IRType type = Array.Find(assembly.Types, t => t.TypeDefData.TypeNamespace == pTypeRefData.TypeNamespace && t.TypeDefData.TypeName == pTypeRefData.TypeName);
+                        IRType type = assembly.Types.Find(t => t.Namespace == pTypeRefData.TypeNamespace && t.Name == pTypeRefData.TypeName);
                         if (type == null) throw new NullReferenceException();
                         return type;
                     }
                 case ResolutionScopeIndex.ResolutionScopeType.TypeRef:
                     {
-                        IRType type = ResolveType(pTypeRefData.ResolutionScope.TypeRef);
+                        IRType type = PresolveType(pTypeRefData.ResolutionScope.TypeRef);
                         if (type == null) throw new NullReferenceException();
-                        type = type.NestedTypes.Find(t => t.TypeDefData.TypeNamespace == pTypeRefData.TypeNamespace && t.TypeDefData.TypeName == pTypeRefData.TypeName);
+                        type = type.NestedTypes.Find(t => t.Namespace == pTypeRefData.TypeNamespace && t.Name == pTypeRefData.TypeName);
                         if (type == null) throw new NullReferenceException();
                         return type;
                     }
@@ -241,29 +303,31 @@ namespace Fusion.IR
             throw new NullReferenceException();
         }
 
-        public IRType ResolveType(TypeDefRefOrSpecIndex pTypeDefRefOrSpecIndex)
+        public IRType PresolveType(TypeDefRefOrSpecIndex pTypeDefRefOrSpecIndex)
         {
             switch (pTypeDefRefOrSpecIndex.Type)
             {
-                case TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeDef: return ResolveType(pTypeDefRefOrSpecIndex.TypeDef);
-                case TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeRef: return ResolveType(pTypeDefRefOrSpecIndex.TypeRef);
+                case TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeDef: return PresolveType(pTypeDefRefOrSpecIndex.TypeDef);
+                case TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeRef: return PresolveType(pTypeDefRefOrSpecIndex.TypeRef);
+                case TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeSpec: return PresolveType(pTypeDefRefOrSpecIndex.TypeSpec.ExpandedSignature);
                 default: break;
             }
             throw new NullReferenceException();
         }
 
-        public IRType ResolveType(MetadataToken pMetadataToken)
+        public IRType PresolveType(MetadataToken pMetadataToken)
         {
             switch (pMetadataToken.Table)
             {
-                case CLIMetadataTables.TypeDef: return ResolveType((TypeDefData)pMetadataToken.Data);
-                case CLIMetadataTables.TypeRef: return ResolveType((TypeRefData)pMetadataToken.Data);
+                case CLIMetadataTables.TypeDef: return PresolveType((TypeDefData)pMetadataToken.Data);
+                case CLIMetadataTables.TypeRef: return PresolveType((TypeRefData)pMetadataToken.Data);
+                case CLIMetadataTables.TypeSpec: return PresolveType(((TypeSpecData)pMetadataToken.Data).ExpandedSignature);
                 default: break;
             }
             throw new NullReferenceException();
         }
 
-        public IRType ResolveType(SigType pSigType)
+        public IRType PresolveType(SigType pSigType)
         {
             IRType type = null;
             switch (pSigType.ElementType)
@@ -285,25 +349,32 @@ namespace Fusion.IR
                 case SigElementType.Pointer:
                     {
                         if (pSigType.PtrVoid) type = CreatePointerType(System_Void);
-                        else type = CreatePointerType(ResolveType(pSigType.PtrType));
+                        else type = CreatePointerType(PresolveType(pSigType.PtrType));
                         break;
                     }
-                case SigElementType.ValueType: type = ResolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.ValueTypeDefOrRefOrSpecToken)); break;
-                case SigElementType.Class: type = ResolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.ClassTypeDefOrRefOrSpecToken)); break;
+                case SigElementType.ValueType: type = PresolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.ValueTypeDefOrRefOrSpecToken)); break;
+                case SigElementType.Class: type = PresolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.ClassTypeDefOrRefOrSpecToken)); break;
                 case SigElementType.Var:
-                    type = IRType.TemporaryVarType.Clone();
-                    type.IsGenericVarOrMVar = true;
+                    type = new IRType(AssemblyFileLookup[pSigType.CLIFile]);
+                    type.IsTemporaryVar = true;
                     type.TemporaryVarOrMVarIndex = pSigType.VarNumber;
                     break;
-                case SigElementType.Array: type = CreateArrayType(ResolveType(pSigType.ArrayType)); break;
-                case SigElementType.GenericInstantiation: type = ResolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.GenericInstTypeDefOrRefOrSpecToken)); break;
+                case SigElementType.Array: type = CreateArrayType(PresolveType(pSigType.ArrayType)); break;
+                case SigElementType.GenericInstantiation:
+                    {
+                        IRType genericType = PresolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.GenericInstTypeDefOrRefOrSpecToken));
+                        List<IRType> genericTypeParameters = new List<IRType>();
+                        foreach (SigType paramType in pSigType.GenericInstGenArgs) genericTypeParameters.Add(PresolveType(paramType));
+                        type = CreateGenericType(genericType, genericTypeParameters);
+                        break;
+                    }
                 case SigElementType.IPointer: type = System_IntPtr; break;
                 case SigElementType.UPointer: type = System_UIntPtr; break;
                 case SigElementType.Object: type = System_Object; break;
-                case SigElementType.SingleDimensionArray: type = CreateArrayType(ResolveType(pSigType.SZArrayType)); break;
+                case SigElementType.SingleDimensionArray: type = CreateArrayType(PresolveType(pSigType.SZArrayType)); break;
                 case SigElementType.MethodVar:
-                    type = IRType.TemporaryMVarType.Clone();
-                    type.IsGenericVarOrMVar = true;
+                    type = new IRType(AssemblyFileLookup[pSigType.CLIFile]);
+                    type.IsTemporaryMVar = true;
                     type.TemporaryVarOrMVarIndex = pSigType.MVarNumber;
                     break;
                 case SigElementType.Type: type = System_Type; break;
@@ -313,41 +384,40 @@ namespace Fusion.IR
             return type;
         }
 
-        public IRType ResolveType(SigRetType pSigRetType) { return pSigRetType.Void ? null : ResolveType(pSigRetType.Type); }
+        public IRType PresolveType(FieldSig pFieldSig) { return PresolveType(pFieldSig.Type); }
 
-        public IRType ResolveType(SigParam pSigParam) { return ResolveType(pSigParam.Type); }
+        public IRType PresolveType(SigRetType pSigRetType) { return pSigRetType.Void ? null : PresolveType(pSigRetType.Type); }
 
-        public IRType ResolveType(SigLocalVar pSigLocalVar) { return ResolveType(pSigLocalVar.Type); }
+        public IRType PresolveType(SigParam pSigParam) { return PresolveType(pSigParam.Type); }
 
-        public IRMethod ResolveMethod(MethodDefData pMethodDefData)
+        public IRType PresolveType(SigLocalVar pSigLocalVar) { return PresolveType(pSigLocalVar.Type); }
+
+        public IRMethod PresolveMethod(MethodDefData pMethodDefData)
         {
             if (pMethodDefData == null) throw new ArgumentNullException("pMethodDefData");
             return AssemblyFileLookup[pMethodDefData.CLIFile].Methods[pMethodDefData.TableIndex];
         }
 
-        public IRMethod ResolveMethod(MemberRefData pMemberRefData)
+        public IRMethod PresolveMethod(MemberRefData pMemberRefData)
         {
+            if (!pMemberRefData.IsMethodRef) throw new ArgumentException();
             switch (pMemberRefData.Class.Type)
             {
                 case MemberRefParentIndex.MemberRefParentType.TypeDef:
                     {
-                        IRType type = ResolveType(pMemberRefData.Class.TypeDef);
-                        if (pMemberRefData.IsFieldRef) throw new ArgumentException();
+                        IRType type = PresolveType(pMemberRefData.Class.TypeDef);
                         foreach (IRMethod method in type.Methods)
                         {
-                            if (method.MethodDefData.Name != pMemberRefData.Name) continue;
-                            if (CompareSignatures(pMemberRefData.ExpandedMethodSignature, method.MethodDefData.ExpandedSignature)) return method;
+                            if (method.CompareSignature(pMemberRefData)) return method;
                         }
                         throw new NullReferenceException();
                     }
                 case MemberRefParentIndex.MemberRefParentType.TypeRef:
                     {
-                        IRType type = ResolveType(pMemberRefData.Class.TypeRef);
-                        if (pMemberRefData.IsFieldRef) throw new ArgumentException();
+                        IRType type = PresolveType(pMemberRefData.Class.TypeRef);
                         foreach (IRMethod method in type.Methods)
                         {
-                            if (method.MethodDefData.Name != pMemberRefData.Name) continue;
-                            if (CompareSignatures(pMemberRefData.ExpandedMethodSignature, method.MethodDefData.ExpandedSignature)) return method;
+                            if (method.CompareSignature(pMemberRefData)) return method;
                         }
                         throw new NullReferenceException();
                     }
@@ -355,12 +425,56 @@ namespace Fusion.IR
             throw new NullReferenceException();
         }
 
-        public IRMethod ResolveMethod(MetadataToken pMetadataToken)
+        public IRMethod PresolveMethod(MetadataToken pMetadataToken)
         {
             switch (pMetadataToken.Table)
             {
-                case CLIMetadataTables.MethodDef: return ResolveMethod((MethodDefData)pMetadataToken.Data);
-                case CLIMetadataTables.MemberRef: return ResolveMethod((MemberRefData)pMetadataToken.Data);
+                case CLIMetadataTables.MethodDef: return PresolveMethod((MethodDefData)pMetadataToken.Data);
+                case CLIMetadataTables.MemberRef: return PresolveMethod((MemberRefData)pMetadataToken.Data);
+                default: break;
+            }
+            throw new NullReferenceException();
+        }
+
+        public IRField PresolveField(FieldData pFieldData)
+        {
+            if (pFieldData == null) throw new ArgumentNullException("pFieldData");
+            return AssemblyFileLookup[pFieldData.CLIFile].Fields[pFieldData.TableIndex];
+        }
+
+        public IRField PresolveField(MemberRefData pMemberRefData)
+        {
+            if (!pMemberRefData.IsFieldRef) throw new ArgumentException();
+            switch (pMemberRefData.Class.Type)
+            {
+                case MemberRefParentIndex.MemberRefParentType.TypeDef:
+                    {
+                        IRType type = PresolveType(pMemberRefData.Class.TypeDef);
+                        foreach (IRField field in type.Fields)
+                        {
+                            if (field.CompareSignature(pMemberRefData)) return field;
+                        }
+                        throw new NullReferenceException();
+                    }
+                case MemberRefParentIndex.MemberRefParentType.TypeRef:
+                    {
+                        IRType type = PresolveType(pMemberRefData.Class.TypeRef);
+                        foreach (IRField field in type.Fields)
+                        {
+                            if (field.CompareSignature(pMemberRefData)) return field;
+                        }
+                        throw new NullReferenceException();
+                    }
+            }
+            throw new NullReferenceException();
+        }
+
+        public IRField PresolveField(MetadataToken pMetadataToken)
+        {
+            switch (pMetadataToken.Table)
+            {
+                case CLIMetadataTables.Field: return PresolveField((FieldData)pMetadataToken.Data);
+                case CLIMetadataTables.MemberRef: return PresolveField((MemberRefData)pMetadataToken.Data);
                 default: break;
             }
             throw new NullReferenceException();

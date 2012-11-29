@@ -717,53 +717,16 @@
 
         /*
             Description:
-                Call the method at the specified index in the specified type, with overload checking.
+                Call the specified method of the specified type, without overload checking.
 
             Stack:
                 ..., arg0, ..., argN -> ..., value (present if returning non void)
 
             Arguments:
-                IRType                      The type.
-                uint                        The index of the method.
+                MetadataToken               The method to call on the type.
+                bool                        True for virtual callsite based on the actual type, False for callsite based on token.
         */
-        CallVirtual,
-
-        /*
-            Description:
-                Call the method at the specified index in the specified type, with overload checking.
-
-            Stack:
-                ..., arg0, ..., argN -> ..., value (present if returning non void)
-
-            Arguments:
-                IRType                      The type.
-                uint                        The index of the method.
-        */
-        CallConstrained,
-
-        /*
-            Description:
-                Call the specified method, without overload checking.
-
-            Stack:
-                ..., arg0, ..., argN -> ..., value (present if returning non void)
-
-            Arguments:
-                IRMethod                    The method.
-        */
-        CallAbsolute,
-
-        /*
-            Description:
-                Call the specified internal intrinsic method, without overload checking.
-
-            Stack:
-                ..., arg0, ..., argN -> ..., value (present if returning non void)
-
-            Arguments:
-                IRMethod                    The method.
-        */
-        CallInternal,
+        Call,
 
         /*
             Description:
@@ -861,12 +824,25 @@
                 Load the address from a typed reference.
 
             Stack:
-                ..., typedRef -> ..., IRType or address
+                ..., typedRef -> ..., address
 
             Arguments:
-                bool                        True to produce IRType reference, False to produce value address.
+                IRType                      The type.
         */
-        LoadFromTypedReference,
+        LoadTypedReferenceAddress,
+
+
+        /*
+            Description:
+                Load the type token from a typed reference.
+
+            Stack:
+                ..., typedRef -> ..., typeToken
+
+            Arguments:
+                IRType                      The type.
+        */
+        LoadTypedReferenceType,
 
         // Instruction Linearization
         /*

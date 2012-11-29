@@ -1,16 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRLoadInteger64Instruction : IRInstruction
+    public class IRLoadInteger64Instruction : IRInstruction
     {
-        public long Value = 0;
+        public long Value { get; private set; }
 
-        public IRLoadInteger64Instruction(long pValue)
-            : base(IROpcode.LoadInteger64)
+        public IRLoadInteger64Instruction(long pValue) : base(IROpcode.LoadInteger64)
         {
             Value = pValue;
         }

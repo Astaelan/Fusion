@@ -1,11 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRLoadInteger32Instruction : IRInstruction
+    public class IRLoadInteger32Instruction : IRInstruction
     {
         public int Value { get; private set; }
 

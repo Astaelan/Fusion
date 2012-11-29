@@ -1,17 +1,14 @@
-﻿using Fusion.CLI.Metadata;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Fusion.CLI.Metadata;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRLoadArrayElementAddressInstruction : IRInstruction
+    public class IRLoadArrayElementAddressInstruction : IRInstruction
     {
-        public IRType Type = null;
+        public IRType Type { get; private set; }
 
-        public IRLoadArrayElementAddressInstruction(IRType pType)
-            : base(IROpcode.LoadArrayElementAddress)
+        public IRLoadArrayElementAddressInstruction(IRType pType) : base(IROpcode.LoadArrayElementAddress)
         {
             Type = pType;
         }

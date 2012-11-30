@@ -1,17 +1,14 @@
-﻿using Fusion.CLI.Metadata;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Fusion.CLI.Metadata;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRSizeOfInstruction : IRInstruction
+    public class IRSizeOfInstruction : IRInstruction
     {
-        public IRType Type = null;
+        public IRType Type { get; private set; }
 
-        public IRSizeOfInstruction(IRType pType)
-            : base(IROpcode.SizeOf)
+        public IRSizeOfInstruction(IRType pType) : base(IROpcode.SizeOf)
         {
             Type = pType;
         }

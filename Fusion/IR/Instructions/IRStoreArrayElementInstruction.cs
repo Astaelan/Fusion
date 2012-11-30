@@ -1,17 +1,14 @@
-﻿using Fusion.CLI.Metadata;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Fusion.CLI.Metadata;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRStoreArrayElementInstruction : IRInstruction
+    public class IRStoreArrayElementInstruction : IRInstruction
     {
-        public IRType Type = null;
+        public IRType Type { get; private set; }
 
-        public IRStoreArrayElementInstruction(IRType pType)
-            : base(IROpcode.StoreArrayElement)
+        public IRStoreArrayElementInstruction(IRType pType) : base(IROpcode.StoreArrayElement)
         {
             Type = pType;
         }

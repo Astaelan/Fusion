@@ -1,16 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRDivideInstruction : IRInstruction
+    public class IRDivideInstruction : IRInstruction
     {
-        public IROverflowType OverflowType = IROverflowType.None;
+        private IROverflowType mOverflowType = IROverflowType.None;
+        public IROverflowType OverflowType
+        {
+            get { return mOverflowType; }
+            private set { mOverflowType = value; }
+        }
 
-        public IRDivideInstruction(IROverflowType pOverflowType)
-            : base(IROpcode.Divide)
+        public IRDivideInstruction(IROverflowType pOverflowType) : base(IROpcode.Divide)
         {
             OverflowType = pOverflowType;
         }

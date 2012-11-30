@@ -1,16 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRMultiplyInstruction : IRInstruction
+    public class IRMultiplyInstruction : IRInstruction
     {
-        public IROverflowType OverflowType = IROverflowType.None;
+        private IROverflowType mOverflowType = IROverflowType.None;
+        public IROverflowType OverflowType
+        {
+            get { return mOverflowType; }
+            private set { mOverflowType = value; }
+        }
 
-        public IRMultiplyInstruction(IROverflowType pOverflowType)
-            : base(IROpcode.Multiply)
+        public IRMultiplyInstruction(IROverflowType pOverflowType) : base(IROpcode.Multiply)
         {
             OverflowType = pOverflowType;
         }

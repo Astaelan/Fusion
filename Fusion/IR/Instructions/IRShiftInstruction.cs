@@ -1,16 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Fusion.IR.Instructions
 {
-    public sealed class IRShiftInstruction : IRInstruction
+    public class IRShiftInstruction : IRInstruction
     {
-        public IRShiftType ShiftType = IRShiftType.Left;
+        private IRShiftType mShiftType = IRShiftType.Left;
+        public IRShiftType ShiftType 
+        {
+            get { return mShiftType; }
+            private set { mShiftType = value; }
+        }
 
-        public IRShiftInstruction(IRShiftType pShiftType)
-            : base(IROpcode.Shift)
+        public IRShiftInstruction(IRShiftType pShiftType) : base(IROpcode.Shift)
         {
             ShiftType = pShiftType;
         }

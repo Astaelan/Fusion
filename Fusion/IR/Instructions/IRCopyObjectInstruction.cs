@@ -4,13 +4,18 @@ using Fusion.CLI.Metadata;
 
 namespace Fusion.IR.Instructions
 {
-    public class IRCopyObjectInstruction : IRInstruction
+    public sealed class IRCopyObjectInstruction : IRInstruction
     {
         public IRType Type { get; private set; }
 
-        public IRCopyObjectInstruction(IRType pType) : base(IROpcode.CopyObject)
+        public IRCopyObjectInstruction(IRType pType) : base(IROpcode.CopyObject) { Type = pType; }
+
+        public override void Linearize(Stack<IRStackObject> pStack)
         {
-            Type = pType;
+            IRStackObject srcAddr = pStack.Pop();
+            IRStackObject destAddr = pStack.Pop();
+            Sources.Add(new IRLinearizedTarget(destAddr.LinearizedTarget));
+            Sources.Add(new IRLinearizedTarget(srcAddr.LinearizedTarget));
         }
     }
 }

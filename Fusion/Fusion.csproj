@@ -132,9 +132,8 @@
     <Compile Include="IR\IRMethod.cs" />
     <Compile Include="IR\IROpcode.cs" />
     <Compile Include="IR\IRStackObjectSourceType.cs" />
-    <Compile Include="IR\IRTargetData.cs" />
-    <Compile Include="IR\IRTargetType.cs" />
-    <Compile Include="IR\IRTargetTypeAndData.cs" />
+    <Compile Include="IR\IRLinearizedTarget.cs" />
+    <Compile Include="IR\IRLinearizedTargetType.cs" />
     <Compile Include="IR\IRType.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

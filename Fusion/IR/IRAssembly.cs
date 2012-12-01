@@ -59,6 +59,7 @@ namespace Fusion.IR
 
                     if (methodDefData.Body != null && methodDefData.Body.ExpandedLocalVarSignature != null)
                     {
+                        method.MaximumStackDepth = methodDefData.Body.MaxStack;
                         foreach (SigLocalVar sigLocalVar in methodDefData.Body.ExpandedLocalVarSignature.LocalVars)
                         {
                             IRLocal local = new IRLocal(this);
@@ -95,36 +96,42 @@ namespace Fusion.IR
                     IRField field = type.Fields[fieldIndex];
                     field.Type = AppDomain.PresolveType(typeDefData.FieldList[fieldIndex].ExpandedSignature);
                 }
-                for (int methodIndex = 0; methodIndex < type.Methods.Count; ++methodIndex)
+            }
+            for (int methodIndex = 0; methodIndex < Methods.Count; ++methodIndex)
+            {
+                IRMethod method = Methods[methodIndex];
+                MethodDefData methodDefData = File.MethodDefTable[methodIndex];
+                method.ReturnType = AppDomain.PresolveType(methodDefData.ExpandedSignature.RetType);
+                for (int parameterIndex = 0; parameterIndex < method.Parameters.Count; ++parameterIndex)
                 {
-                    IRMethod method = type.Methods[methodIndex];
-                    method.ReturnType = AppDomain.PresolveType(typeDefData.MethodList[methodIndex].ExpandedSignature.RetType);
-                    for (int parameterIndex = 0; parameterIndex < method.Parameters.Count; ++parameterIndex)
-                    {
-                        IRParameter parameter = method.Parameters[parameterIndex];
-                        parameter.Type = AppDomain.PresolveType(typeDefData.MethodList[methodIndex].ExpandedSignature.Params[parameterIndex]);
-                    }
-                    for (int localIndex = 0; localIndex < method.Locals.Count; ++localIndex)
-                    {
-                        IRLocal local = method.Locals[localIndex];
-                        local.Type = AppDomain.PresolveType(typeDefData.MethodList[methodIndex].Body.ExpandedLocalVarSignature.LocalVars[localIndex]);
-                    }
+                    IRParameter parameter = method.Parameters[parameterIndex];
+                    parameter.Type = AppDomain.PresolveType(methodDefData.ExpandedSignature.Params[parameterIndex]);
+                }
+                for (int localIndex = 0; localIndex < method.Locals.Count; ++localIndex)
+                {
+                    IRLocal local = method.Locals[localIndex];
+                    local.Type = AppDomain.PresolveType(methodDefData.Body.ExpandedLocalVarSignature.LocalVars[localIndex]);
                 }
             }
         }
 
         internal void LoadStage3()
         {
-            for (int typeIndex = 0; typeIndex < Types.Count; ++typeIndex)
+            for (int methodIndex = 0; methodIndex < Methods.Count; ++methodIndex)
             {
-                IRType type = Types[typeIndex];
-                for (int methodIndex = 0; methodIndex < type.Methods.Count; ++methodIndex)
-                {
-                    IRMethod method = type.Methods[methodIndex];
-                    MethodDefData methodDefData = File.MethodDefTable[methodIndex];
-                    method.ConvertInstructions(methodDefData);
-                }
+                Methods[methodIndex].ConvertInstructions(File.MethodDefTable[methodIndex]);
+                // TODO: Build CFG for branching, keep it for reuse in optimizations (SSA, etc), but mark dirty if early optimizations destroy it
+                Methods[methodIndex].LinearizeInstructions();
             }
+        }
+
+        internal void LoadStage4()
+        {
+            // Generic resolution and type updating
+        }
+
+        internal void LoadStage5()
+        {
         }
     }
 }

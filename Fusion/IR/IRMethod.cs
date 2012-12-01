@@ -22,9 +22,12 @@ namespace Fusion.IR
 
         // Dynamic Methods
         public bool IsGeneric = false;
-        public string GenericHash = null;
-        public bool GenericParametersResolved = false;
+        public IRMethod GenericMethod = null;
         public List<IRType> GenericParameters = new List<IRType>();
+        //public bool GenericParametersResolved = false;
+
+        // Temporary
+        public ushort MaximumStackDepth = 0;
 
         public IRMethod(IRAssembly pAssembly)
         {
@@ -36,16 +39,6 @@ namespace Fusion.IR
             Assembly = pOriginalMethod.Assembly;
 
             Name = pOriginalMethod.Name;
-
-            ParentType = pOriginalMethod.ParentType;
-            ReturnType = pOriginalMethod.ReturnType;
-            Parameters.AddRange(pOriginalMethod.Parameters);
-            Locals.AddRange(pOriginalMethod.Locals);
-            // Don't copy instructions, they may not exist yet, do that later
-
-            IsGeneric = pOriginalMethod.IsGeneric;
-            GenericHash = pOriginalMethod.GenericHash;
-            GenericParameters.AddRange(pOriginalMethod.GenericParameters);
         }
 
         public bool CompareSignature(MethodSig pMethodSig)
@@ -69,6 +62,7 @@ namespace Fusion.IR
         {
             pInstruction.ILOffset = pILOffset;
             pInstruction.IRIndex = (uint)Instructions.Count;
+            pInstruction.Method = this;
             Instructions.Add(pInstruction);
         }
 
@@ -83,6 +77,7 @@ namespace Fusion.IR
             IRPrefixFlags prefixFlags = IRPrefixFlags.None;
             uint prefixConstrainedToken = 0;
 
+            Console.WriteLine("Converting {0}.{1}.{2}", ParentType.Namespace, ParentType.Name, Name);
             while (!reader.EndOfCode)
             {
                 bool clearFlags = true;
@@ -361,6 +356,12 @@ namespace Fusion.IR
                     prefixConstrainedToken = 0;
                 }
             }
+        }
+
+        public void LinearizeInstructions()
+        {
+            Stack<IRStackObject> stack = new Stack<IRStackObject>((int)MaximumStackDepth);
+            foreach (IRInstruction instruction in Instructions) instruction.Linearize(stack);
         }
     }
 }

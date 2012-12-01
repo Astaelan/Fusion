@@ -36,9 +36,9 @@ namespace Fusion.IR
         public bool IsTemporaryMVar = false;
         public uint TemporaryVarOrMVarIndex = 0;
         public bool IsGeneric = false;
-        public string GenericHash = null;
-        public bool GenericParametersResolved = false;
+        public IRType GenericType = null;
         public List<IRType> GenericParameters = new List<IRType>();
+        //public bool GenericParametersResolved = false;
         public IRType PointerType = null;
         public IRType ArrayType = null;
 
@@ -52,20 +52,6 @@ namespace Fusion.IR
 
             Namespace = pOriginalType.Namespace;
             Name = pOriginalType.Name;
-
-            Fields.AddRange(pOriginalType.Fields);
-            Methods.AddRange(pOriginalType.Methods);
-            NestedTypes.AddRange(pOriginalType.NestedTypes);
-            BaseType = pOriginalType.BaseType;
-
-            IsTemporaryVar = pOriginalType.IsTemporaryVar;
-            IsTemporaryMVar = pOriginalType.IsTemporaryMVar;
-            TemporaryVarOrMVarIndex = pOriginalType.TemporaryVarOrMVarIndex;
-            IsGeneric = pOriginalType.IsGeneric;
-            GenericHash = pOriginalType.GenericHash;
-            GenericParameters.AddRange(pOriginalType.GenericParameters);
-            PointerType = pOriginalType.PointerType;
-            ArrayType = pOriginalType.ArrayType;
         }
     }
 }

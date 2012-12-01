@@ -44,8 +44,6 @@ namespace Fusion.IR
         // Dynamic Types
         public Dictionary<IRType, IRType> PointerTypes = new Dictionary<IRType, IRType>();
         public Dictionary<IRType, IRType> ArrayTypes = new Dictionary<IRType, IRType>();
-        public Dictionary<string, IRType> GenericTypes = new Dictionary<string, IRType>();
-        public Dictionary<IRMethod, Dictionary<string, IRMethod>> GenericMethods = new Dictionary<IRMethod, Dictionary<string, IRMethod>>();
 
         public IRAppDomain()
         {
@@ -115,6 +113,7 @@ namespace Fusion.IR
             Assemblies.ForEach(a => a.LoadStage1());
             Assemblies.ForEach(a => a.LoadStage2());
             Assemblies.ForEach(a => a.LoadStage3());
+            Assemblies.ForEach(a => a.LoadStage4());
             return assembly;
         }
 
@@ -212,42 +211,25 @@ namespace Fusion.IR
         {
             bool genericParameterTypesResolved = true;
             string genericTypeHash = CreateGenericTypeHash(pGenericType, ref genericParameterTypesResolved, pGenericParameterTypes);
-            IRType type = null;
-            if (!GenericTypes.TryGetValue(genericTypeHash, out type))
-            {
-                type = new IRType(pGenericType);
-                type.IsGeneric = true;
-                type.GenericHash = genericTypeHash;
-                type.GenericParametersResolved = genericParameterTypesResolved;
-                type.GenericParameters.AddRange(pGenericParameterTypes);
-                GenericTypes.Add(genericTypeHash, type);
-                Console.WriteLine("Created: {0}", genericTypeHash);
-            }
+            IRType type = new IRType(pGenericType);
+            type.IsGeneric = true;
+            type.GenericType = pGenericType;
+            type.GenericParameters.AddRange(pGenericParameterTypes);
+            //type.GenericParametersResolved = genericParameterTypesResolved;
+            Console.WriteLine("Generic Type: {0}", genericTypeHash);
             return type;
         }
 
         public IRMethod CreateGenericMethod(IRMethod pGenericMethod, List<IRType> pGenericParameterTypes)
         {
-            Dictionary<string, IRMethod> methods = null;
-            if (!GenericMethods.TryGetValue(pGenericMethod, out methods))
-            {
-                methods = new Dictionary<string, IRMethod>();
-                GenericMethods.Add(pGenericMethod, methods);
-            }
-
             bool genericParameterTypesResolved = true;
             string genericMethodHash = CreateGenericMethodHash(pGenericMethod, ref genericParameterTypesResolved, pGenericParameterTypes);
-            IRMethod method = null;
-            if (!methods.TryGetValue(genericMethodHash, out method))
-            {
-                method = new IRMethod(pGenericMethod);
-                method.IsGeneric = true;
-                method.GenericHash = genericMethodHash;
-                method.GenericParametersResolved = genericParameterTypesResolved;
-                method.GenericParameters.AddRange(pGenericParameterTypes);
-                methods.Add(genericMethodHash, method);
-                Console.WriteLine("Created: {0}", genericMethodHash);
-            }
+            IRMethod method = new IRMethod(pGenericMethod);
+            method.IsGeneric = true;
+            method.GenericMethod = pGenericMethod;
+            method.GenericParameters.AddRange(pGenericParameterTypes);
+            //method.GenericParametersResolved = genericParameterTypesResolved;
+            Console.WriteLine("Generic Method: {0}", genericMethodHash);
             return method;
         }
 
@@ -477,7 +459,7 @@ namespace Fusion.IR
                 case MemberRefParentIndex.MemberRefParentType.TypeSpec:
                     {
                         IRType type = PresolveType(pMemberRefData.Class.TypeSpec);
-                        foreach (IRMethod method in type.Methods)
+                        foreach (IRMethod method in type.GenericType.Methods)
                         {
                             if (method.CompareSignature(pMemberRefData)) return method;
                         }
@@ -559,6 +541,73 @@ namespace Fusion.IR
                 default: break;
             }
             throw new NullReferenceException();
+        }
+
+
+        public IRType BinaryNumericResult(IRType pValue1Type, IRType pValue2Type)
+        {
+            IRType resultType = null;
+            if (pValue1Type == System_SByte ||
+                pValue1Type == System_Byte ||
+                pValue1Type == System_Int16 ||
+                pValue1Type == System_UInt16 ||
+                pValue1Type == System_Int32 ||
+                pValue1Type == System_UInt32)
+            {
+                if (pValue2Type == System_SByte ||
+                    pValue2Type == System_Byte ||
+                    pValue2Type == System_Int16 ||
+                    pValue2Type == System_UInt16 ||
+                    pValue2Type == System_Int32 ||
+                    pValue2Type == System_UInt32)
+                {
+                    resultType = System_Int32;
+                }
+                else if (pValue2Type == System_IntPtr ||
+                         pValue2Type == System_UIntPtr)
+                {
+                    resultType = System_IntPtr;
+                }
+                else throw new ArgumentException();
+            }
+            else if (pValue1Type == System_Int64 ||
+                     pValue1Type == System_UInt64)
+            {
+                if (pValue2Type == System_Int64 ||
+                    pValue2Type == System_UInt64)
+                {
+                    resultType = System_Int64;
+                }
+                else throw new ArgumentException();
+            }
+            else if (pValue1Type == System_IntPtr ||
+                     pValue1Type == System_UIntPtr)
+            {
+                if (pValue2Type == System_SByte ||
+                    pValue2Type == System_Byte ||
+                    pValue2Type == System_Int16 ||
+                    pValue2Type == System_UInt16 ||
+                    pValue2Type == System_Int32 ||
+                    pValue2Type == System_UInt32 ||
+                    pValue2Type == System_IntPtr ||
+                    pValue2Type == System_UIntPtr)
+                {
+                    resultType = System_IntPtr;
+                }
+                else throw new ArgumentException();
+            }
+            else if (pValue1Type == System_Single ||
+                     pValue1Type == System_Double)
+            {
+                if (pValue2Type == System_Single ||
+                    pValue2Type == System_Double)
+                {
+                    resultType = System_Double;
+                }
+                else throw new ArgumentException();
+            }
+            else throw new ArgumentException();
+            return resultType;
         }
     }
 }

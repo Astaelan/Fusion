@@ -1,6 +1,6 @@
 ﻿namespace Fusion.IR
 {
-    public enum IRTargetType : byte
+    public enum IRLinearizedTargetType : byte
     {
         Null,
         Local,

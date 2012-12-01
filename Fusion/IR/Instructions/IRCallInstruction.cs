@@ -6,7 +6,7 @@ namespace Fusion.IR.Instructions
     public sealed class IRCallInstruction : IRInstruction
     {
         public IRMethod Target { get; private set; }
-        public bool Virtual { get; protected set; }
+        public bool Virtual { get; private set; }
 
         public IRCallInstruction(IRMethod pTarget, bool pVirtual) : base(IROpcode.Call)
         {

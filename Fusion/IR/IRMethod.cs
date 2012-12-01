@@ -16,15 +16,41 @@ namespace Fusion.IR
 
         public IRType ParentType = null;
         public IRType ReturnType = null;
-        public List<IRParameter> Parameters = new List<IRParameter>();
-        public List<IRLocal> Locals = new List<IRLocal>();
-        public List<IRInstruction> Instructions = new List<IRInstruction>();
+        public readonly List<IRParameter> Parameters = new List<IRParameter>();
+        public readonly List<IRLocal> Locals = new List<IRLocal>();
+        public readonly List<IRInstruction> Instructions = new List<IRInstruction>();
+
+        private bool? mResolvedCache;
+        public bool Resolved
+        {
+            get
+            {
+                if (mResolvedCache != null)
+                    return mResolvedCache.Value;
+                
+                bool ressed = false;
+                if (IsGeneric)
+                {
+                    if (!ReturnType.Resolved) goto SetCache;
+                    if (!Parameters.TrueForAll(p => p.Resolved)) goto SetCache;
+                    if (!Locals.TrueForAll(l => l.Resolved)) goto SetCache;
+                    if (!Instructions.TrueForAll(i => i.Resolved)) goto SetCache;
+                }
+                ressed = true;
+
+            SetCache:
+                mResolvedCache = ressed;
+                return mResolvedCache.Value;
+            }
+        }
 
         // Dynamic Methods
-        public bool IsGeneric = false;
+        public bool IsGeneric
+        {
+            get { return GenericParameters.Count > 0; }
+        }
         public IRMethod GenericMethod = null;
-        public List<IRType> GenericParameters = new List<IRType>();
-        //public bool GenericParametersResolved = false;
+        public readonly GenericParameterCollection GenericParameters = new GenericParameterCollection();
 
         // Temporary
         public ushort MaximumStackDepth = 0;
@@ -34,11 +60,27 @@ namespace Fusion.IR
             Assembly = pAssembly;
         }
 
-        public IRMethod(IRMethod pOriginalMethod)
+        /// <summary>
+        /// This creates a shallow clone of this method, but
+        /// does a deep clone of it's instructions, parameters, and locals.
+        /// </summary>
+        /// <param name="newParent">The parent for the new method.</param>
+        /// <returns>The clone of this method.</returns>
+        public IRMethod Clone(IRType newParent)
         {
-            Assembly = pOriginalMethod.Assembly;
+            IRMethod m = new IRMethod(this.Assembly);
 
-            Name = pOriginalMethod.Name;
+            m.GenericMethod = this.GenericMethod;
+            m.GenericParameters.AddRange(this.GenericParameters);
+            this.Instructions.ForEach(i => m.Instructions.Add(i.Clone(m)));
+            this.Locals.ForEach(l => m.Locals.Add(l.Clone(m)));
+            this.Parameters.ForEach(p => m.Parameters.Add(p.Clone(m)));
+            m.MaximumStackDepth = this.MaximumStackDepth;
+            m.Name = this.Name;
+            m.ParentType = newParent;
+            m.ReturnType = this.ReturnType;
+
+            return m;
         }
 
         public bool CompareSignature(MethodSig pMethodSig)

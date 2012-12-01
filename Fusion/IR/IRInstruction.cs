@@ -29,5 +29,31 @@ namespace Fusion.IR
         }
 
         public abstract void Linearize(Stack<IRStackObject> pStack);
+
+
+        /// <summary>
+        /// This does a shallow copy of all of the members of the
+        /// abstract IRInstruction class to the specified instruction.
+        /// </summary>
+        /// <param name="i">The instruction to copy to.</param>
+        /// <param name="newMethod">The method this instruction will be added to.</param>
+        /// <returns><see cref="i"/></returns>
+        protected IRInstruction CopyTo(IRInstruction i, IRMethod newMethod)
+        {
+            i.ILOffset = this.ILOffset;
+            i.IRIndex = this.IRIndex;
+            i.Opcode = this.Opcode;
+            i.Method = newMethod;
+            i.Destination = this.Destination.Clone();
+            foreach (IRLinearizedTarget t in this.Sources)
+            {
+                i.Sources.Add(t.Clone());
+            }
+            return i;
+        }
+
+        public abstract IRInstruction Clone(IRMethod newMethod);
+        public virtual bool Resolved { get { return true; } }
+
     }
 }

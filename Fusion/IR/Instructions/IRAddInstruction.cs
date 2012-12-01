@@ -30,5 +30,10 @@ namespace Fusion.IR.Instructions
             Destination = new IRLinearizedTarget(result.LinearizedTarget);
             pStack.Push(result);
         }
+
+        public override IRInstruction Clone(IRMethod newMethod)
+        {
+            return CopyTo(new IRAddInstruction(this.OverflowType), newMethod);
+        }
     }
 }

@@ -14,6 +14,28 @@ namespace Fusion.IR
         public IRType ParentType = null;
         public IRType Type = null;
 
+        /// <summary>
+        /// True if all the types that this field
+        /// uses are fully resolved, aka. if they
+        /// are generic, they are fully instantiated.
+        /// </summary>
+        public bool Resolved { get { return Type.Resolved; } }
+
+        /// <summary>
+        /// Creates a shallow copy of this field.
+        /// </summary>
+        /// <returns>The shallow copy.</returns>
+        public IRField Clone(IRType newParent)
+        {
+            IRField f = new IRField(this.Assembly);
+
+            f.Name = this.Name;
+            f.ParentType = newParent;
+            f.Type = this.Type;
+
+            return f;
+        }
+
         public IRField(IRAssembly pAssembly)
         {
             Assembly = pAssembly;

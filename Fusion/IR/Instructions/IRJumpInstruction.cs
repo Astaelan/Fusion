@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
-using Fusion.CLI.Metadata;
 
 namespace Fusion.IR.Instructions
 {
-    public class IRJumpInstruction : IRInstruction
+    public sealed class IRJumpInstruction : IRInstruction
     {
         public IRMethod Target { get; private set; }
 
-        public IRJumpInstruction(IRMethod pTarget) : base(IROpcode.Jump)
+        public IRJumpInstruction(IRMethod pTarget) : base(IROpcode.Jump) { Target = pTarget; }
+
+        public override void Linearize(Stack<IRStackObject> pStack)
         {
-            Target = pTarget;
+            if (pStack.Count > 0) throw new OverflowException();
         }
     }
 }

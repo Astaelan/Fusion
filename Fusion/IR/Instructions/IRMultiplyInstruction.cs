@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Fusion.IR.Instructions
 {
-    public class IRMultiplyInstruction : IRInstruction
+    public sealed class IRMultiplyInstruction : IRInstruction
     {
         private IROverflowType mOverflowType = IROverflowType.None;
         public IROverflowType OverflowType
@@ -12,10 +12,7 @@ namespace Fusion.IR.Instructions
             private set { mOverflowType = value; }
         }
 
-        public IRMultiplyInstruction(IROverflowType pOverflowType) : base(IROpcode.Multiply)
-        {
-            OverflowType = pOverflowType;
-        }
+        public IRMultiplyInstruction(IROverflowType pOverflowType) : base(IROpcode.Multiply) { OverflowType = pOverflowType; }
 
         public override void Linearize(Stack<IRStackObject> pStack)
         {

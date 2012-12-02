@@ -58,6 +58,7 @@ namespace Fusion.IR
             public IRMethod TargetMethod;
             public IRField TargetField;
         }
+        public struct StringLocationData { public string Value; }
 
         public IRLinearizedLocationType Type;
         public LocalLocationData Local;
@@ -79,6 +80,7 @@ namespace Fusion.IR
         public ArrayLengthLocationData ArrayLength;
         public FunctionAddressLocationData FunctionAddress;
         public RuntimeHandleLocationData RuntimeHandle;
+        public StringLocationData String;
 
         public IRLinearizedLocation(IRLinearizedLocationType pType) { Type = pType; }
         public IRLinearizedLocation(IRLinearizedLocation pLinearizedTarget)
@@ -106,6 +108,7 @@ namespace Fusion.IR
                 case IRLinearizedLocationType.ArrayLength: ArrayLength = pLinearizedTarget.ArrayLength; break;
                 case IRLinearizedLocationType.FunctionAddress: FunctionAddress = pLinearizedTarget.FunctionAddress; break;
                 case IRLinearizedLocationType.RuntimeHandle: RuntimeHandle = pLinearizedTarget.RuntimeHandle; break;
+                case IRLinearizedLocationType.String: String = pLinearizedTarget.String; break;
                 default: throw new ArgumentException("Type");
             }
         }

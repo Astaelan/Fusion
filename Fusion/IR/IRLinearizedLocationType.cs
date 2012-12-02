@@ -22,5 +22,6 @@
         ArrayLength,
         FunctionAddress,
         RuntimeHandle,
+        String,
     }
 }

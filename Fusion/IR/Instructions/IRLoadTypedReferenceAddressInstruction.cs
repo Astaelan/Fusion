@@ -3,13 +3,23 @@ using System.Collections.Generic;
 
 namespace Fusion.IR.Instructions
 {
-    public class IRLoadTypedReferenceAddressInstruction : IRInstruction
+    public sealed class IRLoadTypedReferenceAddressInstruction : IRInstruction
     {
         public IRType Type { get; private set; }
 
-        public IRLoadTypedReferenceAddressInstruction(IRType pType) : base(IROpcode.LoadTypedReferenceAddress)
+        public IRLoadTypedReferenceAddressInstruction(IRType pType) : base(IROpcode.LoadTypedReferenceAddress) { Type = pType; }
+
+        public override void Linearize(Stack<IRStackObject> pStack)
         {
-            Type = pType;
+            Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
+
+            IRType pointerType = Method.Assembly.AppDomain.CreatePointerType(Type);
+            IRStackObject result = new IRStackObject();
+            result.Type = pointerType;
+            result.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);
+            result.LinearizedTarget.Local.LocalIndex = AddLinearizedLocal(pointerType);
+            Destination = new IRLinearizedLocation(result.LinearizedTarget);
+            pStack.Push(result);
         }
     }
 }

@@ -30,6 +30,25 @@ namespace Fusion.IR
         public readonly List<IRType> NestedTypes = new List<IRType>();
         public IRType BaseType = null;
 
+        private bool mGlobalTypeIDSet = false;
+        private int mGlobalTypeID;
+        public int GlobalTypeID
+        {
+            get
+            {
+                if (!mGlobalTypeIDSet)
+                    throw new Exception("This type doesn't have a global type id!");
+                return mGlobalTypeID;
+            }
+            set
+            {
+                if (mGlobalTypeIDSet)
+                    throw new Exception("Cannot set the global type id more than once!");
+                mGlobalTypeID = value;
+                mGlobalTypeIDSet = true;
+            }
+        }
+
         // We can cache this because the state
         // of the cache doesn't extend to any
         // derived type.
@@ -127,6 +146,51 @@ namespace Fusion.IR
             t.TemporaryVarOrMVarIndex = this.TemporaryVarOrMVarIndex;
 
             return t;
+        }
+
+        private int? mHashCodeCache;
+        public override int GetHashCode()
+        {
+            if (mHashCodeCache != null)
+                return mHashCodeCache.Value;
+
+            int res;
+            if (this.IsTemporaryVar)
+            {
+                res = (int)this.TemporaryVarOrMVarIndex;
+            }
+            else if (this.IsTemporaryMVar)
+            {
+                // Allow support for up to 256 generic type parameters before
+                // hash collisions occur.
+                res = (int)(this.TemporaryVarOrMVarIndex << 8);
+            }
+            else
+            {
+                // The OR at the end is to ensure that this hash code can never conflict with
+                // either of the 2 above.
+                res = Namespace.GetHashCode() ^ Name.GetHashCode() ^ GenericParameters.GetHashCode() | unchecked((int)0x80000000);
+            }
+
+            mHashCodeCache = res;
+            return mHashCodeCache.Value;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is IRType))
+                return false;
+            return ((IRType)obj).GetHashCode() == this.GetHashCode();
+        }
+
+        public static bool operator ==(IRType a, IRType b)
+        {
+            return a.GetHashCode() == b.GetHashCode();
+        }
+
+        public static bool operator !=(IRType a, IRType b)
+        {
+            return a.GetHashCode() != b.GetHashCode();
         }
     }
 }

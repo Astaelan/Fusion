@@ -70,6 +70,7 @@ namespace Fusion.IR
                 if (mResolvedCache.Value && !param.Resolved) 
                     mResolvedCache = false;
             }
+            mHashCodeCache = null;
         }
 
         /// <summary>
@@ -93,6 +94,7 @@ namespace Fusion.IR
                     }
                 }
             }
+            mHashCodeCache = null;
         }
 
         /// <summary>
@@ -112,12 +114,16 @@ namespace Fusion.IR
             }
             set
             {
-                if (mResolvedCache != null)
+                if (mParams[idx] != value)
                 {
-                    if (mResolvedCache.Value && !value.Resolved)
-                        mResolvedCache = false;
+                    if (mResolvedCache != null)
+                    {
+                        if (mResolvedCache.Value && !value.Resolved)
+                            mResolvedCache = false;
+                    }
+                    mParams[idx] = value;
+                    mHashCodeCache = null;
                 }
-                mParams[idx] = value;
             }
         }
 
@@ -132,5 +138,39 @@ namespace Fusion.IR
             foreach (IRType t in mParams)
                 yield return t;
         }
+
+        private int? mHashCodeCache;
+        public override int GetHashCode()
+        {
+            if (mHashCodeCache != null)
+                return mHashCodeCache.Value;
+            int res = mParams.Count;
+
+            for (int i = 0; i < mParams.Count; i++)
+            {
+                res ^= mParams[i].GlobalTypeID;
+            }
+
+            mHashCodeCache = res;
+            return mHashCodeCache.Value;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is GenericParameterCollection))
+                return false;
+            return ((GenericParameterCollection)obj).GetHashCode() == this.GetHashCode();
+        }
+
+        public static bool operator ==(GenericParameterCollection a, GenericParameterCollection b)
+        {
+            return a.GetHashCode() == b.GetHashCode();
+        }
+
+        public static bool operator !=(GenericParameterCollection a, GenericParameterCollection b)
+        {
+            return a.GetHashCode() != b.GetHashCode();
+        }
+
     }
 }

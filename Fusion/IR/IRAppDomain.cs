@@ -10,6 +10,39 @@ namespace Fusion.IR
 {
     public sealed class IRAppDomain
     {
+        // This class should ONLY ever be used here.
+        public sealed class IRTypeCollection : IEnumerable<IRType>
+        {
+            private readonly List<IRType> vals = new List<IRType>(4096);
+
+            public int Count { get { return vals.Count; } }
+            public IRType this[int idx] { get { return vals[idx]; } }
+
+            public void Add(IRType t)
+            {
+                if (!t.Resolved)
+                    throw new Exception("You cannot add a type which isn't fully resolved to the global type collection!");
+                vals.Add(t);
+                t.GlobalTypeID = vals.Count - 1;
+            }
+
+            public IEnumerator<IRType> GetEnumerator()
+            {
+                foreach (IRType t in vals)
+                    yield return t;
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                foreach (IRType t in vals)
+                    yield return t;
+            }
+        }
+        public IRTypeCollection Types = new IRTypeCollection();
+
+
+
+
         public List<IRAssembly> Assemblies = new List<IRAssembly>();
         public Dictionary<CLIFile, IRAssembly> AssemblyFileLookup = new Dictionary<CLIFile, IRAssembly>();
         public Dictionary<string, IRAssembly> AssemblyFileReferenceNameLookup = new Dictionary<string, IRAssembly>();

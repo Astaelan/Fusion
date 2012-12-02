@@ -3,10 +3,13 @@ using System.Collections.Generic;
 
 namespace Fusion.IR.Instructions
 {
-    public class IRPopInstruction : IRInstruction
+    public sealed class IRPopInstruction : IRInstruction
     {
-        public IRPopInstruction() : base(IROpcode.Pop)
+        public IRPopInstruction() : base(IROpcode.Pop) { }
+
+        public override void Linearize(Stack<IRStackObject> pStack)
         {
+            Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
         }
     }
 }

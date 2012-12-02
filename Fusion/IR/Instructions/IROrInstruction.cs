@@ -3,11 +3,9 @@ using System.Collections.Generic;
 
 namespace Fusion.IR.Instructions
 {
-    public class IROrInstruction : IRInstruction
+    public sealed class IROrInstruction : IRInstruction
     {
-        public IROrInstruction() : base(IROpcode.Or)
-        {
-        }
+        public IROrInstruction() : base(IROpcode.Or) { }
 
         public override void Linearize(Stack<IRStackObject> pStack)
         {

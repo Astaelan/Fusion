@@ -12,10 +12,7 @@ namespace Fusion.IR.Instructions
             private set { mOverflowType = value; }
         }
 
-        public IRRemainderInstruction(IROverflowType pOverflowType) : base(IROpcode.Remainder)
-        {
-            OverflowType = pOverflowType;
-        }
+        public IRRemainderInstruction(IROverflowType pOverflowType) : base(IROpcode.Remainder) { OverflowType = pOverflowType; }
 
         public override void Linearize(Stack<IRStackObject> pStack)
         {

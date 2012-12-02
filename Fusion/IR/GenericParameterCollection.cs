@@ -8,6 +8,11 @@ namespace Fusion.IR
     /// </summary>
     public sealed class GenericParameterCollection : IEnumerable<IRType>
     {
+        /// <summary>
+        /// Represents an empty generic parameter collection.
+        /// </summary>
+        public static readonly GenericParameterCollection Empty = new GenericParameterCollection();
+
         private const int InnerListInitialCapacity = 32;
 
         private readonly List<IRType> mParams = new List<IRType>(InnerListInitialCapacity);
@@ -106,14 +111,23 @@ namespace Fusion.IR
             this.AddRange((IEnumerable<IRType>)paramsToAdd);
         }
 
+        public IRType this[uint idx] { get { return this[(int)idx]; } set { this[(int)idx] = value; } }
         public IRType this[int idx]
         {
             get
             {
+                if (idx < 0)
+                    throw new IndexOutOfRangeException("A generic parameter index cannot be less than 0!");
+                if (idx >= mParams.Count)
+                    throw new IndexOutOfRangeException("The requested generic parameter doesn't exist!");
                 return mParams[idx];
             }
             set
             {
+                if (idx < 0)
+                    throw new IndexOutOfRangeException("A generic parameter index cannot be less than 0!");
+                if (idx >= mParams.Count)
+                    throw new IndexOutOfRangeException("The specified generic parameter doesn't exist!");
                 if (mParams[idx] != value)
                 {
                     if (mResolvedCache != null)

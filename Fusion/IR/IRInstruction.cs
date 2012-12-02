@@ -55,5 +55,12 @@ namespace Fusion.IR
         public abstract IRInstruction Clone(IRMethod newMethod);
         public virtual bool Resolved { get { return true; } }
 
+        public virtual void Resolve(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
+        {
+            if (Destination != null)
+                Destination.Resolve(typeParams, methodParams);
+            Sources.ForEach(s => s.Resolve(typeParams, methodParams));
+        }
+
     }
 }

@@ -116,7 +116,10 @@ namespace Fusion.IR
         public IRType GenericType = null;
         public readonly GenericParameterCollection GenericParameters = new GenericParameterCollection();
         public IRType PointerType = null;
+        public bool IsPointerType { get { return PointerType != null; } }
+
         public IRType ArrayType = null;
+        public bool IsArrayType { get { return ArrayType != null; } }
 
         private IRType() { }
 
@@ -130,13 +133,13 @@ namespace Fusion.IR
         {
             IRType t = new IRType(this.Assembly);
 
-            t.Fields.AddRange(this.Fields);
+            this.Fields.ForEach(f => t.Fields.Add(f.Clone(t)));
             t.Methods.AddRange(this.Methods);
             t.NestedTypes.AddRange(this.NestedTypes);
             t.GenericParameters.AddRange(this.GenericParameters);
 
-            t.BaseType = this.BaseType;
             t.ArrayType = this.ArrayType;
+            t.BaseType = this.BaseType;
             t.GenericType = this.GenericType;
             t.IsTemporaryMVar = this.IsTemporaryMVar;
             t.IsTemporaryVar = this.IsTemporaryVar;
@@ -147,6 +150,72 @@ namespace Fusion.IR
 
             return t;
         }
+
+        private static readonly Dictionary<IRType, IRType> GenericTypes = new Dictionary<IRType, IRType>();
+        /// <summary>
+        /// Resolve any generic types used in this type. This DOES NOT modify the type it
+        /// is called on.
+        /// </summary>
+        /// <param name="selfReference"></param>
+        /// <param name="typeParams"></param>
+        /// <param name="methodParams"></param>
+        public void Resolve(ref IRType selfReference, GenericParameterCollection typeParams, GenericParameterCollection methodParams)
+        {
+            if (!Resolved)
+            {
+                if (IsTemporaryVar)
+                {
+                    selfReference = typeParams[this.TemporaryVarOrMVarIndex];
+                }
+                else if (IsTemporaryMVar)
+                {
+                    selfReference = typeParams[this.TemporaryVarOrMVarIndex];
+                }
+                else if (IsArrayType)
+                {
+                    IRType elemType = ArrayType;
+                    elemType.Resolve(ref elemType, typeParams, methodParams);
+                    selfReference = Assembly.AppDomain.GetArrayType(elemType);
+                }
+                else if (this.GenericParameters.Resolved)
+                {
+                    IRType tp = null;
+                    if (!GenericTypes.TryGetValue(this, out tp))
+                    {
+                        tp = this.GenericType.Clone();
+                        GenericTypes[tp] = tp;
+
+                        for (int i = 0; i < tp.GenericParameters.Count; i++)
+                        {
+                            tp.GenericParameters[i] = this.GenericParameters[i];
+                        }
+                        for (int i = 0; i < tp.Methods.Count; i++)
+                        {
+                            tp.Methods[i] = tp.Methods[i].Resolved ? tp.Methods[i] : tp.Methods[i].Clone(tp);
+                        }
+
+                        // Now resolutions.
+                        tp.BaseType.Resolve(ref tp.BaseType, tp.GenericParameters, GenericParameterCollection.Empty);
+                        tp.Fields.ForEach(f => f.Resolve(tp.GenericParameters));
+                        for (int i = 0; i < tp.Methods.Count; i++)
+                        {
+                            if (!tp.Methods[i].Resolved)
+                            {
+                                tp.Methods[i] = tp.Methods[i].Clone(tp);
+                                tp.Methods[i].Resolve(tp.GenericParameters, GenericParameterCollection.Empty);
+                            }
+                        }
+                        
+                    }
+                    selfReference = tp;
+                }
+                else
+                {
+#warning Need to do the rest of this resolution.
+                }
+            }
+        }
+
 
         private int? mHashCodeCache;
         public override int GetHashCode()
@@ -165,10 +234,21 @@ namespace Fusion.IR
                 // hash collisions occur.
                 res = (int)(this.TemporaryVarOrMVarIndex << 8);
             }
+            else if (IsPointerType)
+            {
+                // 3rd bit from the top set
+                res = PointerType.GetHashCode() | unchecked((int)0x20000000);
+            }
+            else if (IsArrayType)
+            {
+                // 2nd bit from the top set
+                res = ArrayType.GetHashCode() | unchecked((int)0x40000000);
+            }
             else
             {
                 // The OR at the end is to ensure that this hash code can never conflict with
-                // either of the 2 above.
+                // any of the above.
+                // Top bit set
                 res = Namespace.GetHashCode() ^ Name.GetHashCode() ^ GenericParameters.GetHashCode() | unchecked((int)0x80000000);
             }
 

@@ -24,6 +24,13 @@ namespace Fusion.IR.Instructions
             else if (TargetField != null) handleType = Method.Assembly.AppDomain.System_RuntimeFieldHandle;
             else throw new NullReferenceException();
 
+            IRLinearizedLocation value = new IRLinearizedLocation(IRLinearizedLocationType.RuntimeHandle);
+            value.RuntimeHandle.HandleType = handleType;
+            value.RuntimeHandle.TargetType = TargetType;
+            value.RuntimeHandle.TargetMethod = TargetMethod;
+            value.RuntimeHandle.TargetField = TargetField;
+            Sources.Add(value);
+
             IRStackObject result = new IRStackObject();
             result.Type = handleType;
             result.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);

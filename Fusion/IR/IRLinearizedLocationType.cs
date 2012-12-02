@@ -20,5 +20,7 @@
         ArrayElement,
         ArrayElementAddress,
         ArrayLength,
+        FunctionAddress,
+        RuntimeHandle,
     }
 }

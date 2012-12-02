@@ -6,7 +6,7 @@ namespace Fusion.IR.Instructions
     public sealed class IRLoadFunctionInstruction : IRInstruction
     {
         public IRMethod Target { get; private set; }
-        public bool Virtual { get; protected set; }
+        public bool Virtual { get; private set; }
 
         public IRLoadFunctionInstruction(IRMethod pTarget, bool pVirtual) : base(IROpcode.LoadFunction)
         {
@@ -16,6 +16,11 @@ namespace Fusion.IR.Instructions
 
         public override void Linearize(Stack<IRStackObject> pStack)
         {
+            IRLinearizedLocation value = new IRLinearizedLocation(IRLinearizedLocationType.FunctionAddress);
+            value.FunctionAddress.Method = Target;
+            value.FunctionAddress.Virtual = Virtual;
+            Sources.Add(value);
+
             IRStackObject result = new IRStackObject();
             result.Type = Method.Assembly.AppDomain.System_IntPtr;
             result.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);

@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace Fusion.IR
 {
-    [StructLayout(LayoutKind.Explicit)]
     public class IRLinearizedLocation
     {
         public struct LocalLocationData { public uint LocalIndex; }
@@ -47,43 +46,39 @@ namespace Fusion.IR
             public bool NoChecksRequired;
         }
         public struct ArrayLengthLocationData { public IRLinearizedLocation ArrayLocation; }
+        public struct FunctionAddressLocationData
+        {
+            public IRMethod Method;
+            public bool Virtual;
+        }
+        public struct RuntimeHandleLocationData
+        {
+            public IRType HandleType;
+            public IRType TargetType;
+            public IRMethod TargetMethod;
+            public IRField TargetField;
+        }
 
-        [FieldOffset(0)]
         public IRLinearizedLocationType Type;
-        [FieldOffset(1)]
         public LocalLocationData Local;
-        [FieldOffset(1)]
         public LocalAddressLocationData LocalAddress;
-        [FieldOffset(1)]
         public ParameterLocationData Parameter;
-        [FieldOffset(1)]
         public ParameterAddressLocationData ParameterAddress;
-        [FieldOffset(1)]
         public ConstantI4LocationData ConstantI4;
-        [FieldOffset(1)]
         public ConstantI8LocationData ConstantI8;
-        [FieldOffset(1)]
         public ConstantR4LocationData ConstantR4;
-        [FieldOffset(1)]
         public ConstantR8LocationData ConstantR8;
-        [FieldOffset(1)]
         public FieldLocationData Field;
-        [FieldOffset(1)]
         public FieldAddressLocationData FieldAddress;
-        [FieldOffset(1)]
         public StaticFieldLocationData StaticField;
-        [FieldOffset(1)]
         public StaticFieldAddressLocationData StaticFieldAddress;
-        [FieldOffset(1)]
         public IndirectLocationData Indirect;
-        [FieldOffset(1)]
         public SizeOfLocationData SizeOf;
-        [FieldOffset(1)]
         public ArrayElementLocationData ArrayElement;
-        [FieldOffset(1)]
         public ArrayElementAddressLocationData ArrayElementAddress;
-        [FieldOffset(1)]
         public ArrayLengthLocationData ArrayLength;
+        public FunctionAddressLocationData FunctionAddress;
+        public RuntimeHandleLocationData RuntimeHandle;
 
         public IRLinearizedLocation(IRLinearizedLocationType pType) { Type = pType; }
         public IRLinearizedLocation(IRLinearizedLocation pLinearizedTarget)
@@ -109,6 +104,8 @@ namespace Fusion.IR
                 case IRLinearizedLocationType.ArrayElement: ArrayElement = pLinearizedTarget.ArrayElement; break;
                 case IRLinearizedLocationType.ArrayElementAddress: ArrayElementAddress = pLinearizedTarget.ArrayElementAddress; break;
                 case IRLinearizedLocationType.ArrayLength: ArrayLength = pLinearizedTarget.ArrayLength; break;
+                case IRLinearizedLocationType.FunctionAddress: FunctionAddress = pLinearizedTarget.FunctionAddress; break;
+                case IRLinearizedLocationType.RuntimeHandle: RuntimeHandle = pLinearizedTarget.RuntimeHandle; break;
                 default: throw new ArgumentException("Type");
             }
         }

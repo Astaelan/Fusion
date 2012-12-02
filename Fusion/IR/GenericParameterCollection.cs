@@ -162,7 +162,7 @@ namespace Fusion.IR
 
             for (int i = 0; i < mParams.Count; i++)
             {
-                res ^= mParams[i].GlobalTypeID;
+                res ^= mParams[i].GetHashCode();
             }
 
             mHashCodeCache = res;

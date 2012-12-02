@@ -11,14 +11,14 @@ namespace Fusion.IR.Instructions
 
         public override void Linearize(Stack<IRStackObject> pStack)
         {
-            Sources.Add(new IRLinearizedTarget(pStack.Pop().LinearizedTarget));
+            Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
 
             IRStackObject result = new IRStackObject();
             result.Type = Method.Assembly.AppDomain.System_Object;
             result.BoxedType = Type;
-            result.LinearizedTarget = new IRLinearizedTarget(IRLinearizedTargetType.Local);
-            result.LinearizedTarget.LocalVariable.LocalVariableIndex = AddLinearizedLocal(Method.Assembly.AppDomain.System_Object);
-            Destination = new IRLinearizedTarget(result.LinearizedTarget);
+            result.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);
+            result.LinearizedTarget.Local.LocalIndex = AddLinearizedLocal(Method.Assembly.AppDomain.System_Object);
+            Destination = new IRLinearizedLocation(result.LinearizedTarget);
             pStack.Push(result);
         }
     }

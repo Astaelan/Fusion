@@ -26,7 +26,7 @@ namespace Fusion.IR.Instructions
             {
                 case IRBranchCondition.Always: break;
                 case IRBranchCondition.False:
-                case IRBranchCondition.True: Sources.Add(new IRLinearizedTarget(pStack.Pop().LinearizedTarget)); break;
+                case IRBranchCondition.True: Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget)); break;
                 case IRBranchCondition.Equal:
                 case IRBranchCondition.GreaterOrEqual:
                 case IRBranchCondition.GreaterOrEqualUnsigned:
@@ -40,8 +40,8 @@ namespace Fusion.IR.Instructions
                     {
                         IRStackObject value2 = pStack.Pop();
                         IRStackObject value1 = pStack.Pop();
-                        Sources.Add(new IRLinearizedTarget(value1.LinearizedTarget));
-                        Sources.Add(new IRLinearizedTarget(value2.LinearizedTarget));
+                        Sources.Add(new IRLinearizedLocation(value1.LinearizedTarget));
+                        Sources.Add(new IRLinearizedLocation(value2.LinearizedTarget));
                         break;
                     }
             }

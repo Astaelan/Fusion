@@ -11,8 +11,8 @@ namespace Fusion.IR
         public IRMethod Method = null;
 
         // Instruction Linearization
-        public List<IRLinearizedTarget> Sources = new List<IRLinearizedTarget>();
-        public IRLinearizedTarget Destination = null;
+        public List<IRLinearizedLocation> Sources = new List<IRLinearizedLocation>();
+        public IRLinearizedLocation Destination = null;
 
         protected IRInstruction(IROpcode pOpcode)
         {
@@ -45,7 +45,7 @@ namespace Fusion.IR
             i.Opcode = this.Opcode;
             i.Method = newMethod;
             i.Destination = this.Destination.Clone();
-            foreach (IRLinearizedTarget t in this.Sources)
+            foreach (IRLinearizedLocation t in this.Sources)
             {
                 i.Sources.Add(t.Clone());
             }

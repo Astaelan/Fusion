@@ -3,10 +3,22 @@ using System.Collections.Generic;
 
 namespace Fusion.IR.Instructions
 {
-    public class IRLoadArrayLengthInstruction : IRInstruction
+    public sealed class IRLoadArrayLengthInstruction : IRInstruction
     {
-        public IRLoadArrayLengthInstruction() : base(IROpcode.LoadArrayLength)
+        public IRLoadArrayLengthInstruction() : base(IROpcode.LoadArrayLength) { }
+
+        public override void Linearize(Stack<IRStackObject> pStack)
         {
+            IRLinearizedLocation source = new IRLinearizedLocation(IRLinearizedLocationType.ArrayLength);
+            source.ArrayLength.ArrayLocation = new IRLinearizedLocation(pStack.Pop().LinearizedTarget);
+            Sources.Add(source);
+
+            IRStackObject result = new IRStackObject();
+            result.Type = Method.Assembly.AppDomain.System_Int32;
+            result.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);
+            result.LinearizedTarget.Local.LocalIndex = AddLinearizedLocal(Method.Assembly.AppDomain.System_Int32);
+            Destination = new IRLinearizedLocation(result.LinearizedTarget);
+            pStack.Push(result);
         }
     }
 }

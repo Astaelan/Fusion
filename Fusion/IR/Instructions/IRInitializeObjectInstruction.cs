@@ -11,7 +11,7 @@ namespace Fusion.IR.Instructions
 
         public override void Linearize(Stack<IRStackObject> pStack)
         {
-            Sources.Add(new IRLinearizedTarget(pStack.Pop().LinearizedTarget));
+            Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
         }
     }
 }

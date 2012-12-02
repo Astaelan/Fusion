@@ -13,8 +13,8 @@ namespace Fusion.IR.Instructions
         {
             IRStackObject srcAddr = pStack.Pop();
             IRStackObject destAddr = pStack.Pop();
-            Sources.Add(new IRLinearizedTarget(destAddr.LinearizedTarget));
-            Sources.Add(new IRLinearizedTarget(srcAddr.LinearizedTarget));
+            Sources.Add(new IRLinearizedLocation(destAddr.LinearizedTarget));
+            Sources.Add(new IRLinearizedLocation(srcAddr.LinearizedTarget));
         }
     }
 }

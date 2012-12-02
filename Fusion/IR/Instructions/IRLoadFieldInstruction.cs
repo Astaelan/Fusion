@@ -1,16 +1,27 @@
 using System;
 using System.Collections.Generic;
-using Fusion.CLI.Metadata;
 
 namespace Fusion.IR.Instructions
 {
-    public class IRLoadFieldInstruction : IRInstruction
+    public sealed class IRLoadFieldInstruction : IRInstruction
     {
         public IRField Field { get; private set; }
 
-        public IRLoadFieldInstruction(IRField pField) : base(IROpcode.LoadField)
+        public IRLoadFieldInstruction(IRField pField) : base(IROpcode.LoadField) { Field = pField; }
+
+        public override void Linearize(Stack<IRStackObject> pStack)
         {
-            Field = pField;
+            IRLinearizedLocation source = new IRLinearizedLocation(IRLinearizedLocationType.Field);
+            source.Field.Field = Field;
+            source.Field.FieldLocation = new IRLinearizedLocation(pStack.Pop().LinearizedTarget);
+            Sources.Add(source);
+
+            IRStackObject result = new IRStackObject();
+            result.Type = Field.Type;
+            result.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);
+            result.LinearizedTarget.Local.LocalIndex = AddLinearizedLocal(Field.Type);
+            Destination = new IRLinearizedLocation(result.LinearizedTarget);
+            pStack.Push(result);
         }
     }
 }

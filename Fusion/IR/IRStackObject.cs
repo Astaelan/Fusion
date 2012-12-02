@@ -4,6 +4,6 @@
     {
         public IRType Type;
         public IRType BoxedType;
-        public IRLinearizedTarget LinearizedTarget;
+        public IRLinearizedLocation LinearizedTarget;
     }
 }

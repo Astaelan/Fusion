@@ -45,6 +45,11 @@ namespace Fusion.IR
             }
         }
 
+        public void Resolve(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
+        {
+            throw new Exception("Huzzah lazyness!");
+        }
+
         // Dynamic Methods
         public bool IsGeneric
         {
@@ -437,10 +442,6 @@ namespace Fusion.IR
         {
             Stack<IRStackObject> stack = new Stack<IRStackObject>((int)MaximumStackDepth);
             foreach (IRInstruction instruction in Instructions) instruction.Linearize(stack);
-        }
-
-        public void Resolve(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
-        {
         }
     }
 }

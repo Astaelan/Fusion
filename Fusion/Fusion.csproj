@@ -112,6 +112,7 @@
     <Compile Include="IR\Instructions\IRUnboxInstruction.cs" />
     <Compile Include="IR\Instructions\IRXorInstruction.cs" />
     <Compile Include="IR\IRCompareCondition.cs" />
+    <Compile Include="IR\IRControlFlowGraph.cs" />
     <Compile Include="IR\IROverflowType.cs" />
     <Compile Include="IR\Instructions\IRPopInstruction.cs" />
     <Compile Include="IR\Instructions\IRReturnInstruction.cs" />

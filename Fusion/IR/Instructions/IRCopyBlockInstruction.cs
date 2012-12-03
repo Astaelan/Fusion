@@ -16,5 +16,10 @@ namespace Fusion.IR.Instructions
             Sources.Add(new IRLinearizedLocation(srcAddr.LinearizedTarget));
             Sources.Add(new IRLinearizedLocation(size.LinearizedTarget));
         }
+
+        public override IRInstruction Clone(IRMethod newMethod)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

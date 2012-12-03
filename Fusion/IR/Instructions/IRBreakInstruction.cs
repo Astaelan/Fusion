@@ -8,5 +8,10 @@ namespace Fusion.IR.Instructions
         public IRBreakInstruction() : base(IROpcode.Break) { }
 
         public override void Linearize(Stack<IRStackObject> pStack) { }
+
+        public override IRInstruction Clone(IRMethod newMethod)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

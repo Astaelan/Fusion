@@ -17,5 +17,10 @@ namespace Fusion.IR.Instructions
             Destination.Indirect.Type = Type;
             Destination.Indirect.AddressLocation = new IRLinearizedLocation(pStack.Pop().LinearizedTarget);
         }
+
+        public override IRInstruction Clone(IRMethod newMethod)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

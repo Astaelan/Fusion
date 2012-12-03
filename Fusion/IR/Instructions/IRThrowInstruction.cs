@@ -11,5 +11,10 @@ namespace Fusion.IR.Instructions
         {
             Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
         }
+
+        public override IRInstruction Clone(IRMethod newMethod)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

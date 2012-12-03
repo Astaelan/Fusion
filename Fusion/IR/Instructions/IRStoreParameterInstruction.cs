@@ -16,5 +16,10 @@ namespace Fusion.IR.Instructions
             Destination = new IRLinearizedLocation(IRLinearizedLocationType.Parameter);
             Destination.Parameter.ParameterIndex = ParameterIndex;
         }
+
+        public override IRInstruction Clone(IRMethod newMethod)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

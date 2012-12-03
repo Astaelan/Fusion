@@ -16,5 +16,10 @@ namespace Fusion.IR.Instructions
             Destination = new IRLinearizedLocation(IRLinearizedLocationType.StaticField);
             Destination.StaticField.Field = Field;
         }
+
+        public override IRInstruction Clone(IRMethod newMethod)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

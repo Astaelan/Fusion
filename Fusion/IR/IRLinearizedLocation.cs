@@ -112,5 +112,11 @@ namespace Fusion.IR
                 default: throw new ArgumentException("Type");
             }
         }
+
+        public IRLinearizedLocation Clone() { return new IRLinearizedLocation(this); }
+
+        public void Resolve(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
+        {
+        }
     }
 }

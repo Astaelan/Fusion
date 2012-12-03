@@ -10,5 +10,10 @@ namespace Fusion.IR.Instructions
         public IRNopInstruction(bool pForceEmit) : base(IROpcode.Nop) { ForceEmit = pForceEmit; }
 
         public override void Linearize(Stack<IRStackObject> pStack) { }
+
+        public override IRInstruction Clone(IRMethod newMethod)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -54,6 +54,7 @@ namespace Fusion.IR
 
         // Temporary
         public ushort MaximumStackDepth = 0;
+        public IRControlFlowGraph ControlFlowGraph = null;
 
         public IRMethod(IRAssembly pAssembly)
         {
@@ -403,7 +404,12 @@ namespace Fusion.IR
         public void LinearizeInstructions()
         {
             Stack<IRStackObject> stack = new Stack<IRStackObject>((int)MaximumStackDepth);
+            ControlFlowGraph = IRControlFlowGraph.Build(this);
             foreach (IRInstruction instruction in Instructions) instruction.Linearize(stack);
+        }
+
+        public void Resolve(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
+        {
         }
     }
 }

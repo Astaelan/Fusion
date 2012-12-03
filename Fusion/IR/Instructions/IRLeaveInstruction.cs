@@ -13,5 +13,10 @@ namespace Fusion.IR.Instructions
         {
             pStack.Clear();
         }
+
+        public override IRInstruction Clone(IRMethod newMethod)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

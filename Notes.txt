@@ -1,4 +1,4 @@
-- Started, = In Progress, * Completed
+- Started, = Incomplete, * Completed
 
 * Create IRType table, no type linking
 * Create IRFields, link to owner IRType
@@ -11,13 +11,15 @@
 
 * Create Pointer dynamic IRTypes
 * Create Array dynamic IRTypes
+* Create Generic dynamic IRTypes, using generic placeholders
 * Resolver for TypeDef to IRType
 * Resolver for TypeRef to IRType
-* Resolver for TypeDefRefOrSpecIndex to IRType, using uninstantiated generic placeholders
-* Resolver for MetadataToken to IRType, using uninstantiated generic placeholders
-* Resolver for SigType to IRType, using uninstantiated generic placeholders
-* Resolver for SigRetType to IRType, using uninstantiated generic placeholders
-* Resolver for SigParam to IRType, using uninstantiated generic placeholders
+* Resolver for TypeSpec to IRType, using generic placeholders
+* Resolver for TypeDefRefOrSpecIndex to IRType, using generic placeholders
+* Resolver for MetadataToken to IRType, using generic placeholders
+* Resolver for SigType to IRType, using generic placeholders
+* Resolver for SigRetType to IRType, using generic placeholders
+* Resolver for SigParam to IRType, using generic placeholders
 * Link IRType to base IRType
 * Link IRField type
 * Link IRInterfaceImplementation type
@@ -25,16 +27,17 @@
 * Link IRMethod parameter types
 * Link IRLocal types
 
-- Decomposition of ILInstructions into IRInstructions, no stack or type analysis
+* Decomposition of ILInstructions into IRInstructions
 
 Create IRGenericInstantiations for IRTypes
 Create IRGenericInstantiations for IRField types
 Create IRGenericInstantiations for IRMethod return and parameter types
 Create IRGenericInstantiations for IRLocal types
 
-Stack type analysis
-Transform IRInstructions that behave like other IRInstructions under certain conditions
-Stack target linearization
+- Build control flow graph required for linearization of values remaining from inside branches
+= Linearization of IRInstructions
+Transform Load/Store to Move IRInstructions
+Transform instructions that behave like other instructions under certain conditions, IE unbox.any to castclass when dealing with a reference type
 
 Resolve internal calls
 Generate internal calls

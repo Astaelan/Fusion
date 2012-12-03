@@ -18,5 +18,10 @@ namespace Fusion.IR.Instructions
             Destination.ArrayElement.IndexLocation = new IRLinearizedLocation(pStack.Pop().LinearizedTarget);
             Destination.ArrayElement.ArrayLocation = new IRLinearizedLocation(pStack.Pop().LinearizedTarget);
         }
+
+        public override IRInstruction Clone(IRMethod newMethod)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

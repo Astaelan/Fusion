@@ -642,5 +642,58 @@ namespace Fusion.IR
             else throw new ArgumentException();
             return resultType;
         }
+
+        public IRType ShiftNumericResult(IRType pValueType, IRType pShiftAmountType)
+        {
+            IRType resultType = null;
+            if (pValueType == System_SByte ||
+                pValueType == System_Byte ||
+                pValueType == System_Int16 ||
+                pValueType == System_UInt16 ||
+                pValueType == System_Int32 ||
+                pValueType == System_UInt32)
+            {
+                if (pShiftAmountType == System_SByte ||
+                    pShiftAmountType == System_Byte ||
+                    pShiftAmountType == System_Int16 ||
+                    pShiftAmountType == System_UInt16 ||
+                    pShiftAmountType == System_Int32 ||
+                    pShiftAmountType == System_UInt32 ||
+                    pShiftAmountType == System_IntPtr ||
+                    pShiftAmountType == System_UIntPtr)
+                {
+                    resultType = System_Int32;
+                }
+                else throw new ArgumentException();
+            }
+            else if (pValueType == System_Int64 ||
+                     pValueType == System_UInt64)
+            {
+                if (pShiftAmountType == System_Int64 ||
+                    pShiftAmountType == System_UInt64)
+                {
+                    resultType = System_Int64;
+                }
+                else throw new ArgumentException();
+            }
+            else if (pValueType == System_IntPtr ||
+                     pValueType == System_UIntPtr)
+            {
+                if (pShiftAmountType == System_SByte ||
+                    pShiftAmountType == System_Byte ||
+                    pShiftAmountType == System_Int16 ||
+                    pShiftAmountType == System_UInt16 ||
+                    pShiftAmountType == System_Int32 ||
+                    pShiftAmountType == System_UInt32 ||
+                    pShiftAmountType == System_IntPtr ||
+                    pShiftAmountType == System_UIntPtr)
+                {
+                    resultType = System_IntPtr;
+                }
+                else throw new ArgumentException();
+            }
+            else throw new ArgumentException();
+            return resultType;
+        }
     }
 }

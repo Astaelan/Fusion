@@ -3,13 +3,18 @@ using System.Collections.Generic;
 
 namespace Fusion.IR.Instructions
 {
-    public class IRStoreLocalInstruction : IRInstruction
+    public sealed class IRStoreLocalInstruction : IRInstruction
     {
         public uint LocalIndex { get; private set; }
 
-        public IRStoreLocalInstruction(uint pLocalIndex) : base(IROpcode.StoreLocal)
+        public IRStoreLocalInstruction(uint pLocalIndex) : base(IROpcode.StoreLocal) { LocalIndex = pLocalIndex; }
+
+        public override void Linearize(Stack<IRStackObject> pStack)
         {
-            LocalIndex = pLocalIndex;
+            Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
+
+            Destination = new IRLinearizedLocation(IRLinearizedLocationType.Local);
+            Destination.Local.LocalIndex = LocalIndex;
         }
     }
 }

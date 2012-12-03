@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Fusion.IR.Instructions
 {
@@ -9,10 +7,11 @@ namespace Fusion.IR.Instructions
     {
         public uint[] TargetILOffsets = null;
 
-        public IRSwitchInstruction(uint[] pTargetILOffsets)
-            : base(IROpcode.Switch)
+        public IRSwitchInstruction(uint[] pTargetILOffsets) : base(IROpcode.Switch) { TargetILOffsets = pTargetILOffsets; }
+
+        public override void Linearize(Stack<IRStackObject> pStack)
         {
-            TargetILOffsets = pTargetILOffsets;
+            Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
         }
     }
 }

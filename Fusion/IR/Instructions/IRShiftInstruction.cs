@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Fusion.IR.Instructions
 {
-    public class IRShiftInstruction : IRInstruction
+    public sealed class IRShiftInstruction : IRInstruction
     {
         private IRShiftType mShiftType = IRShiftType.Left;
         public IRShiftType ShiftType 
@@ -12,9 +12,23 @@ namespace Fusion.IR.Instructions
             private set { mShiftType = value; }
         }
 
-        public IRShiftInstruction(IRShiftType pShiftType) : base(IROpcode.Shift)
+        public IRShiftInstruction(IRShiftType pShiftType) : base(IROpcode.Shift) { ShiftType = pShiftType; }
+
+        public override void Linearize(Stack<IRStackObject> pStack)
         {
-            ShiftType = pShiftType;
+            IRStackObject shiftAmount = pStack.Pop();
+            IRStackObject value = pStack.Pop();
+
+            Sources.Add(new IRLinearizedLocation(value.LinearizedTarget));
+            Sources.Add(new IRLinearizedLocation(shiftAmount.LinearizedTarget));
+
+            IRType resultType = Method.Assembly.AppDomain.ShiftNumericResult(value.Type, shiftAmount.Type);
+            IRStackObject result = new IRStackObject();
+            result.Type = resultType;
+            result.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);
+            result.LinearizedTarget.Local.LocalIndex = AddLinearizedLocal(resultType);
+            Destination = new IRLinearizedLocation(result.LinearizedTarget);
+            pStack.Push(result);
         }
     }
 }

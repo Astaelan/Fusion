@@ -5,10 +5,7 @@ namespace Fusion.IR.Instructions
 {
     public sealed class IRXorInstruction : IRInstruction
     {
-        public IRXorInstruction()
-            : base(IROpcode.Xor)
-        {
-        }
+        public IRXorInstruction() : base(IROpcode.Xor) { }
 
         public override void Linearize(Stack<IRStackObject> pStack)
         {

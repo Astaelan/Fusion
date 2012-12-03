@@ -1,8 +1,5 @@
-﻿using Fusion.CLI.Metadata;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Fusion.IR.Instructions
 {
@@ -10,10 +7,14 @@ namespace Fusion.IR.Instructions
     {
         public IRField Field = null;
 
-        public IRStoreStaticFieldInstruction(IRField pField)
-            : base(IROpcode.StoreStaticField)
+        public IRStoreStaticFieldInstruction(IRField pField) : base(IROpcode.StoreStaticField) { Field = pField; }
+
+        public override void Linearize(Stack<IRStackObject> pStack)
         {
-            Field = pField;
+            Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
+
+            Destination = new IRLinearizedLocation(IRLinearizedLocationType.StaticField);
+            Destination.StaticField.Field = Field;
         }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Fusion.IR.Instructions
 {
@@ -9,10 +7,14 @@ namespace Fusion.IR.Instructions
     {
         public uint ParameterIndex = 0;
 
-        public IRStoreParameterInstruction(uint pParameterIndex)
-            : base(IROpcode.StoreParameter)
+        public IRStoreParameterInstruction(uint pParameterIndex) : base(IROpcode.StoreParameter) { ParameterIndex = pParameterIndex; }
+
+        public override void Linearize(Stack<IRStackObject> pStack)
         {
-            ParameterIndex = pParameterIndex;
+            Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
+
+            Destination = new IRLinearizedLocation(IRLinearizedLocationType.Parameter);
+            Destination.Parameter.ParameterIndex = ParameterIndex;
         }
     }
 }

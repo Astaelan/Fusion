@@ -7,11 +7,7 @@ namespace Fusion.IR.Instructions
     {
         public IROverflowType OverflowType = IROverflowType.None;
 
-        public IRSubtractInstruction(IROverflowType pOverflowType)
-            : base(IROpcode.Subtract)
-        {
-            OverflowType = pOverflowType;
-        }
+        public IRSubtractInstruction(IROverflowType pOverflowType) : base(IROpcode.Subtract) { OverflowType = pOverflowType; }
 
         public override void Linearize(Stack<IRStackObject> pStack)
         {

@@ -258,19 +258,19 @@ namespace Fusion.IR
 
         public override bool Equals(object obj)
         {
-            if (!(obj is IRType))
-                return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj == null) return false;
+            if (!(obj is IRType)) return false;
             return ((IRType)obj).GetHashCode() == this.GetHashCode();
         }
 
         public static bool operator ==(IRType a, IRType b)
         {
+            if (ReferenceEquals(a, b)) return true;
+            if (((object)a == null) || ((object)b == null)) return false;
             return a.GetHashCode() == b.GetHashCode();
         }
 
-        public static bool operator !=(IRType a, IRType b)
-        {
-            return a.GetHashCode() != b.GetHashCode();
-        }
+        public static bool operator !=(IRType a, IRType b) { return !(a == b); }
     }
 }

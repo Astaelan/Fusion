@@ -12,6 +12,11 @@ namespace Fusion.IR
 
         public bool Resolved { get { return Type.Resolved; } }
 
+        public void Resolve(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
+        {
+            Type.Resolve(ref Type, typeParams, methodParams);
+        }
+
         public IRParameter(IRAssembly pAssembly)
         {
             Assembly = pAssembly;

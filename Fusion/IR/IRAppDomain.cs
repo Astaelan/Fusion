@@ -38,14 +38,14 @@ namespace Fusion.IR
                     yield return t;
             }
         }
-        public IRTypeCollection Types = new IRTypeCollection();
+        public readonly IRTypeCollection Types = new IRTypeCollection();
 
 
 
 
-        public List<IRAssembly> Assemblies = new List<IRAssembly>();
-        public Dictionary<CLIFile, IRAssembly> AssemblyFileLookup = new Dictionary<CLIFile, IRAssembly>();
-        public Dictionary<string, IRAssembly> AssemblyFileReferenceNameLookup = new Dictionary<string, IRAssembly>();
+        public readonly List<IRAssembly> Assemblies = new List<IRAssembly>();
+        public readonly Dictionary<CLIFile, IRAssembly> AssemblyFileLookup = new Dictionary<CLIFile, IRAssembly>();
+        public readonly Dictionary<string, IRAssembly> AssemblyFileReferenceNameLookup = new Dictionary<string, IRAssembly>();
 
         public IRType System_Array = null;
         public IRType System_Boolean = null;
@@ -73,10 +73,6 @@ namespace Fusion.IR
         public IRType System_UIntPtr = null;
         public IRType System_ValueType = null;
         public IRType System_Void = null;
-
-        // Dynamic Types
-        public Dictionary<IRType, IRType> PointerTypes = new Dictionary<IRType, IRType>();
-        public Dictionary<IRType, IRType> ArrayTypes = new Dictionary<IRType, IRType>();
 
         public IRAppDomain()
         {
@@ -150,119 +146,50 @@ namespace Fusion.IR
             return assembly;
         }
 
-        public IRType CreatePointerType(IRType pPointerType)
+        // Dynamic Types
+        private readonly Dictionary<IRType, IRType> PointerTypes = new Dictionary<IRType, IRType>();
+        private readonly Dictionary<IRType, IRType> ArrayTypes = new Dictionary<IRType, IRType>();
+
+        public IRType GetPointerType(IRType pValueAtPointerType)
         {
             IRType type = null;
-            if (!PointerTypes.TryGetValue(pPointerType, out type))
+            if (!PointerTypes.TryGetValue(pValueAtPointerType, out type))
             {
-                type = new IRType(System_IntPtr);
-                type.PointerType = pPointerType;
-                PointerTypes.Add(pPointerType, type);
+                type = System_IntPtr.Clone();
+                type.PointerType = pValueAtPointerType;
+                PointerTypes.Add(pValueAtPointerType, type);
             }
             return type;
         }
 
-        public IRType CreateArrayType(IRType pArrayType)
+        public IRType GetArrayType(IRType pElementType)
         {
             IRType type = null;
-            if (!ArrayTypes.TryGetValue(pArrayType, out type))
+            if (!ArrayTypes.TryGetValue(pElementType, out type))
             {
-                type = new IRType(System_Array);
-                type.ArrayType = pArrayType;
-                ArrayTypes.Add(pArrayType, type);
+                type = System_Array.Clone();
+                type.ArrayType = pElementType;
+                ArrayTypes.Add(pElementType, type);
             }
             return type;
         }
 
-        public string CreateGenericTypeHash(IRType pGenericType, ref bool pGenericParameterTypesResolved, List<IRType> pGenericParameterTypes)
+        public IRType PresolveGenericType(IRType pGenericType, List<IRType> pGenericParameterTypes)
         {
-            StringBuilder hashInput = new StringBuilder();
-            hashInput.AppendFormat("{0}.{1}<", pGenericType.Namespace, pGenericType.Name);
-            bool firstParam = true;
-            foreach (IRType paramType in pGenericParameterTypes)
-            {
-                if (!firstParam) hashInput.Append(", ");
-                if (paramType.PointerType != null) hashInput.AppendFormat("{0}.{1}*", paramType.PointerType.Namespace, paramType.PointerType.Name);
-                else if (paramType.ArrayType != null) hashInput.AppendFormat("{0}.{1}[]", paramType.ArrayType.Namespace, paramType.ArrayType.Name);
-                else if (paramType.IsTemporaryVar)
-                {
-                    pGenericParameterTypesResolved = false;
-                    hashInput.AppendFormat("VAR({0})", paramType.TemporaryVarOrMVarIndex);
-                }
-                else if (paramType.IsTemporaryMVar)
-                {
-                    pGenericParameterTypesResolved = false;
-                    hashInput.AppendFormat("MVAR({0})", paramType.TemporaryVarOrMVarIndex);
-                }
-                else if (paramType.IsGeneric)
-                {
-                    bool genericParameterTypesResolved = true;
-                    hashInput.Append(CreateGenericTypeHash(paramType, ref genericParameterTypesResolved, paramType.GenericParameters));
-                    if (!genericParameterTypesResolved) pGenericParameterTypesResolved = false;
-                }
-                else hashInput.AppendFormat("{0}.{1}", paramType.Namespace, paramType.Name);
-                firstParam = false;
-            }
-            hashInput.Append(">");
-            return hashInput.ToString();
-        }
-
-        public string CreateGenericMethodHash(IRMethod pGenericMethod, ref bool pGenericParameterTypesResolved, List<IRType> pGenericParameterTypes)
-        {
-            StringBuilder hashInput = new StringBuilder();
-            hashInput.AppendFormat("{0}<", pGenericMethod.Name);
-            bool firstParam = true;
-            foreach (IRType paramType in pGenericParameterTypes)
-            {
-                if (!firstParam) hashInput.Append(", ");
-                if (paramType.PointerType != null) hashInput.AppendFormat("{0}.{1}*", paramType.PointerType.Namespace, paramType.PointerType.Name);
-                else if (paramType.ArrayType != null) hashInput.AppendFormat("{0}.{1}[]", paramType.ArrayType.Namespace, paramType.ArrayType.Name);
-                else if (paramType.IsTemporaryVar)
-                {
-                    pGenericParameterTypesResolved = false;
-                    hashInput.AppendFormat("VAR({0})", paramType.TemporaryVarOrMVarIndex);
-                }
-                else if (paramType.IsTemporaryMVar)
-                {
-                    pGenericParameterTypesResolved = false;
-                    hashInput.AppendFormat("MVAR({0})", paramType.TemporaryVarOrMVarIndex);
-                }
-                else if (paramType.IsGeneric)
-                {
-                    bool genericParameterTypesResolved = true;
-                    hashInput.Append(CreateGenericTypeHash(paramType, ref genericParameterTypesResolved, paramType.GenericParameters));
-                    if (!genericParameterTypesResolved) pGenericParameterTypesResolved = false;
-                }
-                else hashInput.AppendFormat("{0}.{1}", paramType.Namespace, paramType.Name);
-                firstParam = false;
-            }
-            hashInput.Append(">");
-            return hashInput.ToString();
-        }
-
-        public IRType CreateGenericType(IRType pGenericType, List<IRType> pGenericParameterTypes)
-        {
-            bool genericParameterTypesResolved = true;
-            string genericTypeHash = CreateGenericTypeHash(pGenericType, ref genericParameterTypesResolved, pGenericParameterTypes);
-            IRType type = new IRType(pGenericType);
-            type.IsGeneric = true;
+            IRType type = new IRType(pGenericType.Assembly);
+            type.Name = pGenericType.Name;
+            type.Namespace = pGenericType.Namespace;
             type.GenericType = pGenericType;
             type.GenericParameters.AddRange(pGenericParameterTypes);
-            //type.GenericParametersResolved = genericParameterTypesResolved;
-            Console.WriteLine("Generic Type: {0}", genericTypeHash);
             return type;
         }
 
-        public IRMethod CreateGenericMethod(IRMethod pGenericMethod, List<IRType> pGenericParameterTypes)
+        public IRMethod PresolveGenericMethod(IRMethod pGenericMethod, List<IRType> pGenericParameterTypes)
         {
-            bool genericParameterTypesResolved = true;
-            string genericMethodHash = CreateGenericMethodHash(pGenericMethod, ref genericParameterTypesResolved, pGenericParameterTypes);
-            IRMethod method = new IRMethod(pGenericMethod);
-            method.IsGeneric = true;
+            IRMethod method = new IRMethod(pGenericMethod.Assembly);
+            method.Name = pGenericMethod.Name;
             method.GenericMethod = pGenericMethod;
             method.GenericParameters.AddRange(pGenericParameterTypes);
-            //method.GenericParametersResolved = genericParameterTypesResolved;
-            Console.WriteLine("Generic Method: {0}", genericMethodHash);
             return method;
         }
 
@@ -424,26 +351,26 @@ namespace Fusion.IR
                 case SigElementType.String: type = System_String; break;
                 case SigElementType.Pointer:
                     {
-                        if (pSigType.PtrVoid) type = CreatePointerType(System_Void);
-                        else type = CreatePointerType(PresolveType(pSigType.PtrType));
+                        if (pSigType.PtrVoid) type = GetPointerType(System_Void);
+                        else type = GetPointerType(PresolveType(pSigType.PtrType));
                         break;
                     }
                 case SigElementType.ValueType: type = PresolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.ValueTypeDefOrRefOrSpecToken)); break;
                 case SigElementType.Class: type = PresolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.ClassTypeDefOrRefOrSpecToken)); break;
                 case SigElementType.Var: type = IRType.GetVarPlaceholder(pSigType.VarNumber); break;
-                case SigElementType.Array: type = CreateArrayType(PresolveType(pSigType.ArrayType)); break;
+                case SigElementType.Array: type = GetArrayType(PresolveType(pSigType.ArrayType)); break;
                 case SigElementType.GenericInstantiation:
                     {
                         IRType genericType = PresolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.GenericInstTypeDefOrRefOrSpecToken));
                         List<IRType> genericTypeParameters = new List<IRType>();
                         foreach (SigType paramType in pSigType.GenericInstGenArgs) genericTypeParameters.Add(PresolveType(paramType));
-                        type = CreateGenericType(genericType, genericTypeParameters);
+                        type = PresolveGenericType(genericType, genericTypeParameters);
                         break;
                     }
                 case SigElementType.IPointer: type = System_IntPtr; break;
                 case SigElementType.UPointer: type = System_UIntPtr; break;
                 case SigElementType.Object: type = System_Object; break;
-                case SigElementType.SingleDimensionArray: type = CreateArrayType(PresolveType(pSigType.SZArrayType)); break;
+                case SigElementType.SingleDimensionArray: type = GetArrayType(PresolveType(pSigType.SZArrayType)); break;
                 case SigElementType.MethodVar: type = IRType.GetMVarPlaceholder(pSigType.MVarNumber); break;
                 case SigElementType.Type: type = System_Type; break;
                 default: break;
@@ -507,7 +434,7 @@ namespace Fusion.IR
             IRMethod genericMethod = PresolveMethod(pMethodSpecData.Method);
             List<IRType> genericMethodParameters = new List<IRType>();
             foreach (SigType paramType in pMethodSpecData.ExpandedInstantiation.GenArgs) genericMethodParameters.Add(PresolveType(paramType));
-            return CreateGenericMethod(genericMethod, genericMethodParameters);
+            return PresolveGenericMethod(genericMethod, genericMethodParameters);
         }
 
         public IRMethod PresolveMethod(MethodDefOrRefIndex pMethodDefOrRefIndex)

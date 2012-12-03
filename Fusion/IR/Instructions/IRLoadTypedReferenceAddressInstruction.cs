@@ -13,7 +13,7 @@ namespace Fusion.IR.Instructions
         {
             Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
 
-            IRType pointerType = Method.Assembly.AppDomain.CreatePointerType(Type);
+            IRType pointerType = Method.Assembly.AppDomain.GetPointerType(Type);
             IRStackObject result = new IRStackObject();
             result.Type = pointerType;
             result.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);

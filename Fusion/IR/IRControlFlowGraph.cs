@@ -6,12 +6,19 @@ namespace Fusion.IR
 {
     public sealed class IRControlFlowGraph
     {
+        public sealed class Node
+        {
+            public uint Index = 0;
+            public List<IRInstruction> Instructions = new List<IRInstruction>();
+        }
+
+        public List<Node> Nodes = new List<Node>();
 
         public static IRControlFlowGraph Build(IRMethod pMethod)
         {
-            IRControlFlowGraph cfg = new IRControlFlowGraph();
+            if (pMethod.Instructions.Count == 0) return null;
 
-            HashSet<uint> branchTargets = new HashSet<uint>();
+            HashSet<IRInstruction> nodeBreaks = new HashSet<IRInstruction>();
             foreach (IRInstruction instruction in pMethod.Instructions)
             {
                 switch (instruction.Opcode)
@@ -19,28 +26,38 @@ namespace Fusion.IR
                     case IROpcode.Branch:
                         {
                             IRBranchInstruction branchInstruction = (IRBranchInstruction)instruction;
-                            if (!branchTargets.Contains(branchInstruction.TargetILOffset)) branchTargets.Add(branchInstruction.TargetILOffset);
+                            if (!nodeBreaks.Contains(instruction)) nodeBreaks.Add(instruction);
+                            if (!nodeBreaks.Contains(branchInstruction.TargetIRInstruction)) nodeBreaks.Add(branchInstruction.TargetIRInstruction);
                             break;
                         }
                     case IROpcode.Switch:
                         {
                             IRSwitchInstruction switchInstruction = (IRSwitchInstruction)instruction;
-                            foreach (uint targetILOffset in switchInstruction.TargetILOffsets)
+                            if (!nodeBreaks.Contains(instruction)) nodeBreaks.Add(instruction);
+                            foreach (IRInstruction targetIRInstruction in switchInstruction.TargetIRInstructions)
                             {
-                                if (!branchTargets.Contains(targetILOffset)) branchTargets.Add(targetILOffset);
+                                if (!nodeBreaks.Contains(targetIRInstruction))
+                                {
+                                    nodeBreaks.Add(targetIRInstruction);
+                                }
                             }
                             break;
                         }
                     case IROpcode.Leave:
                         {
                             IRLeaveInstruction leaveInstruction = (IRLeaveInstruction)instruction;
-                            if (!branchTargets.Contains(leaveInstruction.TargetILOffset)) branchTargets.Add(leaveInstruction.TargetILOffset);
+                            if (!nodeBreaks.Contains(instruction)) nodeBreaks.Add(instruction);
+                            if (!nodeBreaks.Contains(leaveInstruction.TargetIRInstruction)) nodeBreaks.Add(leaveInstruction.TargetIRInstruction);
                             break;
                         }
                     default: break;
                 }
             }
 
+            IRControlFlowGraph cfg = new IRControlFlowGraph();
+            foreach (IRInstruction instruction in pMethod.Instructions)
+            {
+            }
             return cfg;
         }
     }

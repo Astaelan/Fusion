@@ -19,6 +19,7 @@ namespace Fusion.IR
         public readonly List<IRParameter> Parameters = new List<IRParameter>();
         public readonly List<IRLocal> Locals = new List<IRLocal>();
         public readonly List<IRInstruction> Instructions = new List<IRInstruction>();
+        public readonly Dictionary<uint, IRInstruction> ILOffsetToIRInstruction = new Dictionary<uint, IRInstruction>();
 
         private bool? mResolvedCache;
         public bool Resolved
@@ -107,6 +108,7 @@ namespace Fusion.IR
             pInstruction.IRIndex = (uint)Instructions.Count;
             pInstruction.Method = this;
             Instructions.Add(pInstruction);
+            ILOffsetToIRInstruction.Add(pILOffset, pInstruction);
         }
 
         public void ConvertInstructions(MethodDefData pMethodDefData)
@@ -399,12 +401,41 @@ namespace Fusion.IR
                     prefixConstrainedToken = 0;
                 }
             }
+
+            foreach (IRInstruction instruction in Instructions)
+            {
+                switch (instruction.Opcode)
+                {
+                    case IROpcode.Branch:
+                        {
+                            IRBranchInstruction branchInstruction = (IRBranchInstruction)instruction;
+                            branchInstruction.TargetIRInstruction = ILOffsetToIRInstruction[branchInstruction.TargetILOffset];
+                            break;
+                        }
+                    case IROpcode.Switch:
+                        {
+                            IRSwitchInstruction switchInstruction = (IRSwitchInstruction)instruction;
+                            switchInstruction.TargetIRInstructions = new IRInstruction[switchInstruction.TargetILOffsets.Length];
+                            for (int index = 0; index < switchInstruction.TargetILOffsets.Length; ++index)
+                            {
+                                switchInstruction.TargetIRInstructions[index] = ILOffsetToIRInstruction[switchInstruction.TargetILOffsets[index]];
+                            }
+                            break;
+                        }
+                    case IROpcode.Leave:
+                        {
+                            IRLeaveInstruction leaveInstruction = (IRLeaveInstruction)instruction;
+                            leaveInstruction.TargetIRInstruction = ILOffsetToIRInstruction[leaveInstruction.TargetILOffset];
+                            break;
+                        }
+                    default: break;
+                }
+            }
         }
 
         public void LinearizeInstructions()
         {
             Stack<IRStackObject> stack = new Stack<IRStackObject>((int)MaximumStackDepth);
-            ControlFlowGraph = IRControlFlowGraph.Build(this);
             foreach (IRInstruction instruction in Instructions) instruction.Linearize(stack);
         }
 

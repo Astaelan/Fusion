@@ -6,6 +6,7 @@ namespace Fusion.IR.Instructions
     public sealed class IRSwitchInstruction : IRInstruction
     {
         public uint[] TargetILOffsets = null;
+        public IRInstruction[] TargetIRInstructions = null;
 
         public IRSwitchInstruction(uint[] pTargetILOffsets) : base(IROpcode.Switch) { TargetILOffsets = pTargetILOffsets; }
 

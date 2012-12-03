@@ -120,7 +120,7 @@ namespace Fusion.IR
             for (int methodIndex = 0; methodIndex < Methods.Count; ++methodIndex)
             {
                 Methods[methodIndex].ConvertInstructions(File.MethodDefTable[methodIndex]);
-                // TODO: Build CFG for branching, keep it for reuse in optimizations (SSA, etc), but mark dirty if early optimizations destroy it
+                Methods[methodIndex].ControlFlowGraph = IRControlFlowGraph.Build(Methods[methodIndex]);
                 Methods[methodIndex].LinearizeInstructions();
             }
         }

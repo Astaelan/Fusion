@@ -13,6 +13,7 @@ namespace Fusion.IR.Instructions
         }
         
         public uint TargetILOffset { get; set; }
+        public IRInstruction TargetIRInstruction { get; set; }
 
         public IRBranchInstruction(IRBranchCondition pBranchCondition, uint pTargetILOffset) : base(IROpcode.Branch)
         {

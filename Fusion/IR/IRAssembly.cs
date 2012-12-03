@@ -113,6 +113,21 @@ namespace Fusion.IR
                     local.Type = AppDomain.PresolveType(methodDefData.Body.ExpandedLocalVarSignature.LocalVars[localIndex]);
                 }
             }
+            for (int methodIndex = 0; methodIndex < Methods.Count; ++methodIndex)
+            {
+                IRMethod method = Methods[methodIndex];
+                MethodDefData methodDefData = File.MethodDefTable[methodIndex];
+                if (methodDefData.ExpandedSignature.HasThis && !methodDefData.ExpandedSignature.ExplicitThis)
+                {
+                    IRType thisType = null;
+                    if (method.ParentType.IsValueType) thisType = AppDomain.GetPointerType(method.ParentType);
+                    else thisType = method.ParentType;
+                    IRParameter implicitThis = new IRParameter(this);
+                    implicitThis.ParentMethod = method;
+                    implicitThis.Type = thisType;
+                    method.Parameters.Insert(0, implicitThis);
+                }
+            }
         }
 
         internal void LoadStage3()

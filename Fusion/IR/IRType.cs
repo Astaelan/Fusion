@@ -49,6 +49,9 @@ namespace Fusion.IR
             }
         }
 
+        private bool mIsValueType = false;
+        public bool IsValueType { get { return mIsValueType; } }
+        
         // We can cache this because the state
         // of the cache doesn't extend to any
         // derived type.

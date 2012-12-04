@@ -68,8 +68,6 @@ namespace Fusion.CLI.Metadata
 
             int cursor = 0;
             ExpandedSignature = new MethodSig(pFile, Signature, ref cursor);
-
-            if (Body != null) Body.LinkData(this);
         }
 
         public sealed class MethodDefBodyData

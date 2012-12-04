@@ -12,10 +12,10 @@ namespace Fusion.IR.Instructions
             set { mBranchCondition = value; }
         }
         
-        public uint TargetILOffset { get; set; }
+        public int TargetILOffset { get; set; }
         public IRInstruction TargetIRInstruction { get; set; }
 
-        public IRBranchInstruction(IRBranchCondition pBranchCondition, uint pTargetILOffset) : base(IROpcode.Branch)
+        public IRBranchInstruction(IRBranchCondition pBranchCondition, int pTargetILOffset) : base(IROpcode.Branch)
         {
             BranchCondition = pBranchCondition;
             TargetILOffset = pTargetILOffset;

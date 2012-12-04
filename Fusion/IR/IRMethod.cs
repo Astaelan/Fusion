@@ -167,8 +167,8 @@ namespace Fusion.IR
                     case ILOpcode.Ldc_I4_7: AddInstruction(startOfInstruction, new IRLoadInteger32Instruction(7)); break;
                     case ILOpcode.Ldc_I4_8: AddInstruction(startOfInstruction, new IRLoadInteger32Instruction(8)); break;
                     case ILOpcode.Ldc_I4_S: AddInstruction(startOfInstruction, new IRLoadInteger32Instruction(reader.ReadByte())); break;
-                    case ILOpcode.Ldc_I4: AddInstruction(startOfInstruction, new IRLoadInteger32Instruction((int)reader.ReadUInt32())); break;
-                    case ILOpcode.Ldc_I8: AddInstruction(startOfInstruction, new IRLoadInteger64Instruction((long)reader.ReadUInt64())); break;
+                    case ILOpcode.Ldc_I4: AddInstruction(startOfInstruction, new IRLoadInteger32Instruction(reader.ReadInt32())); break;
+                    case ILOpcode.Ldc_I8: AddInstruction(startOfInstruction, new IRLoadInteger64Instruction(reader.ReadInt64())); break;
                     case ILOpcode.Ldc_R4: AddInstruction(startOfInstruction, new IRLoadReal32Instruction(reader.ReadSingle())); break;
                     case ILOpcode.Ldc_R8: AddInstruction(startOfInstruction, new IRLoadReal64Instruction(reader.ReadDouble())); break;
                     case ILOpcode.Dup: AddInstruction(startOfInstruction, new IRDuplicateInstruction()); break;
@@ -177,32 +177,32 @@ namespace Fusion.IR
                     case ILOpcode.Call: AddInstruction(startOfInstruction, new IRCallInstruction(Assembly.AppDomain.PresolveMethod(Assembly.File.ExpandMetadataToken(reader.ReadUInt32())), false)); break;
                     case ILOpcode.CallI: throw new NotImplementedException("CallI");
                     case ILOpcode.Ret: AddInstruction(startOfInstruction, new IRReturnInstruction()); break;
-                    case ILOpcode.Br_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Always, (uint)(reader.ReadByte() + reader.Offset))); break;
-                    case ILOpcode.BrFalse_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.False, (uint)(reader.ReadByte() + reader.Offset))); break;
-                    case ILOpcode.BrTrue_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.True, (uint)(reader.ReadByte() + reader.Offset))); break;
-                    case ILOpcode.Beq_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Equal, (uint)(reader.ReadByte() + reader.Offset))); break;
-                    case ILOpcode.Bge_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.GreaterOrEqual, (uint)(reader.ReadByte() + reader.Offset))); break;
-                    case ILOpcode.Bgt_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Greater, (uint)(reader.ReadByte() + reader.Offset))); break;
-                    case ILOpcode.Ble_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.LessOrEqual, (uint)(reader.ReadByte() + reader.Offset))); break;
-                    case ILOpcode.Blt_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Less, (uint)(reader.ReadByte() + reader.Offset))); break;
-                    case ILOpcode.Bne_Un_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.NotEqualUnsigned, (uint)(reader.ReadByte() + reader.Offset))); break;
-                    case ILOpcode.Bge_Un_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.GreaterOrEqualUnsigned, (uint)(reader.ReadByte() + reader.Offset))); break;
-                    case ILOpcode.Bgt_Un_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.GreaterUnsigned, (uint)(reader.ReadByte() + reader.Offset))); break;
-                    case ILOpcode.Ble_Un_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.LessOrEqualUnsigned, (uint)(reader.ReadByte() + reader.Offset))); break;
-                    case ILOpcode.Blt_Un_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.LessUnsigned, (uint)(reader.ReadByte() + reader.Offset))); break;
-                    case ILOpcode.Br: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Always, (uint)(reader.ReadUInt32() + reader.Offset))); break;
-                    case ILOpcode.BrFalse: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.False, (uint)(reader.ReadUInt32() + reader.Offset))); break;
-                    case ILOpcode.BrTrue: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.True, (uint)(reader.ReadUInt32() + reader.Offset))); break;
-                    case ILOpcode.Beq: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Equal, (uint)(reader.ReadUInt32() + reader.Offset))); break;
-                    case ILOpcode.Bge: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.GreaterOrEqual, (uint)(reader.ReadUInt32() + reader.Offset))); break;
-                    case ILOpcode.Bgt: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Greater, (uint)(reader.ReadUInt32() + reader.Offset))); break;
-                    case ILOpcode.Ble: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.LessOrEqual, (uint)(reader.ReadUInt32() + reader.Offset))); break;
-                    case ILOpcode.Blt: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Less, (uint)(reader.ReadUInt32() + reader.Offset))); break;
-                    case ILOpcode.Bne_Un: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.NotEqualUnsigned, (uint)(reader.ReadUInt32() + reader.Offset))); break;
-                    case ILOpcode.Bge_Un: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.GreaterOrEqualUnsigned, (uint)(reader.ReadUInt32() + reader.Offset))); break;
-                    case ILOpcode.Bgt_Un: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.GreaterUnsigned, (uint)(reader.ReadUInt32() + reader.Offset))); break;
-                    case ILOpcode.Ble_Un: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.LessOrEqualUnsigned, (uint)(reader.ReadUInt32() + reader.Offset))); break;
-                    case ILOpcode.Blt_Un: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.LessUnsigned, (uint)(reader.ReadUInt32() + reader.Offset))); break;
+                    case ILOpcode.Br_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Always, (int)(reader.ReadSByte() + reader.Offset))); break;
+                    case ILOpcode.BrFalse_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.False, (int)(reader.ReadSByte() + reader.Offset))); break;
+                    case ILOpcode.BrTrue_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.True, (int)(reader.ReadSByte() + reader.Offset))); break;
+                    case ILOpcode.Beq_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Equal, (int)(reader.ReadSByte() + reader.Offset))); break;
+                    case ILOpcode.Bge_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.GreaterOrEqual, (int)(reader.ReadSByte() + reader.Offset))); break;
+                    case ILOpcode.Bgt_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Greater, (int)(reader.ReadSByte() + reader.Offset))); break;
+                    case ILOpcode.Ble_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.LessOrEqual, (int)(reader.ReadSByte() + reader.Offset))); break;
+                    case ILOpcode.Blt_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Less, (int)(reader.ReadSByte() + reader.Offset))); break;
+                    case ILOpcode.Bne_Un_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.NotEqualUnsigned, (int)(reader.ReadSByte() + reader.Offset))); break;
+                    case ILOpcode.Bge_Un_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.GreaterOrEqualUnsigned, (int)(reader.ReadSByte() + reader.Offset))); break;
+                    case ILOpcode.Bgt_Un_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.GreaterUnsigned, (int)(reader.ReadSByte() + reader.Offset))); break;
+                    case ILOpcode.Ble_Un_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.LessOrEqualUnsigned, (int)(reader.ReadSByte() + reader.Offset))); break;
+                    case ILOpcode.Blt_Un_S: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.LessUnsigned, (int)(reader.ReadSByte() + reader.Offset))); break;
+                    case ILOpcode.Br: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Always, (int)(reader.ReadInt32() + reader.Offset))); break;
+                    case ILOpcode.BrFalse: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.False, (int)(reader.ReadInt32() + reader.Offset))); break;
+                    case ILOpcode.BrTrue: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.True, (int)(reader.ReadInt32() + reader.Offset))); break;
+                    case ILOpcode.Beq: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Equal, (int)(reader.ReadInt32() + reader.Offset))); break;
+                    case ILOpcode.Bge: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.GreaterOrEqual, (int)(reader.ReadInt32() + reader.Offset))); break;
+                    case ILOpcode.Bgt: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Greater, (int)(reader.ReadInt32() + reader.Offset))); break;
+                    case ILOpcode.Ble: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.LessOrEqual, (int)(reader.ReadInt32() + reader.Offset))); break;
+                    case ILOpcode.Blt: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.Less, (int)(reader.ReadInt32() + reader.Offset))); break;
+                    case ILOpcode.Bne_Un: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.NotEqualUnsigned, (int)(reader.ReadInt32() + reader.Offset))); break;
+                    case ILOpcode.Bge_Un: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.GreaterOrEqualUnsigned, (int)(reader.ReadInt32() + reader.Offset))); break;
+                    case ILOpcode.Bgt_Un: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.GreaterUnsigned, (int)(reader.ReadInt32() + reader.Offset))); break;
+                    case ILOpcode.Ble_Un: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.LessOrEqualUnsigned, (int)(reader.ReadInt32() + reader.Offset))); break;
+                    case ILOpcode.Blt_Un: AddInstruction(startOfInstruction, new IRBranchInstruction(IRBranchCondition.LessUnsigned, (int)(reader.ReadInt32() + reader.Offset))); break;
                     case ILOpcode.Switch:
                         {
                             uint targetCount = reader.ReadUInt32();
@@ -414,7 +414,7 @@ namespace Fusion.IR
                     case IROpcode.Branch:
                         {
                             IRBranchInstruction branchInstruction = (IRBranchInstruction)instruction;
-                            branchInstruction.TargetIRInstruction = ILOffsetToIRInstruction[branchInstruction.TargetILOffset];
+                            branchInstruction.TargetIRInstruction = ILOffsetToIRInstruction[(uint)branchInstruction.TargetILOffset];
                             break;
                         }
                     case IROpcode.Switch:

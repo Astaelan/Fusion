@@ -31,10 +31,24 @@ namespace Fusion.IL
             return (ILOpcode)mData[mCursor++];
         }
 
+        public sbyte ReadSByte()
+        {
+            if (Remaining < 1) throw new EndOfStreamException();
+            return (sbyte)mData[mCursor++];
+        }
+
         public byte ReadByte()
         {
             if (Remaining < 1) throw new EndOfStreamException();
             return mData[mCursor++];
+        }
+
+        public short ReadInt16()
+        {
+            if (Remaining < 2) throw new EndOfStreamException();
+            short value = mData[mCursor++];
+            value |= (short)(mData[mCursor++] << 8);
+            return value;
         }
 
         public ushort ReadUInt16()
@@ -45,6 +59,16 @@ namespace Fusion.IL
             return value;
         }
 
+        public int ReadInt32()
+        {
+            if (Remaining < 4) throw new EndOfStreamException();
+            int value = mData[mCursor++];
+            value |= ((int)mData[mCursor++] << 8);
+            value |= ((int)mData[mCursor++] << 16);
+            value |= ((int)mData[mCursor++] << 24);
+            return value;
+        }
+
         public uint ReadUInt32()
         {
             if (Remaining < 4) throw new EndOfStreamException();
@@ -52,6 +76,20 @@ namespace Fusion.IL
             value |= ((uint)mData[mCursor++] << 8);
             value |= ((uint)mData[mCursor++] << 16);
             value |= ((uint)mData[mCursor++] << 24);
+            return value;
+        }
+
+        public long ReadInt64()
+        {
+            if (Remaining < 8) throw new EndOfStreamException();
+            long value = mData[mCursor++];
+            value |= ((long)mData[mCursor++] << 8);
+            value |= ((long)mData[mCursor++] << 16);
+            value |= ((long)mData[mCursor++] << 24);
+            value |= ((long)mData[mCursor++] << 32);
+            value |= ((long)mData[mCursor++] << 40);
+            value |= ((long)mData[mCursor++] << 48);
+            value |= ((long)mData[mCursor++] << 56);
             return value;
         }
 

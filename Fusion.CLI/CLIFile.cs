@@ -142,6 +142,7 @@ namespace Fusion.CLI
             Array.ForEach(sMetadataLoaders, l => l.Initializer(this));
             Array.ForEach(sMetadataLoaders, l => l.Loader(this));
             Array.ForEach(sMetadataLoaders, l => l.Linker(this));
+            Array.ForEach(MethodDefTable, m => { if (m.Body != null) m.Body.LinkData(m); });
         }
 
         public int ReadHeapIndex(byte p32BitFlag)

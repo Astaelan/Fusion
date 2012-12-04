@@ -11,7 +11,8 @@ namespace Fusion.IR.Instructions
 
         public override void Linearize(Stack<IRStackObject> pStack)
         {
-            for (int count = 0; count < Constructor.Parameters.Count; ++count) Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
+            // Skip first parameter source, it is the 'this' reference that is put on the stack by newobj before constructor call
+            for (int count = 1; count < Constructor.Parameters.Count; ++count) Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
 
             IRStackObject result = new IRStackObject();
             result.Type = Constructor.ParentType;

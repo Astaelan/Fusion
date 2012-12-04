@@ -556,6 +556,22 @@ namespace Fusion.IR
                 }
                 else throw new ArgumentException();
             }
+            else if (pValue1Type.IsPointerType)
+            {
+                if (pValue2Type == System_SByte ||
+                    pValue2Type == System_Byte ||
+                    pValue2Type == System_Int16 ||
+                    pValue2Type == System_UInt16 ||
+                    pValue2Type == System_Int32 ||
+                    pValue2Type == System_UInt32 ||
+                    pValue2Type == System_IntPtr ||
+                    pValue2Type == System_UIntPtr ||
+                    pValue2Type.IsPointerType)
+                {
+                    resultType = System_IntPtr;
+                }
+                else throw new ArgumentException();
+            }
             else if (pValue1Type == System_Single ||
                      pValue1Type == System_Double)
             {
@@ -596,7 +612,8 @@ namespace Fusion.IR
             else if (pValueType == System_Int64 ||
                      pValueType == System_UInt64)
             {
-                if (pShiftAmountType == System_Int64 ||
+                if (pShiftAmountType == System_Int32 ||
+                    pShiftAmountType == System_Int64 ||
                     pShiftAmountType == System_UInt64)
                 {
                     resultType = System_Int64;

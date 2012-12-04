@@ -119,12 +119,9 @@ namespace Fusion.IR
                 MethodDefData methodDefData = File.MethodDefTable[methodIndex];
                 if (methodDefData.ExpandedSignature.HasThis && !methodDefData.ExpandedSignature.ExplicitThis)
                 {
-                    IRType thisType = null;
-                    if (method.ParentType.IsValueType) thisType = AppDomain.GetPointerType(method.ParentType);
-                    else thisType = method.ParentType;
                     IRParameter implicitThis = new IRParameter(this);
                     implicitThis.ParentMethod = method;
-                    implicitThis.Type = thisType;
+                    implicitThis.Type = methd.ParentType.IsValueType ? AppDomain.GetPointerType(method.ParentType) : method.ParentType;
                     method.Parameters.Insert(0, implicitThis);
                 }
             }

@@ -51,6 +51,8 @@ namespace Fusion.IR
 
         private bool mIsValueType = false;
         public bool IsValueType { get { return mIsValueType; } }
+
+        public bool IsEnumType { get { return BaseType == Assembly.AppDomain.System_Enum; } }
         
         // We can cache this because the state
         // of the cache doesn't extend to any

@@ -136,7 +136,7 @@ namespace Fusion.IR
             {
                 Methods[methodIndex].ConvertInstructions(File.MethodDefTable[methodIndex]);
                 Methods[methodIndex].ControlFlowGraph = IRControlFlowGraph.Build(Methods[methodIndex]);
-                Methods[methodIndex].LinearizeInstructions();
+                Methods[methodIndex].LinearizeInstructions(File.MethodDefTable[methodIndex]);
             }
         }
 

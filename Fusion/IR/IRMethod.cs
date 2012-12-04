@@ -92,11 +92,12 @@ namespace Fusion.IR
 
         public bool CompareSignature(MethodSig pMethodSig)
         {
-            if (Parameters.Count != pMethodSig.Params.Count) return false;
+            bool implicitThis = pMethodSig.HasThis && !pMethodSig.ExplicitThis;
+            if ((Parameters.Count - (implicitThis ? 1 : 0)) != pMethodSig.Params.Count) return false;
             if (ReturnType != Assembly.AppDomain.PresolveType(pMethodSig.RetType)) return false;
-            for (int index = 0; index < Parameters.Count; ++index)
+            for (int index = 0; index < pMethodSig.Params.Count; ++index)
             {
-                if (Parameters[index].Type != Assembly.AppDomain.PresolveType(pMethodSig.Params[index])) return false;
+                if (Parameters[index + (implicitThis ? 1 : 0)].Type != Assembly.AppDomain.PresolveType(pMethodSig.Params[index])) return false;
             }
             return true;
         }
@@ -438,10 +439,23 @@ namespace Fusion.IR
             }
         }
 
-        public void LinearizeInstructions()
+        public void LinearizeInstructions(MethodDefData pMethodDefData)
         {
             Stack<IRStackObject> stack = new Stack<IRStackObject>((int)MaximumStackDepth);
-            foreach (IRInstruction instruction in Instructions) instruction.Linearize(stack);
+            MethodDefData.MethodDefBodyData.MethodDefBodyExceptionData exceptionData = null;
+            foreach (IRInstruction instruction in Instructions)
+            {
+                if ((exceptionData = Array.Find(pMethodDefData.Body.Exceptions, e => e.Flags == 0 && e.HandlerOffset == instruction.ILOffset)) != null)
+                {
+                    IRType exceptionType = Assembly.AppDomain.PresolveType(Assembly.File.ExpandMetadataToken(exceptionData.ClassTokenOrFilterOffset));
+                    IRStackObject exceptionObj = new IRStackObject();
+                    exceptionObj.Type = exceptionType;
+                    exceptionObj.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);
+                    exceptionObj.LinearizedTarget.Local.LocalIndex = instruction.AddLinearizedLocal(exceptionType);
+                    stack.Push(exceptionObj);
+                }
+                instruction.Linearize(stack);
+            }
         }
     }
 }

@@ -488,6 +488,15 @@ namespace Fusion.IR
                         }
                         throw new NullReferenceException();
                     }
+                case MemberRefParentIndex.MemberRefParentType.TypeSpec:
+                    {
+                        IRType type = PresolveType(pMemberRefData.Class.TypeSpec);
+                        foreach (IRField field in type.GenericType.Fields)
+                        {
+                            if (field.CompareSignature(pMemberRefData)) return field;
+                        }
+                        throw new NullReferenceException();
+                    }
             }
             throw new NullReferenceException();
         }
@@ -511,6 +520,7 @@ namespace Fusion.IR
                 pValue1Type == System_Byte ||
                 pValue1Type == System_Int16 ||
                 pValue1Type == System_UInt16 ||
+                pValue1Type == System_Char ||
                 pValue1Type == System_Int32 ||
                 pValue1Type == System_UInt32)
             {
@@ -518,6 +528,7 @@ namespace Fusion.IR
                     pValue2Type == System_Byte ||
                     pValue2Type == System_Int16 ||
                     pValue2Type == System_UInt16 ||
+                    pValue2Type == System_Char ||
                     pValue2Type == System_Int32 ||
                     pValue2Type == System_UInt32)
                 {
@@ -547,6 +558,7 @@ namespace Fusion.IR
                     pValue2Type == System_Byte ||
                     pValue2Type == System_Int16 ||
                     pValue2Type == System_UInt16 ||
+                    pValue2Type == System_Char ||
                     pValue2Type == System_Int32 ||
                     pValue2Type == System_UInt32 ||
                     pValue2Type == System_IntPtr ||
@@ -562,6 +574,7 @@ namespace Fusion.IR
                     pValue2Type == System_Byte ||
                     pValue2Type == System_Int16 ||
                     pValue2Type == System_UInt16 ||
+                    pValue2Type == System_Char ||
                     pValue2Type == System_Int32 ||
                     pValue2Type == System_UInt32 ||
                     pValue2Type == System_IntPtr ||
@@ -579,6 +592,27 @@ namespace Fusion.IR
                     pValue2Type == System_Double)
                 {
                     resultType = System_Double;
+                }
+                else throw new ArgumentException();
+            }
+            else if (pValue1Type.IsEnumType &&
+                     pValue2Type.IsEnumType &&
+                     pValue1Type == pValue2Type)
+            {
+                resultType = pValue1Type;
+            }
+            else if (pValue1Type.IsEnumType &&
+                     !pValue2Type.IsEnumType)
+            {
+                if (pValue2Type == System_SByte ||
+                    pValue2Type == System_Byte ||
+                    pValue2Type == System_Int16 ||
+                    pValue2Type == System_UInt16 ||
+                    pValue2Type == System_Char ||
+                    pValue2Type == System_Int32 ||
+                    pValue2Type == System_UInt32)
+                {
+                    resultType = pValue1Type;
                 }
                 else throw new ArgumentException();
             }

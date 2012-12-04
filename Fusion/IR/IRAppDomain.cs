@@ -530,7 +530,8 @@ namespace Fusion.IR
                     pValue2Type == System_UInt16 ||
                     pValue2Type == System_Char ||
                     pValue2Type == System_Int32 ||
-                    pValue2Type == System_UInt32)
+                    pValue2Type == System_UInt32 ||
+                    pValue2Type.IsEnumType)
                 {
                     resultType = System_Int32;
                 }

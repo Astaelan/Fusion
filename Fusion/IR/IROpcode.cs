@@ -831,7 +831,6 @@
         */
         LoadTypedReferenceAddress,
 
-
         /*
             Description:
                 Load the RuntimeTypeHandle from a typed reference.
@@ -842,6 +841,17 @@
             Arguments:
         */
         LoadTypedReferenceType,
+
+        /*
+            Description:
+                Return from a finally clause of an exception handler block.
+
+            Stack:
+                ... -> ...
+
+            Arguments:
+        */
+        EndFinally,
 
         // Instruction Linearization
         /*

@@ -357,7 +357,7 @@ namespace Fusion.IR
                     case ILOpcode.Mul_Ovf_Un: AddInstruction(startOfInstruction, new IRMultiplyInstruction(IROverflowType.Unsigned)); break;
                     case ILOpcode.Sub_Ovf: AddInstruction(startOfInstruction, new IRSubtractInstruction(IROverflowType.Signed)); break;
                     case ILOpcode.Sub_Ovf_Un: AddInstruction(startOfInstruction, new IRSubtractInstruction(IROverflowType.Unsigned)); break;
-                    case ILOpcode.EndFinally: throw new NotImplementedException("EndFinally");
+                    case ILOpcode.EndFinally: AddInstruction(startOfInstruction, new IREndFinallyInstruction()); break;
                     case ILOpcode.Leave: AddInstruction(startOfInstruction, new IRLeaveInstruction(reader.ReadUInt32() + reader.Offset)); break;
                     case ILOpcode.Leave_S: AddInstruction(startOfInstruction, new IRLeaveInstruction((uint)(reader.ReadByte() + reader.Offset))); break;
                     case ILOpcode.StInd_I: AddInstruction(startOfInstruction, new IRStoreIndirectInstruction(Assembly.AppDomain.System_IntPtr)); break;

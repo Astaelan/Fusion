@@ -64,6 +64,7 @@
     <Compile Include="IR\Instructions\IRCopyObjectInstruction.cs" />
     <Compile Include="IR\Instructions\IRDivideInstruction.cs" />
     <Compile Include="IR\Instructions\IRDuplicateInstruction.cs" />
+    <Compile Include="IR\Instructions\IREndFinallyInstruction.cs" />
     <Compile Include="IR\Instructions\IRInitializeBlockInstruction.cs" />
     <Compile Include="IR\Instructions\IRInitializeObjectInstruction.cs" />
     <Compile Include="IR\Instructions\IRJumpInstruction.cs" />

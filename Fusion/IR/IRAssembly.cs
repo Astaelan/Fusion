@@ -121,7 +121,7 @@ namespace Fusion.IR
                 {
                     IRParameter implicitThis = new IRParameter(this);
                     implicitThis.ParentMethod = method;
-                    implicitThis.Type = methd.ParentType.IsValueType ? AppDomain.GetPointerType(method.ParentType) : method.ParentType;
+                    implicitThis.Type = method.ParentType.IsValueType ? AppDomain.GetPointerType(method.ParentType) : method.ParentType;
                     method.Parameters.Insert(0, implicitThis);
                 }
             }

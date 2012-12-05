@@ -24,6 +24,7 @@ namespace Fusion.IR
 
         internal void LoadStage1()
         {
+            Console.WriteLine("================================================== Stage 1: {0} ==================================================", File.ReferenceName);
             foreach (TypeDefData typeDefData in File.TypeDefTable) Types.Add(new IRType(this));
             foreach (FieldData fieldData in File.FieldTable) Fields.Add(new IRField(this));
             foreach (MethodDefData methodDefData in File.MethodDefTable) Methods.Add(new IRMethod(this));
@@ -86,6 +87,7 @@ namespace Fusion.IR
 
         internal void LoadStage2()
         {
+            Console.WriteLine("================================================== Stage 2: {0} ==================================================", File.ReferenceName);
             for (int typeIndex = 0; typeIndex < Types.Count; ++typeIndex)
             {
                 IRType type = Types[typeIndex];
@@ -129,6 +131,7 @@ namespace Fusion.IR
 
         internal void LoadStage3()
         {
+            Console.WriteLine("======================================== Stage 3: {0} ==================================================", File.ReferenceName);
             for (int methodIndex = 0; methodIndex < Methods.Count; ++methodIndex)
             {
                 Methods[methodIndex].ConvertInstructions(File.MethodDefTable[methodIndex]);

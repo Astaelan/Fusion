@@ -457,5 +457,47 @@ namespace Fusion.IR
                 instruction.Linearize(stack);
             }
         }
+
+        public void TransformInstructions(MethodDefData pMethodDefData)
+        {
+            for (int index = 0; index < Instructions.Count; ++index)
+            {
+                IRInstruction currentInstruction = Instructions[index];
+                IRInstruction newInstruction = currentInstruction.Transform();
+                if (newInstruction != currentInstruction)
+                {
+                    Instructions[index] = newInstruction;
+
+                    foreach (IRInstruction tempInstruction in Instructions)
+                    {
+                        switch (tempInstruction.Opcode)
+                        {
+                            case IROpcode.Branch:
+                                {
+                                    IRBranchInstruction branchInstruction = (IRBranchInstruction)tempInstruction;
+                                    if (branchInstruction.TargetIRInstruction == currentInstruction) branchInstruction.TargetIRInstruction = newInstruction;
+                                    break;
+                                }
+                            case IROpcode.Switch:
+                                {
+                                    IRSwitchInstruction switchInstruction = (IRSwitchInstruction)tempInstruction;
+                                    for (int switchIndex = 0; switchIndex < switchInstruction.TargetIRInstructions.Length; ++switchIndex)
+                                    {
+                                        if (switchInstruction.TargetIRInstructions[switchIndex] == currentInstruction) switchInstruction.TargetIRInstructions[switchIndex] = newInstruction;
+                                    }
+                                    break;
+                                }
+                            case IROpcode.Leave:
+                                {
+                                    IRLeaveInstruction leaveInstruction = (IRLeaveInstruction)tempInstruction;
+                                    if (leaveInstruction.TargetIRInstruction == currentInstruction) leaveInstruction.TargetIRInstruction = newInstruction;
+                                    break;
+                                }
+                            default: break;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

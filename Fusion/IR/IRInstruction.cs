@@ -62,5 +62,6 @@ namespace Fusion.IR
             Sources.ForEach(s => s.Resolve(typeParams, methodParams));
         }
 
+        public virtual IRInstruction Transform() { return this; }
     }
 }

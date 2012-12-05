@@ -34,9 +34,9 @@ Create IRGenericInstantiations for IRField types
 Create IRGenericInstantiations for IRMethod return and parameter types
 Create IRGenericInstantiations for IRLocal types
 
-- Build control flow graph required for linearization of values remaining from inside branches
-= Linearization of IRInstructions
-Transform Load/Store to Move IRInstructions
+* Build control flow graph required for linearization of values remaining from inside branches
+* Linearization of IRInstructions
+* Transform Load/Store to Move IRInstructions
 Transform instructions that behave like other instructions under certain conditions, IE unbox.any to castclass when dealing with a reference type
 
 Resolve internal calls

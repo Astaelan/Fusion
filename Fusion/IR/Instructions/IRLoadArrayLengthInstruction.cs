@@ -25,5 +25,7 @@ namespace Fusion.IR.Instructions
         {
             throw new NotImplementedException();
         }
+
+        public override IRInstruction Transform() { return new IRMoveInstruction(this); }
     }
 }

@@ -92,6 +92,7 @@
     <Compile Include="IR\Instructions\IRLoadStringInstruction.cs" />
     <Compile Include="IR\Instructions\IRLoadTypedReferenceInstruction.cs" />
     <Compile Include="IR\Instructions\IRLoadTypedReferenceTypeInstruction.cs" />
+    <Compile Include="IR\Instructions\IRMoveInstruction.cs" />
     <Compile Include="IR\Instructions\IRMultiplyInstruction.cs" />
     <Compile Include="IR\Instructions\IRNegateInstruction.cs" />
     <Compile Include="IR\Instructions\IRNewArrayInstruction.cs" />

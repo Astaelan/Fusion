@@ -114,7 +114,16 @@ namespace Fusion.IR
                     case IROpcode.Branch:
                         {
                             IRBranchInstruction branchInstruction = (IRBranchInstruction)instruction;
-                            branchInstruction.TargetIRInstruction = mILOffsetLookup[branchInstruction.TargetILOffset];
+                            IRInstruction targetInstruction = mILOffsetLookup[branchInstruction.TargetILOffset];
+                            if (targetInstruction.Opcode == IROpcode.Branch)
+                            {
+                                IRBranchInstruction targetBranchInstruction = (IRBranchInstruction)targetInstruction;
+                                if (targetBranchInstruction.BranchCondition == IRBranchCondition.Always)
+                                {
+                                    targetInstruction = mILOffsetLookup[targetBranchInstruction.TargetILOffset];
+                                }
+                            }
+                            branchInstruction.TargetIRInstruction = targetInstruction;
                             if (branchInstruction.TargetIRInstruction == null) throw new NullReferenceException();
                             break;
                         }

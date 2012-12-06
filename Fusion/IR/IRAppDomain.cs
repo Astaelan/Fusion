@@ -189,6 +189,7 @@ namespace Fusion.IR
             IRMethod method = new IRMethod(pGenericMethod.Assembly);
             method.Name = pGenericMethod.Name;
             method.GenericMethod = pGenericMethod;
+            pGenericMethod.Parameters.ForEach(p => method.Parameters.Add(new IRParameter(pGenericMethod.Assembly)));
             method.GenericParameters.AddRange(pGenericParameterTypes);
             return method;
         }

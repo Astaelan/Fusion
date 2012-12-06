@@ -25,7 +25,14 @@ namespace Fusion.IR.Instructions
         {
             switch (BranchCondition)
             {
-                case IRBranchCondition.Always: break;
+                case IRBranchCondition.Always:
+                    if (pStack.Count > 0)
+                    {
+                        int sd = Method.StackDepths.Pop();
+                        while (pStack.Count > sd)
+                            pStack.Pop();
+                    }
+                    break;
                 case IRBranchCondition.False:
                 case IRBranchCondition.True: Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget)); break;
                 case IRBranchCondition.Equal:

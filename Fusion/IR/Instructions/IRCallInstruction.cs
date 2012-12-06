@@ -23,7 +23,7 @@ namespace Fusion.IR.Instructions
                 IRStackObject returned = new IRStackObject();
                 returned.Type = Target.ReturnType;
                 returned.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);
-                returned.LinearizedTarget.Local.LocalIndex = AddLinearizedLocal(Target.ReturnType);
+                returned.LinearizedTarget.Local.LocalIndex = AddLinearizedLocal(pStack, Target.ReturnType);
                 Destination = new IRLinearizedLocation(returned.LinearizedTarget);
                 pStack.Push(returned);
             }

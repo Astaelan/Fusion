@@ -65,6 +65,7 @@ namespace Fusion.IR
                         {
                             IRLocal local = new IRLocal(this);
                             local.ParentMethod = method;
+                            local.Index = (uint)method.Locals.Count;
                             method.Locals.Add(local);
                         }
                     }

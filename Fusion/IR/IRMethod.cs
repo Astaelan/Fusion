@@ -409,24 +409,52 @@ namespace Fusion.IR
             Instructions.FixTargetInstructions();
         }
 
+        private Dictionary<Tuple<int, IRType>, IRLocal> LinearizedStackLocalLookup = new Dictionary<Tuple<int, IRType>, IRLocal>();
+
+        public uint AddLinearizedLocal(Stack<IRStackObject> pStack, IRType pType)
+        {
+            IRLocal local = null;
+            if (!LinearizedStackLocalLookup.TryGetValue(new Tuple<int, IRType>(pStack.Count, pType), out local))
+            {
+                local = new IRLocal(Assembly);
+                local.ParentMethod = this;
+                local.Type = pType;
+                local.Index = (uint)Locals.Count;
+                Locals.Add(local);
+                LinearizedStackLocalLookup[new Tuple<int, IRType>(pStack.Count, pType)] = local;
+            }
+            return local.Index;
+        }
+
+        public Stack<int> StackDepths;
+
         public void LinearizeInstructions(MethodDefData pMethodDefData)
         {
-            Stack<IRStackObject> stack = new Stack<IRStackObject>((int)MaximumStackDepth);
-            MethodDefData.MethodDefBodyData.MethodDefBodyExceptionData exceptionData = null;
-            foreach (IRInstruction instruction in Instructions)
+            if (Instructions.Count > 0)
             {
-                if ((exceptionData = Array.Find(pMethodDefData.Body.Exceptions, e => e.Flags == 0 && e.HandlerOffset == instruction.ILOffset)) != null)
+                Stack<IRStackObject> stack = new Stack<IRStackObject>((int)MaximumStackDepth);
+                StackDepths = new Stack<int>(ControlFlowGraph.Nodes.Count);
+                MethodDefData.MethodDefBodyData.MethodDefBodyExceptionData exceptionData = null;
+                foreach (IRInstruction instruction in Instructions)
                 {
-                    IRType exceptionType = Assembly.AppDomain.PresolveType(Assembly.File.ExpandMetadataToken(exceptionData.ClassTokenOrFilterOffset));
-                    IRStackObject exceptionObj = new IRStackObject();
-                    exceptionObj.Type = exceptionType;
-                    exceptionObj.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);
-                    exceptionObj.LinearizedTarget.Local.LocalIndex = instruction.AddLinearizedLocal(exceptionType);
-                    stack.Push(exceptionObj);
+                    if ((exceptionData = Array.Find(pMethodDefData.Body.Exceptions, e => e.Flags == 0 && e.HandlerOffset == instruction.ILOffset)) != null)
+                    {
+                        IRType exceptionType = Assembly.AppDomain.PresolveType(Assembly.File.ExpandMetadataToken(exceptionData.ClassTokenOrFilterOffset));
+                        IRStackObject exceptionObj = new IRStackObject();
+                        exceptionObj.Type = exceptionType;
+                        exceptionObj.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);
+                        exceptionObj.LinearizedTarget.Local.LocalIndex = instruction.AddLinearizedLocal(stack, exceptionType);
+                        stack.Push(exceptionObj);
+                    }
+                    var n = ControlFlowGraph.FindInstructionNode(instruction);
+                    if (n.Instructions[0].IRIndex == instruction.IRIndex && n.Instructions[n.Instructions.Count - 1].Opcode == IROpcode.Branch && ((IRBranchInstruction)n.Instructions[n.Instructions.Count - 1]).BranchCondition == IRBranchCondition.Always)
+                    {
+                        StackDepths.Push(stack.Count);
+                    }
+                    instruction.Linearize(stack);
                 }
-                instruction.Linearize(stack);
+                if (stack.Count > 0) throw new Exception();
             }
-            if (stack.Count > 0) throw new Exception();
         }
 
         public void TransformInstructions(MethodDefData pMethodDefData)

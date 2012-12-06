@@ -11,6 +11,8 @@ namespace Fusion.IR
         public IRMethod ParentMethod = null;
         public IRType Type = null;
 
+        public uint Index = 0;
+
         public bool Resolved { get { return Type.Resolved; } }
 
         public void Resolve(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
@@ -25,10 +27,11 @@ namespace Fusion.IR
 
         public IRLocal Clone(IRMethod newMethod)
         {
-            IRLocal l = new IRLocal(this.Assembly);
-            l.ParentMethod = newMethod;
-            l.Type = this.Type;
-            return l;
+            IRLocal local = new IRLocal(this.Assembly);
+            local.ParentMethod = newMethod;
+            local.Type = this.Type;
+            local.Index = (uint)newMethod.Locals.Count;
+            return local;
         }
     }
 }

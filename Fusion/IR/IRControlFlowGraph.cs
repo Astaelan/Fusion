@@ -1,6 +1,7 @@
 ﻿using Fusion.IR.Instructions;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Fusion.IR
 {
@@ -143,6 +144,25 @@ namespace Fusion.IR
                 }
             }
             return cfg;
+        }
+
+        public Node FindInstructionNode(IRInstruction pInstruction)
+        {
+            foreach (Node node in Nodes)
+            {
+                foreach (IRInstruction instruction in node.Instructions)
+                {
+                    if (pInstruction == instruction) return node;
+                }
+            }
+            throw new NullReferenceException();
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            Nodes.ForEach(n => sb.AppendLine(string.Format("Node #{0}, 0x{1:X} - 0x{2:X}", n.Index, n.Instructions[0].ILOffset, n.Instructions[n.Instructions.Count - 1].ILOffset)));
+            return sb.ToString();
         }
     }
 }

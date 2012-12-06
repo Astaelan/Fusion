@@ -19,14 +19,7 @@ namespace Fusion.IR
             Opcode = pOpcode;
         }
 
-        public uint AddLinearizedLocal(IRType pType)
-        {
-            IRLocal local = new IRLocal(Method.Assembly);
-            local.ParentMethod = Method;
-            local.Type = pType;
-            Method.Locals.Add(local);
-            return (uint)(Method.Locals.Count - 1);
-        }
+        public uint AddLinearizedLocal(Stack<IRStackObject> pStack, IRType pType) { return Method.AddLinearizedLocal(pStack, pType); }
 
         public abstract void Linearize(Stack<IRStackObject> pStack);
 

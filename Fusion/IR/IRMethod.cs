@@ -86,7 +86,7 @@ namespace Fusion.IR
             m.Name = this.Name;
             m.ParentType = newParent;
             m.ReturnType = this.ReturnType;
-
+            // TODO: Fix Branch/Switch/Leave IRInstruction's to new method instructions based on IRIndex's
             return m;
         }
 
@@ -456,6 +456,7 @@ namespace Fusion.IR
                 }
                 instruction.Linearize(stack);
             }
+            if (stack.Count > 0) throw new Exception();
         }
 
         public void TransformInstructions(MethodDefData pMethodDefData)

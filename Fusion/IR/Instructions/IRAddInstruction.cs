@@ -31,9 +31,6 @@ namespace Fusion.IR.Instructions
             pStack.Push(result);
         }
 
-        public override IRInstruction Clone(IRMethod newMethod)
-        {
-            return CopyTo(new IRAddInstruction(this.OverflowType), newMethod);
-        }
+        public override IRInstruction Clone(IRMethod pNewMethod) { return CopyTo(new IRAddInstruction(OverflowType), pNewMethod); }
     }
 }

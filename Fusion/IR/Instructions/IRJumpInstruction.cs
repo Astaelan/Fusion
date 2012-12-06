@@ -14,9 +14,6 @@ namespace Fusion.IR.Instructions
             if (pStack.Count > 0) throw new OverflowException();
         }
 
-        public override IRInstruction Clone(IRMethod newMethod)
-        {
-            throw new NotImplementedException();
-        }
+        public override IRInstruction Clone(IRMethod pNewMethod) { return CopyTo(new IRJumpInstruction(Target), pNewMethod); }
     }
 }

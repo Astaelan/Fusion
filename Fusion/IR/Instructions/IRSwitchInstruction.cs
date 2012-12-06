@@ -15,9 +15,10 @@ namespace Fusion.IR.Instructions
             Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
         }
 
-        public override IRInstruction Clone(IRMethod newMethod)
+        public override IRInstruction Clone(IRMethod pNewMethod)
         {
-            throw new NotImplementedException();
+            IRInstruction[] newTargetIRInstructions = (IRInstruction[])TargetIRInstructions.Clone();
+            return CopyTo(new IRSwitchInstruction(TargetILOffsets) { TargetIRInstructions = newTargetIRInstructions }, pNewMethod);
         }
     }
 }

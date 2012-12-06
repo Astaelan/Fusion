@@ -9,9 +9,6 @@ namespace Fusion.IR.Instructions
 
         public override void Linearize(Stack<IRStackObject> pStack) { }
 
-        public override IRInstruction Clone(IRMethod newMethod)
-        {
-            throw new NotImplementedException();
-        }
+        public override IRInstruction Clone(IRMethod pNewMethod) { return CopyTo(new IREndFinallyInstruction(), pNewMethod); }
     }
 }

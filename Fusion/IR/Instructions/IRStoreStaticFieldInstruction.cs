@@ -17,10 +17,7 @@ namespace Fusion.IR.Instructions
             Destination.StaticField.Field = Field;
         }
 
-        public override IRInstruction Clone(IRMethod newMethod)
-        {
-            throw new NotImplementedException();
-        }
+        public override IRInstruction Clone(IRMethod pNewMethod) { return CopyTo(new IRStoreStaticFieldInstruction(Field), pNewMethod); }
 
         public override IRInstruction Transform() { return new IRMoveInstruction(this); }
     }

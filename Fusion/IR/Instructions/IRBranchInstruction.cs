@@ -48,9 +48,6 @@ namespace Fusion.IR.Instructions
             }
         }
 
-        public override IRInstruction Clone(IRMethod newMethod)
-        {
-            throw new NotImplementedException();
-        }
+        public override IRInstruction Clone(IRMethod pNewMethod) { return CopyTo(new IRBranchInstruction(BranchCondition, TargetILOffset) { TargetIRInstruction = this.TargetIRInstruction }, pNewMethod); }
     }
 }

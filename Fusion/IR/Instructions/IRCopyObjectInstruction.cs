@@ -17,9 +17,6 @@ namespace Fusion.IR.Instructions
             Sources.Add(new IRLinearizedLocation(srcAddr.LinearizedTarget));
         }
 
-        public override IRInstruction Clone(IRMethod newMethod)
-        {
-            throw new NotImplementedException();
-        }
+        public override IRInstruction Clone(IRMethod pNewMethod) { return CopyTo(new IRCopyObjectInstruction(Type), pNewMethod); }
     }
 }

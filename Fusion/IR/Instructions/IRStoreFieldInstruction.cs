@@ -18,10 +18,7 @@ namespace Fusion.IR.Instructions
             Destination.Field.FieldLocation = new IRLinearizedLocation(pStack.Pop().LinearizedTarget);
         }
 
-        public override IRInstruction Clone(IRMethod newMethod)
-        {
-            throw new NotImplementedException();
-        }
+        public override IRInstruction Clone(IRMethod pNewMethod) { return CopyTo(new IRStoreFieldInstruction(Field), pNewMethod); }
 
         public override IRInstruction Transform() { return new IRMoveInstruction(this); }
     }

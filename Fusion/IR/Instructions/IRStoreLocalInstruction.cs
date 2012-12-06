@@ -17,10 +17,7 @@ namespace Fusion.IR.Instructions
             Destination.Local.LocalIndex = LocalIndex;
         }
 
-        public override IRInstruction Clone(IRMethod newMethod)
-        {
-            throw new NotImplementedException();
-        }
+        public override IRInstruction Clone(IRMethod pNewMethod) { return CopyTo(new IRStoreLocalInstruction(LocalIndex), pNewMethod); }
 
         public override IRInstruction Transform() { return new IRMoveInstruction(this); }
     }

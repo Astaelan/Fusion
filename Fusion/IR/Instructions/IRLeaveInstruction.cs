@@ -15,9 +15,6 @@ namespace Fusion.IR.Instructions
             pStack.Clear();
         }
 
-        public override IRInstruction Clone(IRMethod newMethod)
-        {
-            throw new NotImplementedException();
-        }
+        public override IRInstruction Clone(IRMethod pNewMethod) { return CopyTo(new IRLeaveInstruction(TargetILOffset) { TargetIRInstruction = this.TargetIRInstruction }, pNewMethod); }
     }
 }

@@ -32,9 +32,6 @@ namespace Fusion.IR.Instructions
             pStack.Push(result);
         }
 
-        public override IRInstruction Clone(IRMethod newMethod)
-        {
-            throw new NotImplementedException();
-        }
+        public override IRInstruction Clone(IRMethod pNewMethod) { return CopyTo(new IRConvertCheckedInstruction(Type, OverflowType), pNewMethod); }
     }
 }

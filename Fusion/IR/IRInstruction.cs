@@ -52,7 +52,7 @@ namespace Fusion.IR
             return i;
         }
 
-        public abstract IRInstruction Clone(IRMethod newMethod);
+        public abstract IRInstruction Clone(IRMethod pNewMethod);
         public virtual bool Resolved { get { return true; } }
 
         public virtual void Resolve(GenericParameterCollection typeParams, GenericParameterCollection methodParams)

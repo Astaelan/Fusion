@@ -5,10 +5,10 @@ namespace Fusion.IR.Instructions
 {
     public sealed class IRSwitchInstruction : IRInstruction
     {
-        public uint[] TargetILOffsets = null;
+        public int[] TargetILOffsets = null;
         public IRInstruction[] TargetIRInstructions = null;
 
-        public IRSwitchInstruction(uint[] pTargetILOffsets) : base(IROpcode.Switch) { TargetILOffsets = pTargetILOffsets; }
+        public IRSwitchInstruction(int[] pTargetILOffsets) : base(IROpcode.Switch) { TargetILOffsets = pTargetILOffsets; }
 
         public override void Linearize(Stack<IRStackObject> pStack)
         {

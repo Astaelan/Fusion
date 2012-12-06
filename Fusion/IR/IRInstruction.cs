@@ -5,7 +5,7 @@ namespace Fusion.IR
 {
     public abstract class IRInstruction
     {
-        public uint ILOffset = 0;
+        public int ILOffset = 0;
         public uint IRIndex = 0;
         public IROpcode Opcode = IROpcode.Nop;
         public IRMethod Method = null;

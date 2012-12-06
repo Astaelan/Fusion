@@ -18,8 +18,7 @@ namespace Fusion.IR
         public IRType ReturnType = null;
         public readonly List<IRParameter> Parameters = new List<IRParameter>();
         public readonly List<IRLocal> Locals = new List<IRLocal>();
-        public readonly List<IRInstruction> Instructions = new List<IRInstruction>();
-        public readonly Dictionary<uint, IRInstruction> ILOffsetToIRInstruction = new Dictionary<uint, IRInstruction>();
+        public readonly IRInstructionList Instructions = new IRInstructionList();
 
         private bool? mResolvedCache;
         public bool Resolved
@@ -110,11 +109,10 @@ namespace Fusion.IR
 
         public void AddInstruction(uint pILOffset, IRInstruction pInstruction)
         {
-            pInstruction.ILOffset = pILOffset;
+            pInstruction.ILOffset = (int)pILOffset;
             pInstruction.IRIndex = (uint)Instructions.Count;
             pInstruction.Method = this;
             Instructions.Add(pInstruction);
-            ILOffsetToIRInstruction.Add(pILOffset, pInstruction);
         }
 
         public void ConvertInstructions(MethodDefData pMethodDefData)
@@ -207,9 +205,9 @@ namespace Fusion.IR
                     case ILOpcode.Switch:
                         {
                             uint targetCount = reader.ReadUInt32();
-                            uint[] targetILOffsets = new uint[targetCount];
-                            for (int index = 0; index < targetCount; ++index) targetILOffsets[index] = reader.ReadUInt32();
-                            for (int index = 0; index < targetCount; ++index) targetILOffsets[index] += reader.Offset;
+                            int[] targetILOffsets = new int[targetCount];
+                            for (int index = 0; index < targetCount; ++index) targetILOffsets[index] = reader.ReadInt32();
+                            for (int index = 0; index < targetCount; ++index) targetILOffsets[index] += (int)reader.Offset;
                             AddInstruction(startOfInstruction, new IRSwitchInstruction(targetILOffsets));
                             break;
                         }
@@ -358,8 +356,8 @@ namespace Fusion.IR
                     case ILOpcode.Sub_Ovf: AddInstruction(startOfInstruction, new IRSubtractInstruction(IROverflowType.Signed)); break;
                     case ILOpcode.Sub_Ovf_Un: AddInstruction(startOfInstruction, new IRSubtractInstruction(IROverflowType.Unsigned)); break;
                     case ILOpcode.EndFinally: AddInstruction(startOfInstruction, new IREndFinallyInstruction()); break;
-                    case ILOpcode.Leave: AddInstruction(startOfInstruction, new IRLeaveInstruction(reader.ReadUInt32() + reader.Offset)); break;
-                    case ILOpcode.Leave_S: AddInstruction(startOfInstruction, new IRLeaveInstruction((uint)(reader.ReadByte() + reader.Offset))); break;
+                    case ILOpcode.Leave: AddInstruction(startOfInstruction, new IRLeaveInstruction((int)(reader.ReadInt32() + reader.Offset))); break;
+                    case ILOpcode.Leave_S: AddInstruction(startOfInstruction, new IRLeaveInstruction((int)(reader.ReadByte() + reader.Offset))); break;
                     case ILOpcode.StInd_I: AddInstruction(startOfInstruction, new IRStoreIndirectInstruction(Assembly.AppDomain.System_IntPtr)); break;
                     case ILOpcode.Conv_U: AddInstruction(startOfInstruction, new IRConvertUncheckedInstruction(Assembly.AppDomain.System_UIntPtr)); break;
 
@@ -408,35 +406,7 @@ namespace Fusion.IR
                 }
             }
 
-            foreach (IRInstruction instruction in Instructions)
-            {
-                switch (instruction.Opcode)
-                {
-                    case IROpcode.Branch:
-                        {
-                            IRBranchInstruction branchInstruction = (IRBranchInstruction)instruction;
-                            branchInstruction.TargetIRInstruction = ILOffsetToIRInstruction[(uint)branchInstruction.TargetILOffset];
-                            break;
-                        }
-                    case IROpcode.Switch:
-                        {
-                            IRSwitchInstruction switchInstruction = (IRSwitchInstruction)instruction;
-                            switchInstruction.TargetIRInstructions = new IRInstruction[switchInstruction.TargetILOffsets.Length];
-                            for (int index = 0; index < switchInstruction.TargetILOffsets.Length; ++index)
-                            {
-                                switchInstruction.TargetIRInstructions[index] = ILOffsetToIRInstruction[switchInstruction.TargetILOffsets[index]];
-                            }
-                            break;
-                        }
-                    case IROpcode.Leave:
-                        {
-                            IRLeaveInstruction leaveInstruction = (IRLeaveInstruction)instruction;
-                            leaveInstruction.TargetIRInstruction = ILOffsetToIRInstruction[leaveInstruction.TargetILOffset];
-                            break;
-                        }
-                    default: break;
-                }
-            }
+            Instructions.FixTargetInstructions();
         }
 
         public void LinearizeInstructions(MethodDefData pMethodDefData)
@@ -461,44 +431,7 @@ namespace Fusion.IR
 
         public void TransformInstructions(MethodDefData pMethodDefData)
         {
-            for (int index = 0; index < Instructions.Count; ++index)
-            {
-                IRInstruction currentInstruction = Instructions[index];
-                IRInstruction newInstruction = currentInstruction.Transform();
-                if (newInstruction != currentInstruction)
-                {
-                    Instructions[index] = newInstruction;
-
-                    foreach (IRInstruction tempInstruction in Instructions)
-                    {
-                        switch (tempInstruction.Opcode)
-                        {
-                            case IROpcode.Branch:
-                                {
-                                    IRBranchInstruction branchInstruction = (IRBranchInstruction)tempInstruction;
-                                    if (branchInstruction.TargetIRInstruction == currentInstruction) branchInstruction.TargetIRInstruction = newInstruction;
-                                    break;
-                                }
-                            case IROpcode.Switch:
-                                {
-                                    IRSwitchInstruction switchInstruction = (IRSwitchInstruction)tempInstruction;
-                                    for (int switchIndex = 0; switchIndex < switchInstruction.TargetIRInstructions.Length; ++switchIndex)
-                                    {
-                                        if (switchInstruction.TargetIRInstructions[switchIndex] == currentInstruction) switchInstruction.TargetIRInstructions[switchIndex] = newInstruction;
-                                    }
-                                    break;
-                                }
-                            case IROpcode.Leave:
-                                {
-                                    IRLeaveInstruction leaveInstruction = (IRLeaveInstruction)tempInstruction;
-                                    if (leaveInstruction.TargetIRInstruction == currentInstruction) leaveInstruction.TargetIRInstruction = newInstruction;
-                                    break;
-                                }
-                            default: break;
-                        }
-                    }
-                }
-            }
+            for (int index = 0; index < Instructions.Count; ++index) Instructions[index] = Instructions[index].Transform();
         }
     }
 }

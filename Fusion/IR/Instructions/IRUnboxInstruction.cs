@@ -22,7 +22,7 @@ namespace Fusion.IR.Instructions
             Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
 
             IRType resultType = Type;
-            if (!Value) resultType = Method.Assembly.AppDomain.GetPointerType(Type);
+            if (!Value) resultType = ParentMethod.Assembly.AppDomain.GetPointerType(Type);
             IRStackObject result = new IRStackObject();
             result.Type = resultType;
             result.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);

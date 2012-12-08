@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Fusion.IR
 {
@@ -141,6 +142,18 @@ namespace Fusion.IR
             }
         }
 
+        public void Substitute(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
+        {
+            for (int i = 0; i < mParams.Count; i++)
+            {
+                IRType t = mParams[i];
+                t.Resolve(ref t, typeParams, methodParams);
+                mParams[i] = t;
+			}
+			mHashCodeCache = null;
+			mResolvedCache = null;
+        }
+
         public IEnumerator<IRType> GetEnumerator()
         {
             foreach (IRType t in mParams)
@@ -186,5 +199,17 @@ namespace Fusion.IR
             return a.GetHashCode() != b.GetHashCode();
         }
 
+		public override string ToString()
+		{
+			if (mParams.Count == 0)
+				return "<>";
+
+			StringBuilder sb = new StringBuilder();
+			sb.Append("<");
+			mParams.ForEach(t => sb.Append(t.ToString() + ", "));
+			sb.Remove(sb.Length - 2, 2);
+			sb.Append('>');
+			return sb.ToString();
+		}
     }
 }

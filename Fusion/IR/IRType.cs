@@ -59,6 +59,7 @@ namespace Fusion.IR
         // of the cache doesn't extend to any
         // derived type.
         private bool? mResolvedCache;
+		private bool mResolving = false;
         /// <summary>
         /// True if this type and it's members are fully
         /// resolved, aka. this type has been fully instantiated.
@@ -67,25 +68,24 @@ namespace Fusion.IR
         {
             get
             {
-                if (mResolvedCache != null)
-                    return mResolvedCache.Value;
+				if (mResolvedCache != null)
+					return mResolvedCache.Value;
+				else if (mResolving)
+					return true;
 
-                bool ressed = false;
-                //if (IsGeneric)
-                //{
-                    if (IsTemporaryVar) goto SetCache;
-                    if (IsTemporaryMVar) goto SetCache;
-                    if (PointerType != null && !PointerType.Resolved) goto SetCache;
-                    if (ArrayType != null && !ArrayType.Resolved) goto SetCache;
-                    if (BaseType != null && !BaseType.Resolved) goto SetCache;
-                    if (!Fields.Where(f => f.Type != this).TrueForAll(f => f.Resolved)) goto SetCache;
-                    if (!Methods.TrueForAll(m => m.Resolved)) goto SetCache;
-                //}
-                ressed = true;
+				mResolving = true;
+				if (IsTemporaryVar) return false;
+				if (IsTemporaryMVar) return false;
+                if (PointerType != null && !PointerType.Resolved) return false;
+                if (ArrayType != null && !ArrayType.Resolved) return false;
+                if (BaseType != null && !BaseType.Resolved) return false;
+                if (!Fields.Where(f => f.Type != this).TrueForAll(f => f.Resolved)) return false;
+                if (!Methods.TrueForAll(m => m.Resolved)) return false;
+				mResolving = false;
 
-            SetCache:
-                mResolvedCache = ressed;
-                return mResolvedCache.Value;
+                mResolvedCache = true;
+				Assembly.AppDomain.Types.Add(this);
+                return true;
             }
         }
 
@@ -140,7 +140,7 @@ namespace Fusion.IR
             IRType t = new IRType(this.Assembly);
 
             this.Fields.ForEach(f => t.Fields.Add(f.Clone(t)));
-            t.Methods.AddRange(this.Methods);
+            this.Methods.ForEach(m => t.Methods.Add(m.Clone(t)));
             t.NestedTypes.AddRange(this.NestedTypes);
             t.GenericParameters.AddRange(this.GenericParameters);
 
@@ -159,8 +159,7 @@ namespace Fusion.IR
 
         private static readonly Dictionary<IRType, IRType> GenericTypes = new Dictionary<IRType, IRType>();
         /// <summary>
-        /// Resolve any generic types used in this type. This DOES NOT modify the type it
-        /// is called on.
+        /// Resolve any generic types used in this type.
         /// </summary>
         /// <param name="selfReference"></param>
         /// <param name="typeParams"></param>
@@ -169,60 +168,73 @@ namespace Fusion.IR
         {
             if (!Resolved)
             {
-                if (IsTemporaryVar)
-                {
-                    selfReference = typeParams[this.TemporaryVarOrMVarIndex];
-                }
-                else if (IsTemporaryMVar)
-                {
-                    selfReference = methodParams[this.TemporaryVarOrMVarIndex];
-                }
-                else if (IsArrayType)
-                {
-                    IRType elemType = ArrayType;
-                    elemType.Resolve(ref elemType, typeParams, methodParams);
-                    selfReference = Assembly.AppDomain.GetArrayType(elemType);
-                }
-                else if (this.GenericParameters.Resolved)
-                {
-                    IRType tp = null;
-                    if (!GenericTypes.TryGetValue(this, out tp))
-                    {
-                        tp = this.GenericType.Clone();
-                        GenericTypes[tp] = tp;
+				if (IsGeneric)
+				{
+					if (IsTemporaryVar)
+					{
+						selfReference = typeParams[this.TemporaryVarOrMVarIndex];
+					}
+					else if (IsTemporaryMVar)
+					{
+						selfReference = methodParams[this.TemporaryVarOrMVarIndex];
+					}
+					else if (IsArrayType)
+					{
+						IRType elemType = ArrayType;
+						elemType.Resolve(ref elemType, typeParams, methodParams);
+						selfReference = Assembly.AppDomain.GetArrayType(elemType);
+					}
+					else if (this.GenericParameters.Resolved)
+					{
+						IRType tp = null;
+						if (!GenericTypes.TryGetValue(this, out tp))
+						{
+							tp = this.GenericType.Clone();
+							tp.GenericParameters.Substitute(typeParams, methodParams);
+							GenericTypes[tp] = tp;
 
-                        for (int i = 0; i < tp.GenericParameters.Count; i++)
-                        {
-                            tp.GenericParameters[i] = this.GenericParameters[i];
-                        }
-                        for (int i = 0; i < tp.Methods.Count; i++)
-                        {
-                            tp.Methods[i] = tp.Methods[i].Resolved ? tp.Methods[i] : tp.Methods[i].Clone(tp);
-                        }
+							for (int i = 0; i < tp.GenericParameters.Count; i++)
+							{
+								tp.GenericParameters[i] = this.GenericParameters[i];
+							}
+							for (int i = 0; i < tp.Methods.Count; i++)
+							{
+								tp.Methods[i] = tp.Methods[i].Resolved ? tp.Methods[i] : tp.Methods[i].Clone(tp);
+							}
 
-                        tp.Substitute(typeParams, methodParams);
-                    }
-                    selfReference = tp;
-                }
-                else
-                {
+							tp.Substitute(typeParams, methodParams);
+						}
+						selfReference = tp;
+					}
+					else
+					{
 #warning Need to do the rest of this resolution.
-                }
+					}
+				}
+				else
+				{
+					Substitute(GenericParameterCollection.Empty, GenericParameterCollection.Empty);
+				}
             }
         }
 
+        /// <summary>
+        /// Resolves generic parameters within this type.
+        /// </summary>
+        /// <param name="typeParams"></param>
+        /// <param name="methodParams"></param>
         public void Substitute(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
         {
-            this.BaseType.Resolve(ref this.BaseType, this.GenericParameters, GenericParameterCollection.Empty);
-            this.Fields.ForEach(f => f.Substitute(this.GenericParameters));
-            for (int i = 0; i < this.Methods.Count; i++)
-            {
-                if (!this.Methods[i].Resolved)
-                {
-                    this.Methods[i] = this.Methods[i].Clone(this);
-                    this.Methods[i].Substitute(this.GenericParameters, GenericParameterCollection.Empty);
-                }
-            }
+            this.GenericParameters.Substitute(typeParams, methodParams);
+
+			if (!GenericParameters.Resolved)
+				return;
+
+			if (this.BaseType != null)
+				this.BaseType.Resolve(ref this.BaseType, this.GenericParameters, GenericParameterCollection.Empty);
+
+            this.Fields.ForEach(f => f.Substitute());
+			this.Methods.ForEach(m => m.Substitute(GenericParameterCollection.Empty));
         }
 
 
@@ -281,5 +293,68 @@ namespace Fusion.IR
         }
 
         public static bool operator !=(IRType a, IRType b) { return !(a == b); }
+
+		public override string ToString()
+		{
+			if (IsTemporaryVar)
+				return "T(" + TemporaryVarOrMVarIndex.ToString() + ")";
+			if (IsTemporaryMVar)
+				return "M(" + TemporaryVarOrMVarIndex.ToString() + ")";
+			if (IsPointerType)
+				return PointerType.ToString() + "*";
+			if (IsArrayType)
+				return ArrayType.ToString() + "[]";
+
+			switch (Namespace)
+			{
+				case "System":
+					switch (Name)
+					{
+						case "Boolean":
+							return "bool";
+						case "Byte":
+							return "byte";
+						case "SByte":
+							return "sbyte";
+						case "UInt16":
+							return "ushort";
+						case "Int16":
+							return "short";
+						case "UInt32":
+							return "uint";
+						case "Int32":
+							return "int";
+						case "UInt64":
+							return "ulong";
+						case "Int64":
+							return "long";
+						case "Single":
+							return "float";
+						case "Double":
+							return "double";
+						case "Decimal":
+							return "decimal";
+						case "String":
+							return "string";
+						case "Char":
+							return "char";
+						case "Void":
+							return "void";
+						case "Object":
+							return "object";
+						default:
+							break;
+					}
+					break;
+				default:
+					break;
+			}
+			string nn = Namespace + "." + Name;
+			if (IsGeneric)
+			{
+				nn += GenericParameters.ToString();
+			}
+			return nn;
+		}
     }
 }

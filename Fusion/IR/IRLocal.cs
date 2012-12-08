@@ -9,15 +9,35 @@ namespace Fusion.IR
     {
         public IRAssembly Assembly = null;
         public IRMethod ParentMethod = null;
-        public IRType Type = null;
+
+		private IRLocal mParentLocal = null;
+		private IRType mType;
+		public IRType Type
+		{
+			get
+			{
+				if (mType == null && mParentLocal != null)
+				{
+					mType = mParentLocal.Type;
+					mParentLocal = null;
+				}
+				return mType;
+			}
+			set
+			{
+				mType = value;
+			}
+		}
 
         public uint Index = 0;
 
         public bool Resolved { get { return Type.Resolved; } }
 
-        public void Resolve(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
+		public void Substitute() { Resolve(); }
+
+        public void Resolve()
         {
-            Type.Resolve(ref Type, typeParams, methodParams);
+			Type.Resolve(ref mType, ParentMethod.ParentType.GenericParameters, ParentMethod.GenericParameters);
         }
 
         public IRLocal(IRAssembly pAssembly)
@@ -29,9 +49,15 @@ namespace Fusion.IR
         {
             IRLocal local = new IRLocal(this.Assembly);
             local.ParentMethod = newMethod;
-            local.Type = this.Type;
+            local.mType = this.Type;
             local.Index = (uint)newMethod.Locals.Count;
+			local.mParentLocal = this.Type == null ? this : null;
             return local;
         }
+
+		public override string ToString()
+		{
+			return Type.ToString() + ": " + Index.ToString();
+		}
     }
 }

@@ -10,7 +10,7 @@ namespace Fusion.IR.Instructions
         {
             ILOffset = pInstruction.ILOffset;
             IRIndex = pInstruction.IRIndex;
-            Method = pInstruction.Method;
+            ParentMethod = pInstruction.ParentMethod;
             Sources.AddRange(pInstruction.Sources);
             Destination = pInstruction.Destination;
         }

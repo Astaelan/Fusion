@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions.cs" />
     <Compile Include="IL\ILExtendedOpcode.cs" />
     <Compile Include="IL\ILOpcode.cs" />
     <Compile Include="IL\ILReader.cs" />

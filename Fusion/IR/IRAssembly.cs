@@ -49,6 +49,7 @@ namespace Fusion.IR
                     IRMethod method = Methods[methodDefData.TableIndex];
                     method.Name = methodDefData.Name;
                     method.ParentType = type;
+					method.IsStatic = (methodDefData.Flags & MethodAttributes.Static) == MethodAttributes.Static;
                     type.Methods.Add(method);
 
                     foreach (ParamData paramData in methodDefData.ParamList)
@@ -90,31 +91,6 @@ namespace Fusion.IR
         {
             Console.WriteLine("================================================== Stage 2: {0} ==================================================", File.ReferenceName);
 
-            if (CORLibrary)
-            {
-                IRType arrType = Types.Find(t => t.Name == "Array" && t.Namespace == "System");
-                TypeDefData typeDefData = File.TypeDefTable[Types.IndexOf(arrType)];
-                if (typeDefData.Extends.Type != TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeDef || typeDefData.Extends.TypeDef != null) arrType.BaseType = AppDomain.PresolveType(typeDefData.Extends);
-                for (int fieldIndex = 0; fieldIndex < arrType.Fields.Count; ++fieldIndex)
-                {
-                    IRField field = arrType.Fields[fieldIndex];
-                    field.Type = AppDomain.PresolveType(typeDefData.FieldList[fieldIndex].ExpandedSignature);
-                    if (field.Type == null) throw new Exception();
-                }
-            }
-            if (CORLibrary)
-            {
-                IRType intptrType = Types.Find(t => t.Name == "IntPtr" && t.Namespace == "System");
-                TypeDefData typeDefData = File.TypeDefTable[Types.IndexOf(intptrType)];
-                if (typeDefData.Extends.Type != TypeDefRefOrSpecIndex.TypeDefRefOrSpecType.TypeDef || typeDefData.Extends.TypeDef != null) intptrType.BaseType = AppDomain.PresolveType(typeDefData.Extends);
-                for (int fieldIndex = 0; fieldIndex < intptrType.Fields.Count; ++fieldIndex)
-                {
-                    IRField field = intptrType.Fields[fieldIndex];
-                    field.Type = AppDomain.PresolveType(typeDefData.FieldList[fieldIndex].ExpandedSignature);
-                    if (field.Type == null) throw new Exception();
-                }
-            }
-
             for (int typeIndex = 0; typeIndex < Types.Count; ++typeIndex)
             {
                 IRType type = Types[typeIndex];
@@ -135,6 +111,7 @@ namespace Fusion.IR
                 for (int parameterIndex = 0; parameterIndex < method.Parameters.Count; ++parameterIndex)
                 {
                     IRParameter parameter = method.Parameters[parameterIndex];
+					//parameter.ParameterIndex = parameterIndex;
                     parameter.Type = AppDomain.PresolveType(methodDefData.ExpandedSignature.Params[parameterIndex]);
                 }
                 for (int localIndex = 0; localIndex < method.Locals.Count; ++localIndex)
@@ -170,7 +147,8 @@ namespace Fusion.IR
         }
 
         internal void LoadStage4()
-        {
+		{
+			Console.WriteLine("================================================== Stage 4: {0} ==================================================", File.ReferenceName);
             // Generic resolution and type updating
             Types.ForEach(t => t.Substitute(GenericParameterCollection.Empty, GenericParameterCollection.Empty));
         }

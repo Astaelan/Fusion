@@ -16,9 +16,9 @@ namespace Fusion.IR.Instructions
             Sources.Add(source);
 
             IRStackObject result = new IRStackObject();
-            result.Type = Method.Parameters[(int)ParameterIndex].Type;
+            result.Type = ParentMethod.Parameters[(int)ParameterIndex].Type;
             result.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);
-            result.LinearizedTarget.Local.LocalIndex = AddLinearizedLocal(pStack, Method.Parameters[(int)ParameterIndex].Type);
+            result.LinearizedTarget.Local.LocalIndex = AddLinearizedLocal(pStack, ParentMethod.Parameters[(int)ParameterIndex].Type);
             Destination = new IRLinearizedLocation(result.LinearizedTarget);
             pStack.Push(result);
         }

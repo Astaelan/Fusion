@@ -11,8 +11,26 @@ namespace Fusion.IR
 
         public string Name = null;
 
-        public IRType ParentType = null;
-        public IRType Type = null;
+		public IRType ParentType = null;
+
+		private IRField mParentField = null;
+		private IRType mType;
+		public IRType Type
+		{
+			get
+			{
+				if (mType == null && mParentField != null)
+				{
+					mType = mParentField.Type;
+					mParentField = null;
+				}
+				return mType;
+			}
+			set
+			{
+				mType = value;
+			}
+		}
 
         /// <summary>
         /// True if all the types that this field
@@ -21,13 +39,15 @@ namespace Fusion.IR
         /// </summary>
         public bool Resolved { get { return Type.Resolved; } }
 
+		public void Resolve() { Substitute(); }
+
         /// <summary>
         /// Resolve any generic types in this field.
         /// </summary>
         /// <param name="typeParams">The type parameters to use to resolve with.</param>
-        public void Substitute(GenericParameterCollection typeParams)
+        public void Substitute()
         {
-            Type.Resolve(ref Type, typeParams, GenericParameterCollection.Empty);
+            Type.Resolve(ref mType, ParentType.GenericParameters, GenericParameterCollection.Empty);
         }
 
         /// <summary>
@@ -41,6 +61,7 @@ namespace Fusion.IR
             f.Name = this.Name;
             f.ParentType = newParent;
             f.Type = this.Type;
+			f.mParentField = this.Type == null ? this : null;
 
             return f;
         }
@@ -49,6 +70,11 @@ namespace Fusion.IR
         {
             Assembly = pAssembly;
         }
+
+		public override string ToString()
+		{
+			return Type.ToString() + " " + Name;
+		}
 
         public bool CompareSignature(FieldSig pFieldSig)
         {

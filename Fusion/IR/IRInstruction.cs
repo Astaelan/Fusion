@@ -8,7 +8,7 @@ namespace Fusion.IR
         public int ILOffset = 0;
         public uint IRIndex = 0;
         public IROpcode Opcode = IROpcode.Nop;
-        public IRMethod Method = null;
+        public IRMethod ParentMethod = null;
 
         // Instruction Linearization
         public bool Linearized = false;
@@ -20,7 +20,7 @@ namespace Fusion.IR
             Opcode = pOpcode;
         }
 
-        public uint AddLinearizedLocal(Stack<IRStackObject> pStack, IRType pType) { return Method.AddLinearizedLocal(pStack, pType); }
+        public uint AddLinearizedLocal(Stack<IRStackObject> pStack, IRType pType) { return ParentMethod.AddLinearizedLocal(pStack, pType); }
 
         public abstract void Linearize(Stack<IRStackObject> pStack);
 
@@ -37,7 +37,7 @@ namespace Fusion.IR
             i.ILOffset = this.ILOffset;
             i.IRIndex = this.IRIndex;
             i.Opcode = this.Opcode;
-            i.Method = newMethod;
+            i.ParentMethod = newMethod;
             i.Destination = this.Destination.Clone();
             foreach (IRLinearizedLocation t in this.Sources)
             {
@@ -49,11 +49,13 @@ namespace Fusion.IR
         public abstract IRInstruction Clone(IRMethod pNewMethod);
         public virtual bool Resolved { get { return true; } }
 
-        public virtual void Resolve(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
+		public void Substitute() { Resolve(); }
+
+        public virtual void Resolve()
         {
             if (Destination != null)
-                Destination.Resolve(typeParams, methodParams);
-            Sources.ForEach(s => s.Resolve(typeParams, methodParams));
+				Destination.Resolve(ParentMethod.ParentType.GenericParameters, ParentMethod.GenericParameters);
+			Sources.ForEach(s => s.Resolve(ParentMethod.ParentType.GenericParameters, ParentMethod.GenericParameters));
         }
 
         public virtual IRInstruction Transform() { return this; }

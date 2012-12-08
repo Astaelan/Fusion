@@ -19,9 +19,9 @@ namespace Fusion.IR.Instructions
         public override void Linearize(Stack<IRStackObject> pStack)
         {
             IRType handleType = null;
-            if (TargetType != null) handleType = Method.Assembly.AppDomain.System_RuntimeTypeHandle;
-            else if (TargetMethod != null) handleType = Method.Assembly.AppDomain.System_RuntimeMethodHandle;
-            else if (TargetField != null) handleType = Method.Assembly.AppDomain.System_RuntimeFieldHandle;
+            if (TargetType != null) handleType = ParentMethod.Assembly.AppDomain.System_RuntimeTypeHandle;
+            else if (TargetMethod != null) handleType = ParentMethod.Assembly.AppDomain.System_RuntimeMethodHandle;
+            else if (TargetField != null) handleType = ParentMethod.Assembly.AppDomain.System_RuntimeFieldHandle;
             else throw new NullReferenceException();
 
             IRLinearizedLocation value = new IRLinearizedLocation(IRLinearizedLocationType.RuntimeHandle);

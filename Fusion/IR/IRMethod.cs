@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Fusion.CLI;
+using System.Text;
 
 namespace Fusion.IR
 {
@@ -14,6 +15,8 @@ namespace Fusion.IR
         public IRAssembly Assembly = null;
 
         public string Name = null;
+
+		public bool IsStatic { get; set; }
 
         public IRType ParentType = null;
         public IRType ReturnType = null;
@@ -28,28 +31,67 @@ namespace Fusion.IR
             {
                 if (mResolvedCache != null)
                     return mResolvedCache.Value;
-                
-                bool ressed = false;
-                if (IsGeneric)
-                {
-                    if (!ReturnType.Resolved) goto SetCache;
-                    if (!Parameters.TrueForAll(p => p.Resolved)) goto SetCache;
-                    if (!Locals.TrueForAll(l => l.Resolved)) goto SetCache;
-                    if (!Instructions.TrueForAll(i => i.Resolved)) goto SetCache;
-                }
-                ressed = true;
 
-            SetCache:
-                mResolvedCache = ressed;
-                return mResolvedCache.Value;
+				if (ReturnType != ParentType && ReturnType != null)
+				{
+					if (!ReturnType.Resolved) return false;
+				}
+				if (!Parameters.Where(p => p.Type != ParentType).TrueForAll(p => p.Resolved)) return false;
+				if (!Locals.Where(p => p.Type != ParentType).TrueForAll(l => l.Resolved)) return false;
+				if (!Instructions.TrueForAll(i => i.Resolved)) return false;
+
+				mResolvedCache = true;
+                return true;
             }
         }
 
-        public void Substitute(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
-        {
+		public void Resolve(ref IRMethod selfReference)
+		{
+			if (!Resolved)
+			{
+				if (IsGeneric)
+				{
+					// This will eventually need to get the instantiation of this method.
+				}
+				else
+				{
+					Substitute(GenericParameterCollection.Empty);
+				}
+			}
+		}
 
-            throw new Exception("Huzzah lazyness!");
+        public void Substitute(GenericParameterCollection methodParams)
+        {
+			if (ReturnType != null)
+				ReturnType.Resolve(ref ReturnType, ParentType.GenericParameters, methodParams);
+			Parameters.ForEach(p => p.Substitute());
+			Locals.ForEach(l => l.Substitute());
+			Instructions.ForEach(i => i.Substitute());
         }
+
+		/// <summary>
+		/// This creates a shallow clone of this method, but
+		/// does a deep clone of it's instructions, parameters, and locals.
+		/// </summary>
+		/// <param name="newParent">The parent for the new method.</param>
+		/// <returns>The clone of this method.</returns>
+		public IRMethod Clone(IRType newParent)
+		{
+			IRMethod m = new IRMethod(this.Assembly);
+
+			m.GenericMethod = this.GenericMethod;
+			m.GenericParameters.AddRange(this.GenericParameters);
+			this.Instructions.ForEach(i => m.Instructions.Add(i.Clone(m)));
+			this.Locals.ForEach(l => m.Locals.Add(l.Clone(m)));
+			this.Parameters.ForEach(p => m.Parameters.Add(p.Clone(m)));
+			m.MaximumStackDepth = this.MaximumStackDepth;
+			m.Name = this.Name;
+			m.ParentType = newParent;
+			m.ReturnType = this.ReturnType;
+			m.IsStatic = this.IsStatic;
+			// TODO: Fix Branch/Switch/Leave IRInstruction's to new method instructions based on IRIndex's
+			return m;
+		}
 
         // Dynamic Methods
         public bool IsGeneric
@@ -68,28 +110,23 @@ namespace Fusion.IR
             Assembly = pAssembly;
         }
 
-        /// <summary>
-        /// This creates a shallow clone of this method, but
-        /// does a deep clone of it's instructions, parameters, and locals.
-        /// </summary>
-        /// <param name="newParent">The parent for the new method.</param>
-        /// <returns>The clone of this method.</returns>
-        public IRMethod Clone(IRType newParent)
-        {
-            IRMethod m = new IRMethod(this.Assembly);
+		public override string ToString()
+		{
+			StringBuilder sb = new StringBuilder();
 
-            m.GenericMethod = this.GenericMethod;
-            m.GenericParameters.AddRange(this.GenericParameters);
-            this.Instructions.ForEach(i => m.Instructions.Add(i.Clone(m)));
-            this.Locals.ForEach(l => m.Locals.Add(l.Clone(m)));
-            this.Parameters.ForEach(p => m.Parameters.Add(p.Clone(m)));
-            m.MaximumStackDepth = this.MaximumStackDepth;
-            m.Name = this.Name;
-            m.ParentType = newParent;
-            m.ReturnType = this.ReturnType;
-            // TODO: Fix Branch/Switch/Leave IRInstruction's to new method instructions based on IRIndex's
-            return m;
-        }
+			sb.Append(ReturnType == null ? "(null)" : ReturnType.ToString());
+			sb.Append(" ");
+			sb.Append(ParentType.ToString());
+			sb.Append(IsStatic ? "::" : ".");
+			sb.Append(Name);
+			sb.Append("(");
+			Parameters.ForEach(p => sb.Append(p.ToString() + ", "));
+			if (Parameters.Count > 0)
+				sb.Remove(sb.Length - 2, 2);
+			sb.Append(")");
+
+			return sb.ToString();
+		}
 
         public bool CompareSignature(MethodSig pMethodSig)
         {
@@ -113,7 +150,7 @@ namespace Fusion.IR
         {
             pInstruction.ILOffset = (int)pILOffset;
             pInstruction.IRIndex = (uint)Instructions.Count;
-            pInstruction.Method = this;
+            pInstruction.ParentMethod = this;
             Instructions.Add(pInstruction);
         }
 
@@ -508,34 +545,6 @@ namespace Fusion.IR
         public void TransformInstructions(MethodDefData pMethodDefData)
         {
             for (int index = 0; index < Instructions.Count; ++index) Instructions[index] = Instructions[index].Transform();
-        }
-    }
-
-    public static class Extensions
-    {
-        public static T Last<T>(this T[] arr)
-        {
-            return arr[arr.Length - 1];
-        }
-
-        public static T Last<T>(this List<T> lst)
-        {
-            return lst[lst.Count - 1];
-        }
-
-        public static bool TrueForAll<T>(this IEnumerable<T> coll, Func<T, bool> fc)
-        {
-            foreach (T t in coll)
-                if (!fc(t)) 
-                    return false;
-            return true;
-        }
-
-        public static Stack<T> Duplicate<T>(this Stack<T> stack)
-        {
-            T[] elements = stack.ToArray();
-            Array.Reverse(elements);
-            return new Stack<T>(elements);
         }
     }
 }

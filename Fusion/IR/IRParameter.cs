@@ -8,13 +8,35 @@ namespace Fusion.IR
     {
         public IRAssembly Assembly = null;
         public IRMethod ParentMethod = null;
-        public IRType Type = null;
+
+		//public int ParameterIndex = 0;
+
+		private IRParameter mParentParameter = null;
+		private IRType mType;
+		public IRType Type
+		{
+			get
+			{
+				if (mType == null && mParentParameter != null)
+				{
+					mType = mParentParameter.Type;
+					mParentParameter = null;
+				}
+				return mType;
+			}
+			set
+			{
+				mType = value;
+			}
+		}
 
         public bool Resolved { get { return Type.Resolved; } }
 
-        public void Resolve(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
+		public void Substitute() { Resolve(); }
+
+        public void Resolve()
         {
-            Type.Resolve(ref Type, typeParams, methodParams);
+            Type.Resolve(ref mType, ParentMethod.ParentType.GenericParameters, ParentMethod.GenericParameters);
         }
 
         public IRParameter(IRAssembly pAssembly)
@@ -26,8 +48,15 @@ namespace Fusion.IR
         {
             IRParameter p = new IRParameter(this.Assembly);
             p.ParentMethod = newMethod;
-            p.Type = this.Type;
+			p.Type = this.Type;
+			//p.ParameterIndex = this.ParameterIndex;
+			p.mParentParameter = this.Type == null ? this : null;
             return p;
         }
+
+		public override string ToString()
+		{
+			return Type.ToString();// +": " + ParameterIndex.ToString();
+		}
     }
 }

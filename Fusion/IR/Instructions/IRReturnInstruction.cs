@@ -9,7 +9,7 @@ namespace Fusion.IR.Instructions
 
         public override void Linearize(Stack<IRStackObject> pStack)
         {
-            if (Method.ReturnType != null) Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
+            if (ParentMethod.ReturnType != null) Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget));
         }
 
         public override IRInstruction Clone(IRMethod pNewMethod) { return CopyTo(new IRReturnInstruction(), pNewMethod); }

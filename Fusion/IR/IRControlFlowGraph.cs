@@ -158,6 +158,13 @@ namespace Fusion.IR
             throw new NullReferenceException();
         }
 
+        public void PopulateParents(Node pNode, List<Node> pParents)
+        {
+            if (pParents.Contains(pNode)) return;
+            pParents.Add(pNode);
+            pNode.ParentNodes.ForEach(n => PopulateParents(n, pParents));
+        }
+
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();

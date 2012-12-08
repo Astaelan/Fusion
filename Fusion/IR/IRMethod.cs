@@ -3,6 +3,7 @@ using Fusion.CLI.Signature;
 using Fusion.IL;
 using Fusion.IR.Instructions;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Fusion.CLI;
 
@@ -426,40 +427,106 @@ namespace Fusion.IR
             return local.Index;
         }
 
-        public Stack<int> StackDepths;
+        private void LinearizePath(MethodDefData pMethodDefData, IRInstruction pStartInstruction, Stack<IRStackObject> pStack, Queue<Tuple<IRInstruction, Stack<IRStackObject>>> pBranches)
+        {
+            int stackReturn = pStack.Count;
+            IRInstruction currentInstruction = pStartInstruction;
+            MethodDefData.MethodDefBodyData.MethodDefBodyExceptionData exceptionData = null;
+            while (currentInstruction != null)
+            {
+                if (currentInstruction.Linearized && pStack.Count == stackReturn) break;
+
+                if ((exceptionData = Array.Find(pMethodDefData.Body.Exceptions, e => e.Flags == 0 && e.HandlerOffset == currentInstruction.ILOffset)) != null)
+                {
+                    IRType exceptionType = Assembly.AppDomain.PresolveType(Assembly.File.ExpandMetadataToken(exceptionData.ClassTokenOrFilterOffset));
+                    IRStackObject exceptionObj = new IRStackObject();
+                    exceptionObj.Type = exceptionType;
+                    exceptionObj.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);
+                    exceptionObj.LinearizedTarget.Local.LocalIndex = currentInstruction.AddLinearizedLocal(pStack, exceptionType);
+                    pStack.Push(exceptionObj);
+                }
+
+                currentInstruction.Linearize(pStack);
+                currentInstruction.Linearized = true;
+                switch (currentInstruction.Opcode)
+                {
+                    case IROpcode.Branch:
+                        {
+                            IRBranchInstruction branchInstruction = (IRBranchInstruction)currentInstruction;
+                            if (branchInstruction.BranchCondition == IRBranchCondition.Always) currentInstruction = branchInstruction.TargetIRInstruction;
+                            else
+                            {
+                                pBranches.Enqueue(new Tuple<IRInstruction, Stack<IRStackObject>>(branchInstruction.TargetIRInstruction, pStack.Duplicate()));
+                                currentInstruction = Instructions[currentInstruction.IRIndex + 1];
+                            }
+                            break;
+                        }
+                    case IROpcode.Switch:
+                        {
+                            IRSwitchInstruction switchInstruction = (IRSwitchInstruction)currentInstruction;
+                            foreach (IRInstruction targetInstruction in switchInstruction.TargetIRInstructions)
+                            {
+                                pBranches.Enqueue(new Tuple<IRInstruction, Stack<IRStackObject>>(targetInstruction, pStack.Duplicate()));
+                            }
+                            currentInstruction = Instructions[currentInstruction.IRIndex + 1];
+                            break;
+                        }
+                    case IROpcode.Leave:
+                        {
+                            IRLeaveInstruction leaveInstruction = (IRLeaveInstruction)currentInstruction;
+                            currentInstruction = leaveInstruction.TargetIRInstruction;
+                            break;
+                        }
+                    case IROpcode.Jump:
+                    case IROpcode.Throw:
+                    case IROpcode.Return: currentInstruction = null; break;
+                    default: currentInstruction = currentInstruction.IRIndex >= Instructions.Count ? null : Instructions[currentInstruction.IRIndex + 1]; break;
+                }
+            }
+        }
 
         public void LinearizeInstructions(MethodDefData pMethodDefData)
         {
             if (Instructions.Count > 0)
             {
                 Stack<IRStackObject> stack = new Stack<IRStackObject>((int)MaximumStackDepth);
-                StackDepths = new Stack<int>(ControlFlowGraph.Nodes.Count);
-                MethodDefData.MethodDefBodyData.MethodDefBodyExceptionData exceptionData = null;
-                foreach (IRInstruction instruction in Instructions)
-                {
-                    if ((exceptionData = Array.Find(pMethodDefData.Body.Exceptions, e => e.Flags == 0 && e.HandlerOffset == instruction.ILOffset)) != null)
-                    {
-                        IRType exceptionType = Assembly.AppDomain.PresolveType(Assembly.File.ExpandMetadataToken(exceptionData.ClassTokenOrFilterOffset));
-                        IRStackObject exceptionObj = new IRStackObject();
-                        exceptionObj.Type = exceptionType;
-                        exceptionObj.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);
-                        exceptionObj.LinearizedTarget.Local.LocalIndex = instruction.AddLinearizedLocal(stack, exceptionType);
-                        stack.Push(exceptionObj);
-                    }
-                    var n = ControlFlowGraph.FindInstructionNode(instruction);
-                    if (n.Instructions[0].IRIndex == instruction.IRIndex && n.Instructions[n.Instructions.Count - 1].Opcode == IROpcode.Branch && ((IRBranchInstruction)n.Instructions[n.Instructions.Count - 1]).BranchCondition == IRBranchCondition.Always)
-                    {
-                        StackDepths.Push(stack.Count);
-                    }
-                    instruction.Linearize(stack);
-                }
+                Queue<Tuple<IRInstruction, Stack<IRStackObject>>> branches = new Queue<Tuple<IRInstruction, Stack<IRStackObject>>>();
+                LinearizePath(pMethodDefData, Instructions[0], stack, branches);
                 if (stack.Count > 0) throw new Exception();
+                while (branches.Count > 0)
+                {
+                    Tuple<IRInstruction, Stack<IRStackObject>> branch = branches.Dequeue();
+                    int expectedOnStack = branch.Item2.Count;
+                    LinearizePath(pMethodDefData, branch.Item1, branch.Item2, branches);
+                    if (branch.Item2.Count != expectedOnStack) throw new Exception();
+                }
+                //if (!Instructions.TrueForAll(i => i.Linearized)) throw new Exception();
             }
         }
 
         public void TransformInstructions(MethodDefData pMethodDefData)
         {
             for (int index = 0; index < Instructions.Count; ++index) Instructions[index] = Instructions[index].Transform();
+        }
+    }
+
+    public static class Extensions
+    {
+        public static T Last<T>(this T[] arr)
+        {
+            return arr[arr.Length - 1];
+        }
+
+        public static T Last<T>(this List<T> lst)
+        {
+            return lst[lst.Count - 1];
+        }
+
+        public static Stack<T> Duplicate<T>(this Stack<T> stack)
+        {
+            T[] elements = stack.ToArray();
+            Array.Reverse(elements);
+            return new Stack<T>(elements);
         }
     }
 }

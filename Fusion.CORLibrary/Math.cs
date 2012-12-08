@@ -168,6 +168,7 @@
         #region Cosh
         public static double Cosh(double x)
         {
+            //return (x == 0F) ? 1F : ((x <= (ln2 / 2)) ? (2F) : ((x <= 22F) ? 3F : 4F));
             if (x < 0.0F) x = -x;
             return ((x == 0F) ? 1F : ((x <= (ln2 / 2)) ? (1 + (_power((Exp(x) - 1), 2) / (2 * Exp(x)))) : ((x <= 22F) ? ((Exp(x) + (1 / Exp(x))) / 2) : (0.5F * (Exp(x) + Exp(-x))))));
         }

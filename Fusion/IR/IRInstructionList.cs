@@ -105,6 +105,21 @@ namespace Fusion.IR
 
         public bool TrueForAll(Predicate<IRInstruction> match) { return mInstructions.TrueForAll(match); }
 
+        private IRInstruction GetTarget(IRBranchInstruction pBranchInstruction)
+        {
+            IRInstruction targetInstruction = mILOffsetLookup[pBranchInstruction.TargetILOffset];
+            if (targetInstruction.Opcode == IROpcode.Branch)
+            {
+                IRBranchInstruction targetBranchInstruction = (IRBranchInstruction)targetInstruction;
+                if (targetBranchInstruction.BranchCondition == IRBranchCondition.Always)
+                {
+                    targetInstruction = mILOffsetLookup[targetBranchInstruction.TargetILOffset];
+                    targetInstruction = GetTarget(targetBranchInstruction);
+                }
+            }
+            return targetInstruction;
+        }
+
         public void FixTargetInstructions()
         {
             foreach (IRInstruction instruction in mInstructions)
@@ -114,16 +129,7 @@ namespace Fusion.IR
                     case IROpcode.Branch:
                         {
                             IRBranchInstruction branchInstruction = (IRBranchInstruction)instruction;
-                            IRInstruction targetInstruction = mILOffsetLookup[branchInstruction.TargetILOffset];
-                            if (targetInstruction.Opcode == IROpcode.Branch)
-                            {
-                                IRBranchInstruction targetBranchInstruction = (IRBranchInstruction)targetInstruction;
-                                if (targetBranchInstruction.BranchCondition == IRBranchCondition.Always)
-                                {
-                                    targetInstruction = mILOffsetLookup[targetBranchInstruction.TargetILOffset];
-                                }
-                            }
-                            branchInstruction.TargetIRInstruction = targetInstruction;
+                            branchInstruction.TargetIRInstruction = GetTarget(branchInstruction);
                             if (branchInstruction.TargetIRInstruction == null) throw new NullReferenceException();
                             break;
                         }

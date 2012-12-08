@@ -11,6 +11,7 @@ namespace Fusion.IR
         public IRMethod Method = null;
 
         // Instruction Linearization
+        public bool Linearized = false;
         public List<IRLinearizedLocation> Sources = new List<IRLinearizedLocation>();
         public IRLinearizedLocation Destination = null;
 

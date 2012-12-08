@@ -14,6 +14,7 @@ namespace Fusion.IR.Instructions
         
         public int TargetILOffset { get; set; }
         public IRInstruction TargetIRInstruction { get; set; }
+        public int StackDepth { get; set; }
 
         public IRBranchInstruction(IRBranchCondition pBranchCondition, int pTargetILOffset) : base(IROpcode.Branch)
         {
@@ -26,12 +27,12 @@ namespace Fusion.IR.Instructions
             switch (BranchCondition)
             {
                 case IRBranchCondition.Always:
-                    if (pStack.Count > 0)
-                    {
-                        int sd = Method.StackDepths.Pop();
-                        while (pStack.Count > sd)
-                            pStack.Pop();
-                    }
+                    //if (pStack.Count > 0)
+                    //{
+                    //    int sd = Method.StackDepths.Pop();
+                    //    while (pStack.Count > sd)
+                    //        pStack.Pop();
+                    //}
                     break;
                 case IRBranchCondition.False:
                 case IRBranchCondition.True: Sources.Add(new IRLinearizedLocation(pStack.Pop().LinearizedTarget)); break;

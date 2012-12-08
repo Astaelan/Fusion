@@ -35,8 +35,9 @@ Create IRGenericInstantiations for IRMethod return and parameter types
 Create IRGenericInstantiations for IRLocal types
 
 * Build control flow graph
-Fix linearization of values remaining from inside branches, IE ternary operations, and if (x == null || y == null) scenario (source coming from 2 branches)
+* Fix linearization of values remaining from inside branches, IE ternary operations, and if (x == null || y == null) scenario (source coming from 2 branches)
 * Linearization of IRInstructions
+Linearization of Exception Handlers, and Finally Handlers
 * Transform Load/Store to Move IRInstructions
 Transform instructions that behave like other instructions under certain conditions, IE unbox.any to castclass when dealing with a reference type
 

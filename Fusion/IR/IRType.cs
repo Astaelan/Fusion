@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace Fusion.IR
@@ -70,16 +71,16 @@ namespace Fusion.IR
                     return mResolvedCache.Value;
 
                 bool ressed = false;
-                if (IsGeneric)
-                {
+                //if (IsGeneric)
+                //{
                     if (IsTemporaryVar) goto SetCache;
                     if (IsTemporaryMVar) goto SetCache;
                     if (PointerType != null && !PointerType.Resolved) goto SetCache;
                     if (ArrayType != null && !ArrayType.Resolved) goto SetCache;
                     if (BaseType != null && !BaseType.Resolved) goto SetCache;
-                    if (!Fields.TrueForAll(f => f.Resolved)) goto SetCache;
+                    if (!Fields.Where(f => f.Type != this).TrueForAll(f => f.Resolved)) goto SetCache;
                     if (!Methods.TrueForAll(m => m.Resolved)) goto SetCache;
-                }
+                //}
                 ressed = true;
 
             SetCache:
@@ -174,7 +175,7 @@ namespace Fusion.IR
                 }
                 else if (IsTemporaryMVar)
                 {
-                    selfReference = typeParams[this.TemporaryVarOrMVarIndex];
+                    selfReference = methodParams[this.TemporaryVarOrMVarIndex];
                 }
                 else if (IsArrayType)
                 {
@@ -199,24 +200,27 @@ namespace Fusion.IR
                             tp.Methods[i] = tp.Methods[i].Resolved ? tp.Methods[i] : tp.Methods[i].Clone(tp);
                         }
 
-                        // Now resolutions.
-                        tp.BaseType.Resolve(ref tp.BaseType, tp.GenericParameters, GenericParameterCollection.Empty);
-                        tp.Fields.ForEach(f => f.Resolve(tp.GenericParameters));
-                        for (int i = 0; i < tp.Methods.Count; i++)
-                        {
-                            if (!tp.Methods[i].Resolved)
-                            {
-                                tp.Methods[i] = tp.Methods[i].Clone(tp);
-                                tp.Methods[i].Resolve(tp.GenericParameters, GenericParameterCollection.Empty);
-                            }
-                        }
-                        
+                        tp.Substitute(typeParams, methodParams);
                     }
                     selfReference = tp;
                 }
                 else
                 {
 #warning Need to do the rest of this resolution.
+                }
+            }
+        }
+
+        public void Substitute(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
+        {
+            this.BaseType.Resolve(ref this.BaseType, this.GenericParameters, GenericParameterCollection.Empty);
+            this.Fields.ForEach(f => f.Substitute(this.GenericParameters));
+            for (int i = 0; i < this.Methods.Count; i++)
+            {
+                if (!this.Methods[i].Resolved)
+                {
+                    this.Methods[i] = this.Methods[i].Clone(this);
+                    this.Methods[i].Substitute(this.GenericParameters, GenericParameterCollection.Empty);
                 }
             }
         }

@@ -45,8 +45,9 @@ namespace Fusion.IR
             }
         }
 
-        public void Resolve(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
+        public void Substitute(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
         {
+
             throw new Exception("Huzzah lazyness!");
         }
 
@@ -520,6 +521,14 @@ namespace Fusion.IR
         public static T Last<T>(this List<T> lst)
         {
             return lst[lst.Count - 1];
+        }
+
+        public static bool TrueForAll<T>(this IEnumerable<T> coll, Func<T, bool> fc)
+        {
+            foreach (T t in coll)
+                if (!fc(t)) 
+                    return false;
+            return true;
         }
 
         public static Stack<T> Duplicate<T>(this Stack<T> stack)

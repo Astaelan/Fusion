@@ -25,7 +25,7 @@ namespace Fusion.IR
         /// Resolve any generic types in this field.
         /// </summary>
         /// <param name="typeParams">The type parameters to use to resolve with.</param>
-        public void Resolve(GenericParameterCollection typeParams)
+        public void Substitute(GenericParameterCollection typeParams)
         {
             Type.Resolve(ref Type, typeParams, GenericParameterCollection.Empty);
         }

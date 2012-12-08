@@ -76,6 +76,7 @@ namespace Fusion.IR
 				mResolving = true;
 				if (IsTemporaryVar) return false;
 				if (IsTemporaryMVar) return false;
+				if (!GenericParameters.Resolved) return false;
                 if (PointerType != null && !PointerType.Resolved) return false;
                 if (ArrayType != null && !ArrayType.Resolved) return false;
                 if (BaseType != null && !BaseType.Resolved) return false;

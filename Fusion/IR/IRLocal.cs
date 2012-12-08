@@ -19,12 +19,14 @@ namespace Fusion.IR
 				if (mType == null && mParentLocal != null)
 				{
 					mType = mParentLocal.Type;
+					if (mType == null) throw new Exception();
 					mParentLocal = null;
 				}
 				return mType;
 			}
 			set
 			{
+				if (value == null) throw new Exception();
 				mType = value;
 			}
 		}
@@ -48,10 +50,11 @@ namespace Fusion.IR
         public IRLocal Clone(IRMethod newMethod)
         {
             IRLocal local = new IRLocal(this.Assembly);
-            local.ParentMethod = newMethod;
-            local.mType = this.Type;
-            local.Index = (uint)newMethod.Locals.Count;
+			local.ParentMethod = newMethod;
 			local.mParentLocal = this.Type == null ? this : null;
+			if (this.Type != null)
+				local.mType = this.Type;
+            local.Index = (uint)newMethod.Locals.Count;
             return local;
         }
 

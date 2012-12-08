@@ -246,14 +246,15 @@ namespace Fusion.IR
 
             int res;
             if (this.IsTemporaryVar)
-            {
-                res = (int)this.TemporaryVarOrMVarIndex;
+			{
+				// 5th bit from the top set
+				res = (int)this.TemporaryVarOrMVarIndex + 1;
             }
             else if (this.IsTemporaryMVar)
             {
                 // Allow support for up to 256 generic type parameters before
                 // hash collisions occur.
-                res = (int)(this.TemporaryVarOrMVarIndex << 8);
+				res = (int)((this.TemporaryVarOrMVarIndex + 1) << 8);
             }
             else if (IsPointerType)
             {

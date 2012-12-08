@@ -21,9 +21,16 @@ namespace Fusion.IR.Instructions
             if (Target.ReturnType != null)
             {
                 IRStackObject returned = new IRStackObject();
-                returned.Type = Target.ReturnType;
+				IRType retType = Target.ReturnType;
+
+				if (retType.IsTemporaryVar)
+					retType = Target.ParentType.GenericParameters[retType.TemporaryVarOrMVarIndex];
+				else if (retType.IsTemporaryMVar)
+					retType = Target.GenericParameters[retType.TemporaryVarOrMVarIndex];
+
+				returned.Type = retType;
                 returned.LinearizedTarget = new IRLinearizedLocation(IRLinearizedLocationType.Local);
-                returned.LinearizedTarget.Local.LocalIndex = AddLinearizedLocal(pStack, Target.ReturnType);
+                returned.LinearizedTarget.Local.LocalIndex = AddLinearizedLocal(pStack, retType);
                 Destination = new IRLinearizedLocation(returned.LinearizedTarget);
                 pStack.Push(returned);
             }

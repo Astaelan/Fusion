@@ -119,6 +119,8 @@ namespace Fusion.IR
 			sb.Append(ParentType.ToString());
 			sb.Append(IsStatic ? "::" : ".");
 			sb.Append(Name);
+			if (IsGeneric)
+				sb.Append(GenericParameters.ToString());
 			sb.Append("(");
 			Parameters.ForEach(p => sb.Append(p.ToString() + ", "));
 			if (Parameters.Count > 0)

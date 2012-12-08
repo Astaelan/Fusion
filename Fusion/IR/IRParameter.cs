@@ -9,8 +9,6 @@ namespace Fusion.IR
         public IRAssembly Assembly = null;
         public IRMethod ParentMethod = null;
 
-		//public int ParameterIndex = 0;
-
 		private IRParameter mParentParameter = null;
 		private IRType mType;
 		public IRType Type
@@ -49,14 +47,13 @@ namespace Fusion.IR
             IRParameter p = new IRParameter(this.Assembly);
             p.ParentMethod = newMethod;
 			p.Type = this.Type;
-			//p.ParameterIndex = this.ParameterIndex;
 			p.mParentParameter = this.Type == null ? this : null;
             return p;
         }
 
 		public override string ToString()
 		{
-			return Type.ToString();// +": " + ParameterIndex.ToString();
+			return Type.ToString();
 		}
     }
 }

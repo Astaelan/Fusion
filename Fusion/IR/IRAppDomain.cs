@@ -172,6 +172,10 @@ namespace Fusion.IR
                 type.ArrayType = pElementType;
                 ArrayTypes.Add(pElementType, type);
             }
+			if (pElementType.IsTemporaryVar != type.ArrayType.IsTemporaryVar || pElementType.IsTemporaryMVar != type.ArrayType.IsTemporaryMVar)
+			{
+				throw new Exception();
+			}
             return type;
         }
 
@@ -185,12 +189,16 @@ namespace Fusion.IR
             return type;
         }
 
-        public IRMethod PresolveGenericMethod(IRMethod pGenericMethod, List<IRType> pGenericParameterTypes)
+        public IRMethod PresolveGenericMethod(IRMethod pGenericMethod, List<IRType> pGenericParameterTypes, List<IRType> pParentTypeGenericParameters = null)
         {
             IRMethod method = new IRMethod(pGenericMethod.Assembly);
             method.Name = pGenericMethod.Name;
             method.GenericMethod = pGenericMethod;
             method.ReturnType = pGenericMethod.ReturnType;
+			if (pParentTypeGenericParameters != null)
+			{
+				method.ParentType = PresolveGenericType(pGenericMethod.ParentType, pParentTypeGenericParameters);
+			}
             pGenericMethod.Parameters.ForEach(p => method.Parameters.Add(new IRParameter(pGenericMethod.Assembly)));
             method.GenericParameters.AddRange(pGenericParameterTypes);
             return method;
@@ -360,7 +368,6 @@ namespace Fusion.IR
                     }
                 case SigElementType.ValueType: type = PresolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.ValueTypeDefOrRefOrSpecToken)); break;
                 case SigElementType.Class: type = PresolveType(pSigType.CLIFile.ExpandTypeDefRefOrSpecToken(pSigType.ClassTypeDefOrRefOrSpecToken)); break;
-                case SigElementType.Var: type = IRType.GetVarPlaceholder(pSigType.VarNumber); break;
                 case SigElementType.Array: type = GetArrayType(PresolveType(pSigType.ArrayType)); break;
                 case SigElementType.GenericInstantiation:
                     {
@@ -373,7 +380,8 @@ namespace Fusion.IR
                 case SigElementType.IPointer: type = System_IntPtr; break;
                 case SigElementType.UPointer: type = System_UIntPtr; break;
                 case SigElementType.Object: type = System_Object; break;
-                case SigElementType.SingleDimensionArray: type = GetArrayType(PresolveType(pSigType.SZArrayType)); break;
+				case SigElementType.SingleDimensionArray: type = GetArrayType(PresolveType(pSigType.SZArrayType)); break;
+				case SigElementType.Var: type = IRType.GetVarPlaceholder(pSigType.VarNumber); break;
                 case SigElementType.MethodVar: type = IRType.GetMVarPlaceholder(pSigType.MVarNumber); break;
                 case SigElementType.Type: type = System_Type; break;
                 default: break;
@@ -424,7 +432,8 @@ namespace Fusion.IR
                         IRType type = PresolveType(pMemberRefData.Class.TypeSpec);
                         foreach (IRMethod method in type.GenericType.Methods)
                         {
-                            if (method.CompareSignature(pMemberRefData)) return method;
+                            if (method.CompareSignature(pMemberRefData)) 
+								return PresolveGenericMethod(method, new List<IRType>(), type.GenericParameters.ToList());
                         }
                         throw new NullReferenceException();
                     }
@@ -436,7 +445,8 @@ namespace Fusion.IR
         {
             IRMethod genericMethod = PresolveMethod(pMethodSpecData.Method);
             List<IRType> genericMethodParameters = new List<IRType>();
-            foreach (SigType paramType in pMethodSpecData.ExpandedInstantiation.GenArgs) genericMethodParameters.Add(PresolveType(paramType));
+            foreach (SigType paramType in pMethodSpecData.ExpandedInstantiation.GenArgs) 
+				genericMethodParameters.Add(PresolveType(paramType));
             return PresolveGenericMethod(genericMethod, genericMethodParameters);
         }
 

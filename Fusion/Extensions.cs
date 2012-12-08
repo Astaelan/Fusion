@@ -16,6 +16,44 @@ namespace Fusion
 			return lst[lst.Count - 1];
 		}
 
+		public static T[] Slice<T>(this T[] lst, int sIdx, int eIdx)
+		{
+			T[] ret = new T[eIdx - sIdx];
+			for (int i = sIdx, i2 = 0; i < eIdx; i++, i2++)
+			{
+				ret[i2] = lst[i];
+			}
+			return ret;
+		}
+
+		public static List<T> Slice<T>(this List<T> lst, int sIdx, int eIdx)
+		{
+			List<T> ret = new List<T>(eIdx - sIdx);
+			for (int i = sIdx; i < eIdx; i++)
+			{
+				ret.Add(lst[i]);
+			}
+			return ret;
+		}
+
+		public static List<T> Slice<T>(this IEnumerable<T> coll, int sIdx, int eIdx)
+		{
+			List<T> ret = new List<T>(eIdx - sIdx);
+			int i = sIdx;
+			int i2 = 0;
+			foreach (T t in coll)
+			{
+				if (i >= i2)
+				{
+					ret.Add(t);
+					i++;
+				}
+				i2++;
+				if (i2 == eIdx) break;
+			}
+			return ret;
+		}
+
 		public static bool TrueForAll<T>(this IEnumerable<T> coll, Func<T, bool> fc)
 		{
 			foreach (T t in coll)

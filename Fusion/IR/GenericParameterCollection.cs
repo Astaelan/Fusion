@@ -142,6 +142,11 @@ namespace Fusion.IR
             }
         }
 
+		public List<IRType> ToList()
+		{
+			return new List<IRType>(mParams);
+		}
+
         public void Substitute(GenericParameterCollection typeParams, GenericParameterCollection methodParams)
         {
             for (int i = 0; i < mParams.Count; i++)

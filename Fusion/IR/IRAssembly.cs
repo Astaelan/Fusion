@@ -2,6 +2,7 @@
 using Fusion.CLI.Metadata;
 using Fusion.CLI.Signature;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace Fusion.IR
@@ -36,6 +37,11 @@ namespace Fusion.IR
 
                 type.Namespace = typeDefData.TypeNamespace;
                 type.Name = typeDefData.TypeName;
+				var genParams = File.GenericParamTable.Where(gp => gp.Owner.Type == TypeOrMethodDefIndex.TypeOrMethodDefType.TypeDef && gp.Owner.TypeDef == typeDefData).ToList();
+				for (int i = 0; i < genParams.Count; i++)
+				{
+					type.GenericParameters.Add(IRType.GetVarPlaceholder(genParams[i].Number));
+				}
 
                 foreach (FieldData fieldData in typeDefData.FieldList)
                 {
@@ -106,12 +112,16 @@ namespace Fusion.IR
             for (int methodIndex = 0; methodIndex < Methods.Count; ++methodIndex)
             {
                 IRMethod method = Methods[methodIndex];
-                MethodDefData methodDefData = File.MethodDefTable[methodIndex];
+				MethodDefData methodDefData = File.MethodDefTable[methodIndex];
+				var mGenParams = File.GenericParamTable.Where(gp => gp.Owner.Type == TypeOrMethodDefIndex.TypeOrMethodDefType.MethodDef && gp.Owner.MethodDef == methodDefData).ToList();
+				for (int i = 0; i < mGenParams.Count; i++)
+				{
+					method.GenericParameters.Add(IRType.GetMVarPlaceholder(mGenParams[i].Number));
+				}
                 method.ReturnType = AppDomain.PresolveType(methodDefData.ExpandedSignature.RetType);
                 for (int parameterIndex = 0; parameterIndex < method.Parameters.Count; ++parameterIndex)
                 {
                     IRParameter parameter = method.Parameters[parameterIndex];
-					//parameter.ParameterIndex = parameterIndex;
                     parameter.Type = AppDomain.PresolveType(methodDefData.ExpandedSignature.Params[parameterIndex]);
                 }
                 for (int localIndex = 0; localIndex < method.Locals.Count; ++localIndex)
@@ -150,7 +160,7 @@ namespace Fusion.IR
 		{
 			Console.WriteLine("================================================== Stage 4: {0} ==================================================", File.ReferenceName);
             // Generic resolution and type updating
-            Types.ForEach(t => t.Substitute(GenericParameterCollection.Empty, GenericParameterCollection.Empty));
+            Types.ForEach(t => t.Substitute(t.GenericParameters, GenericParameterCollection.Empty));
         }
 
         internal void LoadStage5()

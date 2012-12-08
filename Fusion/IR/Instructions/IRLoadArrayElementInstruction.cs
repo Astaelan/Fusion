@@ -7,13 +7,21 @@ namespace Fusion.IR.Instructions
     {
         public IRType Type { get; private set; }
 
-        public IRLoadArrayElementInstruction(IRType pType) : base(IROpcode.LoadArrayElement) { Type = pType; }
+        public IRLoadArrayElementInstruction(IRType pType) : base(IROpcode.LoadArrayElement) 
+		{
+			Type = pType;
+		}
 
         public override void Linearize(Stack<IRStackObject> pStack)
         {
             IRLinearizedLocation source = new IRLinearizedLocation(IRLinearizedLocationType.ArrayElement);
             source.ArrayElement.IndexLocation = new IRLinearizedLocation(pStack.Pop().LinearizedTarget);
-            source.ArrayElement.ArrayLocation = new IRLinearizedLocation(pStack.Pop().LinearizedTarget);
+			var arraySource = pStack.Pop();
+            source.ArrayElement.ArrayLocation = new IRLinearizedLocation(arraySource.LinearizedTarget);
+			if (Type == null)
+			{
+				Type = arraySource.Type.ArrayType;
+			}
             source.ArrayElement.ElementType = Type;
             Sources.Add(source);
 
